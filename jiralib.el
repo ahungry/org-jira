@@ -132,108 +132,6 @@ This is maintained by `jiralib-login'.")
 
 (defvar jiralib-wsdl nil)
 
-
-
-;;; jiralib.el --- Connect to JIRALIB issue tracking software
-
-;; Copyright (C) 2009 Brian Zwahr
-;; original Copyright (C) 2007  Dave Benjamin
-
-;; Authors: 
-;; Brian Zwahr <echosa@gmail.com>
-;; Dave Benjamin <dave@ramenlabs.com>
-;; Version: 0.3.3
-;; Last modified: October 12, 2009
-
-;; This file is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-
-;; This file is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-
-;;; **********
-;;; Commentary
-;;; **********
-
-;; This file provides jiralib-mode, an emacs major mode for connecting to and 
-;; using a Jiralib server. (http://www.atlassian.com/software/jira/). This 
-;; jiralib-mode is far from complete (more below) but is mostly usable as is 
-;; for the features that are present.
-
-;; Note that some functions/processes can be a bit slow. I believe this has 
-;; something to do with XMLRPC.
-
-;; Also, XMLRPC access to jiralib is incomplete. Certain Jiralib features cannot be 
-;; used via XMLRPC such as (but not limited to):
-;; - Changing ticket status
-;; - Closing/resolving tickets
-;; - Watching a ticket
-
-;; All of the XML-RPC API is wrapped, though not all of the API is exposed
-;; via interactive functions. For API details, see:
-
-;; http://confluence.atlassian.com/pages/viewpage.action?pageId=1035
-;; http://www.atlassian.com/software/jira/docs/api/rpc-jiralib-plugin/latest/com/atlassian/jira/rpc/xmlrpc/XmlRpcService.html
-
-;;; *************
-;;; Configuration
-;;; *************
-
-;; 1.) Load the file jiralib.el, either manuall or place (require 'jiralib) in your .emacs with jiralib.el in the load path.
-;; 2.) Customize the variable jiralib-url to point to the XML-RPC url of the Jiralib
-;; installation to be accessed.
-;; 3.) The faces can be customized for different look/feel/highlighting.
-
-;;; *****
-;;; Usage
-;;; *****
-
-;; M-x jiralib-mode will load the major mode into a new buffer named *Jiralib*.
-;; You will be asked to login; use the username/password for the Jiralib server.
-;; A few internal lists should be populated automatically containing a list
-;; of projects, issue types, etc. 
-
-;; The following commands/keyboard shorcuts can be used:
-
-;; li - jiralib-list-issues
-;; lp - jiralib-list-projects
-;; lf - jiralib-list-filters
-;; si - jiralib-search-issues
-;; sp - jiralib-search-project-issues
-;; i - jiralib-show-issue
-;; c - jiralib-create-ticket
-;; o - jiralib-comment-ticket
-;; r - jiralib-refresh-ticket
-;; a - jiralib-assign-ticket
-;; n - jiralib-next-comment
-;; p - jiralib-previous-comment
-;; jl - jiralib-login
-;; jL - jiralib-logout
-;; Q - jiralib-mode-quit
-
-;; When viewing an issues, pressing o, r, etc. acts upon that issue. 
-;; For instance, while viewing an issue, pressing o will ask for a comment. 
-;; That comment will be posted to the issue currently being viewed.
-
-;; Some prompts have tab completions in the minibuffer/echo area. Try it out to
-;; see which prompts do and which do not.
-
-;;; Code:
-
-
-;; **************************
-;; Jiralib Mode - by Brian Zwahr
-;; **************************
-
 (defun jiralib-load-wsdl ()
   "Load the JIRA WSDL descriptor."
   (setq jiralib-wsdl (soap-load-wsdl-from-url (if (string-equal jiralib-wsdl-descriptor-url "")
@@ -387,7 +285,7 @@ emacs-lisp"
   "Return an assoc list mapping a status code to its name.
 NOTE: Status codes are stored as strings, not numbers.
 
-This function will only ask JIRA for the list of codes once, than
+This function will only ask JIRA for the list of codes once, then
 will cache it."
   (unless jiralib-status-codes-cache
     (setq jiralib-status-codes-cache
