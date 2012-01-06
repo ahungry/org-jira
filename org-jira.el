@@ -221,14 +221,16 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
      (unless jiralib-user-login-name
        (call-interactively 'jiralib-login))
      (list (jiralib-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jiralib-user-login-name)))))
-  (mapc (lambda (issue)
+  (let (project-buffer)
+    (mapc (lambda (issue)
 	    (let* ((proj-key (cdr (assoc 'project issue)))
 		   (issue-id (cdr (assoc 'key issue)))
 		   (issue-summary (cdr (assoc 'summary issue)))
 		   (issue-headline issue-summary))
 	      (let ((project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir)))
-		(with-current-buffer (or (find-buffer-visiting project-file)
-					 (find-file project-file))
+		(setq project-buffer (or (find-buffer-visiting project-file)
+					 (find-file project-file)))
+		(with-current-buffer project-buffer
 		  (org-jira-mode t)
 		  (widen)
 		  (show-all)
@@ -260,7 +262,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 		       (point))
 		     (replace-regexp-in-string "-" "_" issue-id)
 		     nil)
-							    
+		    
 		    (mapc (lambda (entry)
 			    (let ((val (org-jira-get-issue-val entry issue)))
 			      (when (and val (not (string= val "")))
@@ -292,7 +294,8 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 			  '(description))
 		    (org-jira-update-comments-for-current-issue)
 		    )))))
-	  issues))
+	  issues)
+    (switch-to-buffer project-buffer)))
 
 (defun org-jira-update-comment ()
   "update a comment for the current issue"
