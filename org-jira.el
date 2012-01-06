@@ -31,7 +31,7 @@
 
 
 (require 'org)
-(require 'jira2)
+(require 'jiralib)
 
 (defgroup org-jira nil
   "Post to weblogs from Emacs"
@@ -162,7 +162,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	(find-file projects-file))
     (org-jira-mode t)
     (save-excursion
-      (let* ((oj-projs (jira2-get-projects)))
+      (let* ((oj-projs (jiralib-get-projects)))
 	(mapc (lambda (proj)
 		(let* ((proj-key (cdr (assoc 'key proj)))
 		       (proj-headline (format "Project: [[file:%s.org][%s]]" proj-key proj-key)))
@@ -201,13 +201,13 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   (cond ((eq key 'components)
 	 (org-jira-get-issue-components issue))
 	((eq key 'status)
-	 (or (cdr (assoc (cdr (assoc 'status issue)) (jira2-get-statuses))) ""))
+	 (or (cdr (assoc (cdr (assoc 'status issue)) (jiralib-get-statuses))) ""))
 	((eq key 'resolution)
-	 (or (cdr (assoc (cdr (assoc 'resolution issue)) (jira2-get-resolutions))) ""))
+	 (or (cdr (assoc (cdr (assoc 'resolution issue)) (jiralib-get-resolutions))) ""))
 	((eq key 'type)
-	 (or (cdr (assoc (cdr (assoc 'type issue)) (jira2-get-issue-types))) ""))
+	 (or (cdr (assoc (cdr (assoc 'type issue)) (jiralib-get-issue-types))) ""))
 	((eq key 'priority)
-	 (or (cdr (assoc (cdr (assoc 'priority issue)) (jira2-get-prioritys))) ""))
+	 (or (cdr (assoc (cdr (assoc 'priority issue)) (jiralib-get-prioritys))) ""))
 	((eq key 'description)
 	 (org-jira-strip-string (or (cdr (assoc 'description issue)) "")))
 	(t
@@ -218,9 +218,9 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   "Get list of issues."
   (interactive
    (progn
-     (unless jira2-user-login-name
-       (call-interactively 'jira2-login))
-     (list (jira2-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jira2-user-login-name)))))
+     (unless jiralib-user-login-name
+       (call-interactively 'jiralib-login))
+     (list (jiralib-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jiralib-user-login-name)))))
   (mapc (lambda (issue)
 	    (let* ((proj-key (cdr (assoc 'project issue)))
 		   (issue-id (cdr (assoc 'key issue)))
@@ -301,8 +301,8 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	 (comment-id (org-jira-get-from-org 'comment 'id))
 	 (comment (org-jira-get-comment-body comment-id)))
     (if comment-id
-	(jira2-edit-comment comment-id comment)
-      (jira2-add-comment issue-id comment)
+	(jiralib-edit-comment comment-id comment)
+      (jiralib-add-comment issue-id comment)
       (org-jira-delete-current-comment)
       (org-jira-update-comments-for-current-issue))))
 
@@ -313,7 +313,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 
 (defun org-jira-update-comments-for-current-issue ()
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
-	 (comments (jira2-get-comments issue-id)))
+	 (comments (jiralib-get-comments issue-id)))
     (mapc (lambda (comment)
 	    (ensure-on-issue-id issue-id
 	      (let* ((comment-id (cdr (assoc 'id comment)))
@@ -374,7 +374,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   "Read project name"
   (completing-read 
    "Project: "
-   (jira2-make-list (jira2-get-projects) 'key)
+   (jiralib-make-list (jiralib-get-projects) 'key)
    nil
    t
    (car org-jira-project-read-history)
@@ -384,7 +384,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   "Read issue type name"
   (completing-read
    "Type: "
-   (mapcar 'cdr (jira2-get-issue-types))
+   (mapcar 'cdr (jiralib-get-issue-types))
    nil
    t
    (car org-jira-type-read-history)
@@ -400,14 +400,14 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
           (equal type "")
           (equal summary ""))
       (error "Must provide all information!"))
-  (let* ((project-components (jira2-get-components project))
+  (let* ((project-components (jiralib-get-components project))
 	 (user (completing-read "Assignee: " (mapcar 'car jira-users))))
     (setq ticket-alist (list (cons 'project project)
-			     (cons 'type (car (rassoc type (jira2-get-issue-types)))) 
+			     (cons 'type (car (rassoc type (jiralib-get-issue-types)))) 
 			     (cons 'summary summary) 
 			     (cons 'description description)
 			     (cons 'assignee (cdr (assoc user jira-users)))))
-    (jira2-create-issue ticket-alist)))
+    (jiralib-create-issue ticket-alist)))
 
 (defun org-jira-strip-string (str)
   "remove the beginning and ending white space for a string"
@@ -449,29 +449,29 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   "Read issue workflow progress resolution."
   (let ((resolution (completing-read
 		     "Resolution: "
-		     (mapcar 'cdr (jira2-get-resolutions))
+		     (mapcar 'cdr (jiralib-get-resolutions))
 		     nil
 		     t
 		     (car org-jira-resolution-history)
 		     'org-jira-resolution-history)))
-    (car (rassoc resolution (jira2-get-resolutions)))))
+    (car (rassoc resolution (jiralib-get-resolutions)))))
 
 (defun org-jira-refresh-issue ()
   "Refresh issue from jira to org"
   (interactive)
   (ensure-on-issue
    (let* ((issue-id (org-jira-id)))
-     (org-jira-get-issues (list (jira2-get-issue issue-id))))))
+     (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
 
 (defun org-jira-progress-issue ()
   "Progress issue workflow"
   (interactive)
   (ensure-on-issue
    (let* ((issue-id (org-jira-id))
-	  (actions (jira2-get-available-actions issue-id))
+	  (actions (jiralib-get-available-actions issue-id))
 	  (action (org-jira-read-action actions))
 	  (resolution (org-jira-read-resolution))
-	  (issue (jira2-progress-workflow-action issue-id action `((resolution . ,resolution)))))
+	  (issue (jiralib-progress-workflow-action issue-id action `((resolution . ,resolution)))))
      (org-jira-get-issues (list issue)))))
      
      
@@ -484,11 +484,11 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	   (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
 	   (org-issue-type (org-jira-get-issue-val-from-org 'type))
 	   (org-issue-status (org-jira-get-issue-val-from-org 'status))
-	   (issue (jira2-get-issue issue-id))
+	   (issue (jiralib-get-issue issue-id))
 	   (project (org-jira-get-issue-val 'project issue))
-	   (project-components (jira2-get-components project)))
+	   (project-components (jiralib-get-components project)))
       
-      (jira2-update-issue issue-id ;(jira2-update-issue "FB-1" '((components . ["10001" "10000"])))
+      (jiralib-update-issue issue-id ;(jiralib-update-issue "FB-1" '((components . ["10001" "10000"])))
 			  (list (cons 
 				 'components 
 				 (apply 'vector 
@@ -499,10 +499,10 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 						 (list comp-id)
 					       nil)))
 					 (split-string org-issue-components ",\\s *"))))
-				(cons 'priority (car (rassoc org-issue-priority (jira2-get-prioritys))))
+				(cons 'priority (car (rassoc org-issue-priority (jiralib-get-prioritys))))
 				(cons 'description org-issue-description)
 				(cons 'summary (org-jira-get-issue-val-from-org 'summary))))
-      (org-jira-get-issues (list (jira2-get-issue issue-id))))))
+      (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
 
 
 (defun org-jira-parse-issue-id ()
@@ -511,7 +511,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
     (let ((continue t)
 	  issue-id)
       (while continue
-	(when (string-match (jira2-get-issue-regexp) 
+	(when (string-match (jiralib-get-issue-regexp) 
 			    (or (setq issue-id (org-entry-get (point) "ID"))
 				""))
 	  (setq continue nil))
@@ -562,7 +562,7 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
   `(save-excursion
      (while (org-up-heading-safe)) ; goto the top heading
      (let ((org-jira-id (org-jira-id)))
-       (unless (and org-jira-id (string-match (jira2-get-issue-regexp) org-jira-id))
+       (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) org-jira-id))
 	 (error "Not on a issue region!")))
      ,@body))
 
@@ -613,6 +613,6 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
   "Open the current issue in external browser."
   (interactive)
   (ensure-on-issue
-   (w3m-external-view (concat jira2-url "/browse/" (org-jira-id)))))
+   (w3m-external-view (concat jiralib-url "/browse/" (org-jira-id)))))
 (provide 'org-jira)
 
