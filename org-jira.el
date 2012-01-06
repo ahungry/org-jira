@@ -217,7 +217,10 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 (defun org-jira-get-issues (issues)
   "Get list of issues."
   (interactive
-   (list (jira2-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jira2-user-login-name))))
+   (progn
+     (unless jira2-user-login-name
+       (call-interactively 'jira2-login))
+     (list (jira2-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jira2-user-login-name)))))
   (mapc (lambda (issue)
 	    (let* ((proj-key (cdr (assoc 'project issue)))
 		   (issue-id (cdr (assoc 'key issue)))

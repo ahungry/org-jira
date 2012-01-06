@@ -244,22 +244,27 @@ This is maintained by `jira2-login'.")
   "Login into JIRA and store the authentication token in `jira2-token'"
   ;; NOTE that we cannot rely on `jira2-call' because `jira2-call' relies on
   ;; us ;-)
-  (interactive (let ((found (nth 0 (auth-source-search :max 1
-                                           :host (if (string= jira2-host "")
-						     (url-host (url-generic-parse-url jira2-url))
-						   jira2-host)
-                                           :port 80
-                                           :require '(:user :secret)
-                                           :create t)))
-	  user secret)
-      (when found
-	  (setq user (plist-get found :user)
-		secret
-		(let ((sec (plist-get found :secret)))
-		  (if (functionp sec)
-		      (funcall sec)
-		    sec)))
-	  (list user secret))))
+  (interactive 
+   (if (> 24 emacs-major-version)
+       (let ((user (read-string "Username for Jira server login? "))
+	     (password (read-passwd "Password for Jira server login? ")))
+	 (list user password))
+     (let ((found (nth 0 (auth-source-search :max 1
+					     :host (if (string= jira2-host "")
+						       (url-host (url-generic-parse-url jira2-url))
+						     jira2-host)
+					     :port 80
+					     :require '(:user :secret)
+					     :create t)))
+	   user secret)
+       (when found
+	 (setq user (plist-get found :user)
+	       secret
+	       (let ((sec (plist-get found :secret)))
+		 (if (functionp sec)
+		     (funcall sec)
+		   sec)))
+	 (list user secret)))))
   (unless jira2-wsdl 
     (jira2-load-wsdl))
   (setq jira2-token 
@@ -682,15 +687,5 @@ Return nil if the field is not found"
 (defun jira2-strip-cr (string)
   "Removes carriage returns from a string"
   (when string (replace-regexp-in-string "\r" "" string)))
-
-;; Modified by Brian Zwahr to a specific *Jira2* buffer, not a temp buffer
-(defmacro jira2-with-jira2-buffer (&rest body)
-  "Sends all output and buffer modifications to *Jira2* buffer."
-  `(with-current-buffer "*Jira2*" 
-     (delete-region (point-min) (point-max))
-     (setq truncate-lines t)
-     ,@body
-     (beginning-of-buffer)))
-
 
 (provide 'jira2)
