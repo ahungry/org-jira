@@ -614,5 +614,11 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
   (interactive)
   (ensure-on-issue
    (w3m-external-view (concat jiralib-url "/browse/" (org-jira-id)))))
+
+(org-add-link-type "jira" 'org-jira-open)
+
+(defun org-jira-open (path)
+  "Open a Jira Link from PATH."
+  (org-jira-get-issues (list (jiralib-get-issue path))))
 (provide 'org-jira)
 
