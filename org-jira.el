@@ -125,6 +125,7 @@ All the other properties are optional. They over-ride the global variables.
     (define-key org-jira-map (kbd "C-c pg") 'org-jira-get-projects)
     (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
     (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
+    (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
     (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
@@ -213,7 +214,29 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	(t
 	 (or (cdr (assoc key issue)) ""))))
 
+(defun org-jira-get-issues-headonly (issues)
+  "Get list of issues, head only"
 
+  (interactive
+   (progn
+     (unless jiralib-user-login-name
+       (call-interactively 'jiralib-login))
+     (list (jiralib-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jiralib-user-login-name)))))
+  
+  (let* ((issues-file (expand-file-name "issues-headonly.org" org-jira-working-dir))
+	 (issues-headonly-buffer (or (find-buffer-visiting issues-file)
+				     (find-file issues-file))))
+    (with-current-buffer issues-headonly-buffer
+      (widen)
+      (delete-region (point-min) (point-max))
+      
+      (mapc (lambda (issue)
+	      (let ((issue-id (org-jira-get-issue-val 'key issue))
+		    (issue-summary (org-jira-get-issue-val 'summary issue)))
+		(insert (format "- [jira:%s] %s\n" issue-id issue-summary))))
+	    issues))
+    (switch-to-buffer issues-headonly-buffer)))
+      
 (defun org-jira-get-issues (issues)
   "Get list of issues."
   (interactive
