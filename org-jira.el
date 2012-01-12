@@ -197,22 +197,36 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	       (cdr (assoc 'name comp)))
 	     (cdr (assoc 'components issue)) ", "))
 
+(defun org-jira-get-comment-val (key comment)
+  "Return the value associated with KEY of COMMENT"
+  (let ((tmp  (or (cdr (assoc key comment)) "")))
+    (cond ((or (eq key 'created) (eq key 'updated)) ; how to convert "2012-01-09T08:59:15.000Z" to my timezone?
+	   (condition-case ()
+	       (format-time-string "%Y-%m-%d %T" 
+				   (apply
+				    'encode-time
+				    (parse-time-string (replace-regexp-in-string "T\\|\\.000" " " tmp))))
+	     (error tmp)))
+	  (t
+	   tmp))))
+
 (defun org-jira-get-issue-val (key issue)
   "Return the value associated with key KEY of issue ISSUE."
-  (cond ((eq key 'components)
-	 (org-jira-get-issue-components issue))
-	((eq key 'status)
-	 (or (cdr (assoc (cdr (assoc 'status issue)) (jiralib-get-statuses))) ""))
-	((eq key 'resolution)
-	 (or (cdr (assoc (cdr (assoc 'resolution issue)) (jiralib-get-resolutions))) ""))
-	((eq key 'type)
-	 (or (cdr (assoc (cdr (assoc 'type issue)) (jiralib-get-issue-types))) ""))
-	((eq key 'priority)
-	 (or (cdr (assoc (cdr (assoc 'priority issue)) (jiralib-get-prioritys))) ""))
-	((eq key 'description)
-	 (org-jira-strip-string (or (cdr (assoc 'description issue)) "")))
-	(t
-	 (or (cdr (assoc key issue)) ""))))
+  (let ((tmp  (or (cdr (assoc key issue)) "")))
+    (cond ((eq key 'components)
+	   (org-jira-get-issue-components issue))
+	  ((eq key 'status)
+	   (cdr (assoc tmp (jiralib-get-statuses))))
+	  ((eq key 'resolution)
+	   (cdr (assoc tmp (jiralib-get-resolutions))))
+	  ((eq key 'type)
+	   (cdr (assoc tmp (jiralib-get-issue-types))))
+	  ((eq key 'priority)
+	   (cdr (assoc tmp (jiralib-get-prioritys))))
+	  ((eq key 'description)
+	   (org-jira-strip-string tmp))
+	  (t
+	   tmp))))
 
 (defun org-jira-get-issues-headonly (issues)
   "Get list of issues, head only"
@@ -362,6 +376,11 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 		(insert comment-headline "\n")
 		(org-narrow-to-subtree)
 		(org-entry-put (point) "ID" comment-id)
+		(let ((created (org-jira-get-comment-val 'created comment))
+		      (updated (org-jira-get-comment-val 'updated comment)))
+		  (org-entry-put (point) "created" created)
+		  (unless (string= created updated)
+		    (org-entry-put (point) "updated" updated)))
 		(goto-char (point-max))
 		(insert (or (cdr (assoc 'body comment)) "")))))
 	  (mapcan (lambda (comment) (if (string= (cdr (assoc 'author comment))
