@@ -234,14 +234,26 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	  (t
 	   tmp))))
 
+(defvar org-jira-jql-history nil)
+(defun org-jira-get-issue-list ()
+  "Get list of issues, using jql (jira query language). Default
+is unresolved issues assigned to current login user; with a
+prefix argument you are given the chance to enter your own jql."
+  (let ((jql (format "assignee = currentUser() and resolution = unresolved ORDER BY priority DESC, created ASC")))
+    (when current-prefix-arg
+      (setq jql (read-string "Jql: " 
+			     (if org-jira-jql-history
+				 (car org-jira-jql-history)
+			       "assignee = currentUser() and resolution = unresolved")
+			     'org-jira-jql-history)))
+    (list (jiralib-do-jql-search jql))))
+
 (defun org-jira-get-issues-headonly (issues)
-  "Get list of issues, head only"
+  "Get list of issues assigned to you and unresolved, head
+only. With a prefix argument, allow you to customize the jql. See `org-jira-get-issue-list'"
 
   (interactive
-   (progn
-     (unless jiralib-user-login-name
-       (call-interactively 'jiralib-login))
-     (list (jiralib-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jiralib-user-login-name)))))
+   (org-jira-get-issue-list))
   
   (let* ((issues-file (expand-file-name "issues-headonly.org" org-jira-working-dir))
 	 (issues-headonly-buffer (or (find-buffer-visiting issues-file)
@@ -258,12 +270,12 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
     (switch-to-buffer issues-headonly-buffer)))
       
 (defun org-jira-get-issues (issues)
-  "Get list of issues."
+  "Get list of issues. Default is get unfinished issues assigned
+to you, but you can customize jql with a prefix argument. See
+`org-jira-get-issue-list'"
+
   (interactive
-   (progn
-     (unless jiralib-user-login-name
-       (call-interactively 'jiralib-login))
-     (list (jiralib-do-jql-search (format "assignee = %s and resolution = unresolved ORDER BY priority DESC, created ASC" jiralib-user-login-name)))))
+   (org-jira-get-issue-list))
   (let (project-buffer)
     (mapc (lambda (issue)
 	    (let* ((proj-key (cdr (assoc 'project issue)))
