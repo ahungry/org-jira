@@ -197,16 +197,20 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	       (cdr (assoc 'name comp)))
 	     (cdr (assoc 'components issue)) ", "))
 
+(defun org-jira-transform-time-format (jira-time-str)
+  "Convert \"2012-01-09T08:59:15.000Z\" to \"2012-01-09 16:59:15\", with my timezone being +0800"
+  (condition-case ()
+      (format-time-string "%Y-%m-%d %T" 
+			  (apply
+			   'encode-time
+			   (parse-time-string (replace-regexp-in-string "T\\|\\.000" " " jira-time-str))))
+    (error jira-time-str)))
+
 (defun org-jira-get-comment-val (key comment)
   "Return the value associated with KEY of COMMENT"
   (let ((tmp  (or (cdr (assoc key comment)) "")))
-    (cond ((or (eq key 'created) (eq key 'updated)) ; how to convert "2012-01-09T08:59:15.000Z" to my timezone?
-	   (condition-case ()
-	       (format-time-string "%Y-%m-%d %T" 
-				   (apply
-				    'encode-time
-				    (parse-time-string (replace-regexp-in-string "T\\|\\.000" " " tmp))))
-	     (error tmp)))
+    (cond ((or (eq key 'created) (eq key 'updated)) 
+	   (org-jira-transform-time-format tmp))
 	  (t
 	   tmp))))
 
@@ -215,6 +219,8 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   (let ((tmp  (or (cdr (assoc key issue)) "")))
     (cond ((eq key 'components)
 	   (org-jira-get-issue-components issue))
+	  ((or (eq key 'created) (eq key 'updated))
+	   (org-jira-transform-time-format tmp))
 	  ((eq key 'status)
 	   (cdr (assoc tmp (jiralib-get-statuses))))
 	  ((eq key 'resolution)
@@ -304,7 +310,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 			    (let ((val (org-jira-get-issue-val entry issue)))
 			      (when (and val (not (string= val "")))
 				(org-entry-put (point) (symbol-name entry) val))))
-			  '(assignee reporter type priority resolution status components))
+			  '(assignee reporter type priority resolution status components created updated))
 		    (org-entry-put (point) "ID" (cdr (assoc 'key issue)))
 
 		    (mapc (lambda (heading-entry)
@@ -528,25 +534,27 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 	   (org-issue-resolution (org-jira-get-issue-val-from-org 'resolution))
 	   (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
 	   (org-issue-type (org-jira-get-issue-val-from-org 'type))
+	   (org-issue-assignee (org-jira-get-issue-val-from-org 'assignee))
 	   (org-issue-status (org-jira-get-issue-val-from-org 'status))
 	   (issue (jiralib-get-issue issue-id))
 	   (project (org-jira-get-issue-val 'project issue))
 	   (project-components (jiralib-get-components project)))
       
       (jiralib-update-issue issue-id ;(jiralib-update-issue "FB-1" '((components . ["10001" "10000"])))
-			  (list (cons 
-				 'components 
-				 (apply 'vector 
-					(mapcan 
-					 (lambda (item)
-					   (let ((comp-id (car (rassoc item project-components))))
-					     (if comp-id
-						 (list comp-id)
-					       nil)))
-					 (split-string org-issue-components ",\\s *"))))
-				(cons 'priority (car (rassoc org-issue-priority (jiralib-get-prioritys))))
-				(cons 'description org-issue-description)
-				(cons 'summary (org-jira-get-issue-val-from-org 'summary))))
+			    (list (cons 
+				   'components 
+				   (apply 'vector 
+					  (mapcan 
+					   (lambda (item)
+					     (let ((comp-id (car (rassoc item project-components))))
+					       (if comp-id
+						   (list comp-id)
+						 nil)))
+					   (split-string org-issue-components ",\\s *"))))
+				  (cons 'priority (car (rassoc org-issue-priority (jiralib-get-prioritys))))
+				  (cons 'description org-issue-description)
+				  (cons 'assignee org-issue-assignee)
+				  (cons 'summary (org-jira-get-issue-val-from-org 'summary))))
       (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
 
 
