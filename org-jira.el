@@ -128,6 +128,8 @@ All the other properties are optional. They over-ride the global variables.
     (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
     (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
     (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
+    (define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
+    (define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
     (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
@@ -690,6 +692,20 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
   (interactive)
   (ensure-on-issue
    (browse-url-default-browser (concat jiralib-url "/browse/" (org-jira-id)))))
+
+(defun org-jira-get-issues-from-filter (filter)
+  "Get issues from filter which are jql created and saved on the
+server side. Provide this command in case some users are not able
+to use client side jql (maybe because of Jira server version?)."
+  (interactive
+   (list (completing-read "Filter: " (mapcar 'cdr (jiralib-get-saved-filters)))))
+  (org-jira-get-issues (jiralib-get-issues-from-filter (car (rassoc filter (jiralib-get-saved-filters))))))
+
+(defun org-jira-get-issues-from-filter-headonly (filter)
+  "Get issues *head only* from saved filter. See `org-jira-get-issues-from-filter'"
+  (interactive
+   (list (completing-read "Filter: " (mapcar 'cdr (jiralib-get-saved-filters)))))
+  (org-jira-get-issues-headonly (jiralib-get-issues-from-filter (car (rassoc filter (jiralib-get-saved-filters))))))
 
 (org-add-link-type "jira" 'org-jira-open)
 

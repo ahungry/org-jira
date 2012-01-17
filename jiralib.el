@@ -564,7 +564,7 @@ Return nil if the field is not found"
 
 (defun jiralib-get-saved-filters ()
   "Gets all saved filters available for the currently logged in user"
-  (jiralib-call 'getSavedFilters))
+  (jiralib-make-assoc-list (jiralib-call 'getSavedFilters) 'id 'name))
 
 (defun jiralib-get-server-info ()
   "Returns the Server information such as baseUrl, version, edition, buildDate, buildNumber."
