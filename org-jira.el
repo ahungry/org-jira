@@ -39,6 +39,8 @@
 
 (defvar org-jira-working-dir "~/../.org-jira"
   "Folder under which to store org-jira working files")
+(defvar org-jira-default-jql "assignee = currentUser() and resolution = unresolved ORDER BY priority DESC, created ASC"
+  "Default jql for querying your Jira tickets")
 (defvar jira-users (list (cons "Full Name" "username"))
   "Jira has not api for discovering all users, so we should provide it somewhere else")
 
@@ -130,6 +132,7 @@ All the other properties are optional. They over-ride the global variables.
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
     (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
+    (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
     (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
     (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
     org-jira-map))
@@ -239,7 +242,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   "Get list of issues, using jql (jira query language). Default
 is unresolved issues assigned to current login user; with a
 prefix argument you are given the chance to enter your own jql."
-  (let ((jql (format "assignee = currentUser() and resolution = unresolved ORDER BY priority DESC, created ASC")))
+  (let ((jql org-jira-default-jql))
     (when current-prefix-arg
       (setq jql (read-string "Jql: " 
 			     (if org-jira-jql-history
@@ -368,6 +371,14 @@ to you, but you can customize jql with a prefix argument. See
   "delete the current comment"
   (ensure-on-comment
    (delete-region (point-min) (point-max))))
+
+(defun org-jira-copy-current-issue-key ()
+  "Copy the current issue's key into clipboard"
+  (interactive)
+  (let ((issue-id (org-jira-get-from-org 'issue 'key)))
+    (with-temp-buffer
+      (insert issue-id)
+      (kill-region (point-min) (point-max)))))
 
 (defun org-jira-update-comments-for-current-issue ()
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
@@ -678,7 +689,7 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
   "Open the current issue in external browser."
   (interactive)
   (ensure-on-issue
-   (w3m-external-view (concat jiralib-url "/browse/" (org-jira-id)))))
+   (browse-url-default-browser (concat jiralib-url "/browse/" (org-jira-id)))))
 
 (org-add-link-type "jira" 'org-jira-open)
 
