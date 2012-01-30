@@ -37,7 +37,7 @@
   "Post to weblogs from Emacs"
   :group 'org-jira)
 
-(defvar org-jira-working-dir "~/../.org-jira"
+(defvar org-jira-working-dir "~/.org-jira"
   "Folder under which to store org-jira working files")
 (defvar org-jira-default-jql "assignee = currentUser() and resolution = unresolved ORDER BY priority DESC, created ASC"
   "Default jql for querying your Jira tickets")
@@ -444,6 +444,7 @@ to you, but you can customize jql with a prefix argument. See
      (org-jira-get-issues (list issue)))))
 
 (defvar org-jira-project-read-history nil)
+(defvar org-jira-priority-read-history nil)
 (defvar org-jira-type-read-history nil)
 
 (defun org-jira-read-project ()
@@ -455,6 +456,16 @@ to you, but you can customize jql with a prefix argument. See
    t
    (car org-jira-project-read-history)
    'org-jira-project-read-history))
+
+(defun org-jira-read-priority ()
+  "Read priority name"
+  (completing-read 
+   "Priority: "
+   (mapcar 'cdr (jiralib-get-prioritys))
+   nil
+   t
+   (car org-jira-priority-read-history)
+   'org-jira-priority-read-history))
 
 (defun org-jira-read-issue-type ()
   "Read issue type name"
@@ -477,11 +488,13 @@ to you, but you can customize jql with a prefix argument. See
           (equal summary ""))
       (error "Must provide all information!"))
   (let* ((project-components (jiralib-get-components project))
-	 (user (completing-read "Assignee: " (mapcar 'car jira-users))))
+	 (user (completing-read "Assignee: " (mapcar 'car jira-users)))
+	 (priority (car (rassoc (org-jira-read-priority) (jiralib-get-prioritys)))))
     (setq ticket-alist (list (cons 'project project)
 			     (cons 'type (car (rassoc type (jiralib-get-issue-types)))) 
 			     (cons 'summary summary) 
 			     (cons 'description description)
+			     (cons 'priority priority)
 			     (cons 'assignee (cdr (assoc user jira-users)))))
     (jiralib-create-issue ticket-alist)))
 
