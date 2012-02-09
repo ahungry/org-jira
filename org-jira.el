@@ -435,13 +435,12 @@ to you, but you can customize jql with a prefix argument. See
   (ensure-on-todo
    (when (org-jira-parse-issue-id)
      (error "Already on jira ticket"))
-   (let ((issue (org-jira-create-issue 
-		 (org-jira-read-project)
-		 (org-jira-read-issue-type)
-		 (org-get-heading t t)
-		 (org-get-entry))))
-     (delete-region (point-min) (point-max))
-     (org-jira-get-issues (list issue)))))
+   (save-excursion (org-jira-create-issue 
+		    (org-jira-read-project)
+		    (org-jira-read-issue-type)
+		    (org-get-heading t t)
+		    (org-get-entry)))
+   (delete-region (point-min) (point-max))))
 
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-priority-read-history nil)
@@ -476,7 +475,38 @@ to you, but you can customize jql with a prefix argument. See
    t
    (car org-jira-type-read-history)
    'org-jira-type-read-history))
-		   
+
+(defun org-jira-read-subtask-type ()
+  "Read issue type name"
+  (completing-read
+   "Type: "
+   (mapcar 'cdr (jiralib-get-subtask-types))
+   nil
+   t
+   (car org-jira-type-read-history)
+   'org-jira-type-read-history))
+
+(defun org-jira-get-issue-struct (project type summary description)
+  "helper function for the struct used in creating issues and subtasks"
+  (if (or (equal project "")
+          (equal type "")
+          (equal summary ""))
+      (error "Must provide all information!"))
+  (let* ((project-components (jiralib-get-components project))
+	 (user (completing-read "Assignee: " (mapcar 'car jira-users)))
+	 (priority (car (rassoc (org-jira-read-priority) (jiralib-get-prioritys))))
+	 (ticket-struct (list (cons 'project project)
+			     (cons 'type (car (rassoc type (if (and (boundp 'parent-id) parent-id)
+							       (jiralib-get-subtask-types)
+							     (jiralib-get-issue-types)))))
+			     (cons 'summary (format "%s%s" (if (and (boundp 'parent-id) parent-id)
+							       (format "[jira:%s] " parent-id)
+							     "")
+						    summary))
+			     (cons 'description description)
+			     (cons 'priority priority)
+			     (cons 'assignee (cdr (assoc user jira-users))))))
+    ticket-struct))
 (defun org-jira-create-issue (project type summary description)
   "create an issue"
   (interactive (list (org-jira-read-project)
@@ -487,16 +517,23 @@ to you, but you can customize jql with a prefix argument. See
           (equal type "")
           (equal summary ""))
       (error "Must provide all information!"))
-  (let* ((project-components (jiralib-get-components project))
-	 (user (completing-read "Assignee: " (mapcar 'car jira-users)))
-	 (priority (car (rassoc (org-jira-read-priority) (jiralib-get-prioritys)))))
-    (setq ticket-alist (list (cons 'project project)
-			     (cons 'type (car (rassoc type (jiralib-get-issue-types)))) 
-			     (cons 'summary summary) 
-			     (cons 'description description)
-			     (cons 'priority priority)
-			     (cons 'assignee (cdr (assoc user jira-users)))))
-    (jiralib-create-issue ticket-alist)))
+  (let* ((parent-id nil)
+	 (ticket-struct (org-jira-get-issue-struct project type summary description)))
+    (org-jira-get-issues (list (jiralib-create-issue ticket-struct)))))
+
+(defun org-jira-create-subtask (project type summary description)
+  "create an subtask issue"
+  (interactive (ensure-on-issue (list (org-jira-read-project)
+		     (org-jira-read-subtask-type)
+		     (read-string "Summary: ")
+                     (read-string "Description: "))))
+  (if (or (equal project "")
+          (equal type "")
+          (equal summary ""))
+      (error "Must provide all information!"))
+  (let* ((parent-id (org-jira-parse-issue-id))
+	 (ticket-struct (org-jira-get-issue-struct project type summary description)))
+    (org-jira-get-issues (list (jiralib-create-subtask ticket-struct parent-id)))))
 
 (defun org-jira-strip-string (str)
   "remove the beginning and ending white space for a string"

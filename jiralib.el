@@ -529,6 +529,24 @@ Return nil if the field is not found"
   "Creates an issue in JIRALIB from a Hashtable object."
   (jiralib-call 'createIssue r-issue-struct))
 
+(defun jiralib-create-subtask (r-issue-struct parent-issue-id)
+  (jiralib-call 'createIssueWithParent r-issue-struct parent-issue-id))
+
+
+(defvar jiralib-subtask-types-cache nil)
+
+(defun jiralib-get-subtask-types ()
+  "Return an assoc list mapping an issue type code to its name.
+NOTE: Issue type codes are stored as strings, not numbers.
+
+This function will only ask JIRA for the list of codes once, than
+will cache it."
+  (unless jiralib-subtask-types-cache
+    (setq jiralib-subtask-types-cache
+	  (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes") 'id 'name)))
+  jiralib-subtask-types-cache)
+
+
 (defun jiralib-get-comments (issue-key)
   "Returns all comments associated with the issue"
   (jiralib-call 'getComments issue-key))
