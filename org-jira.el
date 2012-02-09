@@ -135,6 +135,8 @@ All the other properties are optional. They over-ride the global variables.
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
     (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
     (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
+    (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
+    (define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
     (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
     (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
     org-jira-map))
@@ -442,6 +444,12 @@ to you, but you can customize jql with a prefix argument. See
 		    (org-get-entry)))
    (delete-region (point-min) (point-max))))
 
+(defun org-jira-get-subtasks ()
+  "get subtasks for the current issue"
+  (interactive)
+  (ensure-on-issue
+     (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
+
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-priority-read-history nil)
 (defvar org-jira-type-read-history nil)
@@ -499,10 +507,10 @@ to you, but you can customize jql with a prefix argument. See
 			     (cons 'type (car (rassoc type (if (and (boundp 'parent-id) parent-id)
 							       (jiralib-get-subtask-types)
 							     (jiralib-get-issue-types)))))
-			     (cons 'summary (format "%s%s" (if (and (boundp 'parent-id) parent-id)
-							       (format "[jira:%s] " parent-id)
-							     "")
-						    summary))
+			     (cons 'summary (format "%s%s" summary
+						    (if (and (boundp 'parent-id) parent-id)
+							(format " (subtask of [jira:%s])" parent-id)
+						      "")))
 			     (cons 'description description)
 			     (cons 'priority priority)
 			     (cons 'assignee (cdr (assoc user jira-users))))))
