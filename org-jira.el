@@ -578,6 +578,23 @@ to you, but you can customize jql with a prefix argument. See
 		 'org-jira-actions-history)))
     (car (rassoc action actions))))
 
+(defvar org-jira-fields-history nil)
+(defun org-jira-read-field (fields)
+  "Read (custom) fields for workflow progress"
+  (let ((field-desc (completing-read
+		     "More fields to set: "
+		     (cons "Thanks, no more fields are *required*." (mapcar 'cdr fields))
+		     nil
+		     t
+		     nil
+		     'org-jira-fields-history))
+	field-name)
+    (setq field-name (car (rassoc field-desc fields)))
+    (if field-name
+	(intern field-name)
+      field-name)))
+  
+
 (defvar org-jira-resolution-history nil)
 (defun org-jira-read-resolution ()
   "Read issue workflow progress resolution."
@@ -597,6 +614,7 @@ to you, but you can customize jql with a prefix argument. See
    (let* ((issue-id (org-jira-id)))
      (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
 
+(defvar org-jira-fields-values-history nil)
 (defun org-jira-progress-issue ()
   "Progress issue workflow"
   (interactive)
@@ -604,8 +622,38 @@ to you, but you can customize jql with a prefix argument. See
    (let* ((issue-id (org-jira-id))
 	  (actions (jiralib-get-available-actions issue-id))
 	  (action (org-jira-read-action actions))
-	  (resolution (org-jira-read-resolution))
-	  (issue (jiralib-progress-workflow-action issue-id action `((resolution . ,resolution)))))
+	  (fields (jiralib-get-fields-for-action issue-id action))
+	  (field-key)
+	  (custom-fields-collector nil)
+	  (custom-fields (progn
+			   ;delete those elements in fields, which has
+			   ;already been set in custom-fields-collector
+
+			   (while fields
+			     (setq fields (delete-if (lambda (strstr)
+						       (member-if (lambda (symstr)
+								    (string= (car strstr)  (symbol-name (car symstr))))
+								  custom-fields-collector))
+						     fields))
+			     (setq field-key (org-jira-read-field fields))
+			     (if (not field-key)
+				 (setq fields nil)
+			       (setq custom-fields-collector
+				     (cons
+				      (cons field-key
+					    (if (eq field-key 'resolution)
+						(org-jira-read-resolution)
+					      (completing-read 
+					       (format "Please enter %s's value: "
+						       (cdr (assoc (symbol-name field-key) fields)))
+					       org-jira-fields-values-history
+					       nil
+					       nil
+					       nil
+					       'org-jira-fields-values-history)))
+				      custom-fields-collector))))
+			   custom-fields-collector))			   
+	  (issue (jiralib-progress-workflow-action issue-id action custom-fields)))
      (org-jira-get-issues (list issue)))))
      
      
