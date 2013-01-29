@@ -1,23 +1,24 @@
-# org-jira mode
+* org-jira mode
 
-Use [Jira](http://www.atlassian.com/software/jira/overview/) in Emacs org-mode.
+Use [[http://www.atlassian.com/software/jira/overview/][Jira]] in Emacs org-mode.
 
-For usage, please watch [this youtube video](http://www.youtube.com/watch?v=6Sp3h1Qlf4w). Or watch it on [youku](http://v.youku.com/v_show/id_XNDc1NTIwOTY0.html) if
+For usage, please watch [[http://www.youtube.com/watch?v=6Sp3h1Qlf4w][this youtube video]]. Or watch it on [[http://v.youku.com/v_show/id_XNDc1NTIwOTY0.html][youku]] if
 you can't visit youtube for some reason. My apologies beforehand if
 you find the video too verbose and boring.
 
-## External libraries
+** External libraries
 
-The [emacs-soap-client](http://code.google.com/p/emacs-soap-client/source/checkout) package is required, I used to bundle it
+The [[http://code.google.com/p/emacs-soap-client/source/checkout][emacs-soap-client]] package is required, I used to bundle it
 together with org-jira (because I had a patch for adding comments in
-Chinese), but [tarsius](https://github.com/baohaojun/org-jira/issues/8) pointed out to me it is not a good idea. So
+Chinese), but [[https://github.com/baohaojun/org-jira/issues/8][tarsius]] pointed out to me it is not a good idea. So
 please install that package along with org-jira.
 
-About the patch, I have submitted it [upstream](http://code.google.com/p/emacs-soap-client/issues/detail?id=16&colspec=ID Type Status Priority Owner Summary). You can download it
-from the [attachment url](http://emacs-soap-client.googlecode.com/issues/attachment?aid=160000000&name=0001-Patch-for-soap-client.patch&token=0w4_XPg-Fe9sNqcTqgNP5RTXlXY:1359427017708) if it is not accepted yet.
+About the patch, I have submitted it [[http://code.google.com/p/emacs-soap-client/issues/detail?id=16&colspec=ID%20Type%20Status%20Priority%20Owner%20Summary][upstream]]. You can download it
+from the [[http://emacs-soap-client.googlecode.com/issues/attachment?aid=160000000&name=0001-Patch-for-soap-client.patch&token=0w4_XPg-Fe9sNqcTqgNP5RTXlXY%3A1359427017708][attachment url]] if it is not accepted yet.
 
-## Commands supported
+** Commands supported
 
+#+BEGIN_EXAMPLE
     org-jira-browse-issue         M-x ... RET
        Open the current issue in external browser.
     org-jira-copy-current-issue-key M-x ... RET
@@ -51,3 +52,5 @@ from the [attachment url](http://emacs-soap-client.googlecode.com/issues/attachm
        Update a comment for the current issue
     org-jira-update-issue         M-x ... RET
        Update an issue
+#+END_EXAMPLE
+
