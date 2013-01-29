@@ -352,7 +352,7 @@ to you, but you can customize jql with a prefix argument. See
 				    (org-insert-subheading t))
 				  (insert entry-heading "\n"))
 
-				(insert (org-jira-get-issue-val heading-entry issue)))))
+				(insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
 			  '(description))
 		    (org-jira-update-comments-for-current-issue)
 		    )))))
@@ -364,7 +364,7 @@ to you, but you can customize jql with a prefix argument. See
   (interactive)
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
 	 (comment-id (org-jira-get-from-org 'comment 'id))
-	 (comment (org-jira-get-comment-body comment-id)))
+	 (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id))))
     (if comment-id
 	(jiralib-edit-comment comment-id comment)
       (jiralib-add-comment issue-id comment)
@@ -415,7 +415,7 @@ to you, but you can customize jql with a prefix argument. See
 		  (unless (string= created updated)
 		    (org-entry-put (point) "updated" updated)))
 		(goto-char (point-max))
-		(insert (or (cdr (assoc 'body comment)) "")))))
+		(insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'body comment)) ""))))))
 	  (mapcan (lambda (comment) (if (string= (cdr (assoc 'author comment))
 						 "admin")
 					nil
@@ -661,7 +661,7 @@ to you, but you can customize jql with a prefix argument. See
   (ensure-on-issue-id 
       issue-id
     (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
-	   (org-issue-description (org-jira-get-issue-val-from-org 'description))
+	   (org-issue-description (replace-regexp-in-string "^  " "" (org-jira-get-issue-val-from-org 'description)))
 	   (org-issue-resolution (org-jira-get-issue-val-from-org 'resolution))
 	   (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
 	   (org-issue-type (org-jira-get-issue-val-from-org 'type))
