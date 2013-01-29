@@ -1647,8 +1647,7 @@ WSDL is the wsdl document used to encode the PARAMETERS."
       (insert ">\n")
       (goto-char (point-max))
       (insert "</soap:Envelope>\n"))
-    (encode-coding-region
-     (point-min) (point-max) 'utf-8)
+
     (buffer-string)))
 
 ;;;; invoking soap methods
