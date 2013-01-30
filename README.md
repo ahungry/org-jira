@@ -16,6 +16,10 @@ please install that package along with org-jira.
 About the patch, I have submitted it [upstream](http://code.google.com/p/emacs-soap-client/issues/detail?id=16&colspec=ID Type Status Priority Owner Summary). You can download it
 from the [attachment url](http://emacs-soap-client.googlecode.com/issues/attachment?aid=160000000&name=0001-Patch-for-soap-client.patch&token=0w4_XPg-Fe9sNqcTqgNP5RTXlXY:1359427017708) if it is not accepted yet.
 
+Update: the issue has been fixed by the author, and I've learned from
+him that emacs-soap-client is bundled with GNU Emacs itself now, and
+he will push the fix into it. So we just need to wait a bit more.
+
 ## Commands supported
 
     org-jira-browse-issue         M-x ... RET
