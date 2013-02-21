@@ -58,3 +58,6 @@ he will push the fix into it. So we just need to wait a bit more.
        Update an issue
 #+END_EXAMPLE
 
+** Acknowledgements
+
+This plug-in is greatly inspired by [[https://github.com/punchagan/org2blog][org2blog]].

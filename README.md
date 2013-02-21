@@ -55,3 +55,7 @@ he will push the fix into it. So we just need to wait a bit more.
        Update a comment for the current issue
     org-jira-update-issue         M-x ... RET
        Update an issue
+
+## Acknowledgements
+
+This plug-in is greatly inspired by [org2blog](https://github.com/punchagan/org2blog).
