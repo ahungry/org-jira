@@ -59,3 +59,10 @@ he will push the fix into it. So we just need to wait a bit more.
 ## Acknowledgements
 
 This plug-in is greatly inspired by [org2blog](https://github.com/punchagan/org2blog).
+
+The [emacs-soap-client](http://code.google.com/p/emacs-soap-client/source/checkout) is the underlying library used to communicate
+with Jira. This project provided a sample jira2.el and I started with
+that file.
+
+This readme is written using org-mode and exported to markdown mode
+for github using `org-md-export-to-markdown`.
