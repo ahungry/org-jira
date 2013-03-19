@@ -252,7 +252,8 @@ prefix argument you are given the chance to enter your own jql."
 			     (if org-jira-jql-history
 				 (car org-jira-jql-history)
 			       "assignee = currentUser() and resolution = unresolved")
-			     'org-jira-jql-history)))
+			     'org-jira-jql-history
+			     "assignee = currentUser() and resolution = unresolved")))
     (list (jiralib-do-jql-search jql))))
 
 (defun org-jira-get-issues-headonly (issues)
