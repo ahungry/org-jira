@@ -6,6 +6,28 @@ For usage, please watch [this youtube video](http://www.youtube.com/watch?v=6Sp3
 you can't visit youtube for some reason. My apologies beforehand if
 you find the video too verbose and boring.
 
+To save the settings in your .emacs, you need only do 2 things:
+
+1.  Set the `defcustom` variables defined in jiralib.el (actually only
+    the `jiralib-url` is required, as the other 2 are usually computed
+    from it correctly and is the case in the video demo):
+    
+        3 matches for "\bdefcustom\b" in buffer: jiralib.el
+             55:(defcustom jiralib-host ""
+            107:(defcustom jiralib-wsdl-descriptor-url
+            120:(defcustom jiralib-url
+
+2.  Write your password in `~/.authinfo`, with machine being the
+    (computed) jiralib-host, and the port being 80 (even if you are
+    using https for Jira):
+    
+        machine JIRALIB-HOST login USERNAME password XXXXX port 80
+    
+    If you do not set USERNAME here, then it will be prompted using the
+    minibuffer; if you set the wrong username/password, then it won't work.
+
+
+
 ## External libraries
 
 The [emacs-soap-client](http://code.google.com/p/emacs-soap-client/source/checkout) package is required, I used to bundle it
