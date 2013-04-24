@@ -162,6 +162,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   (if org-jira-mode
       (run-mode-hooks 'org-jira-mode-hook)))
 
+;;;###autoload
 (defun org-jira-get-projects ()
   "Get list of projects."
   (interactive)
@@ -256,6 +257,7 @@ prefix argument you are given the chance to enter your own jql."
 			     "assignee = currentUser() and resolution = unresolved")))
     (list (jiralib-do-jql-search jql))))
 
+;;;###autoload
 (defun org-jira-get-issues-headonly (issues)
   "Get list of issues assigned to you and unresolved, head
 only. With a prefix argument, allow you to customize the jql. See `org-jira-get-issue-list'"
@@ -277,6 +279,7 @@ only. With a prefix argument, allow you to customize the jql. See `org-jira-get-
 	    issues))
     (switch-to-buffer issues-headonly-buffer)))
       
+;;;###autoload
 (defun org-jira-get-issues (issues)
   "Get list of issues. Default is get unfinished issues assigned
 to you, but you can customize jql with a prefix argument. See
@@ -360,6 +363,7 @@ to you, but you can customize jql with a prefix argument. See
 	  issues)
     (switch-to-buffer project-buffer)))
 
+;;;###autoload
 (defun org-jira-update-comment ()
   "update a comment for the current issue"
   (interactive)
@@ -377,6 +381,7 @@ to you, but you can customize jql with a prefix argument. See
   (ensure-on-comment
    (delete-region (point-min) (point-max))))
 
+;;;###autoload
 (defun org-jira-copy-current-issue-key ()
   "Copy the current issue's key into clipboard"
   (interactive)
@@ -424,6 +429,7 @@ to you, but you can customize jql with a prefix argument. See
 		  comments))))
   
 
+;;;###autoload
 (defun org-jira-update-issue ()
   "update an issue"
   (interactive)
@@ -432,6 +438,7 @@ to you, but you can customize jql with a prefix argument. See
 	(org-jira-update-issue-details issue-id)
       (error "not on an issue"))))
 
+;;;###autoload
 (defun org-jira-todo-to-jira ()
   "convert an ordinary todo item to a jira ticket"
   (interactive)
@@ -445,6 +452,7 @@ to you, but you can customize jql with a prefix argument. See
 		    (org-get-entry)))
    (delete-region (point-min) (point-max))))
 
+;;;###autoload
 (defun org-jira-get-subtasks ()
   "get subtasks for the current issue"
   (interactive)
@@ -516,6 +524,7 @@ to you, but you can customize jql with a prefix argument. See
 			     (cons 'priority priority)
 			     (cons 'assignee (cdr (assoc user jira-users))))))
     ticket-struct))
+;;;###autoload
 (defun org-jira-create-issue (project type summary description)
   "create an issue"
   (interactive (list (org-jira-read-project)
@@ -530,6 +539,7 @@ to you, but you can customize jql with a prefix argument. See
 	 (ticket-struct (org-jira-get-issue-struct project type summary description)))
     (org-jira-get-issues (list (jiralib-create-issue ticket-struct)))))
 
+;;;###autoload
 (defun org-jira-create-subtask (project type summary description)
   "create an subtask issue"
   (interactive (ensure-on-issue (list (org-jira-read-project)
@@ -608,6 +618,7 @@ to you, but you can customize jql with a prefix argument. See
 		     'org-jira-resolution-history)))
     (car (rassoc resolution (jiralib-get-resolutions)))))
 
+;;;###autoload
 (defun org-jira-refresh-issue ()
   "Refresh issue from jira to org"
   (interactive)
@@ -616,6 +627,7 @@ to you, but you can customize jql with a prefix argument. See
      (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
 
 (defvar org-jira-fields-values-history nil)
+;;;###autoload
 (defun org-jira-progress-issue ()
   "Progress issue workflow"
   (interactive)
@@ -794,12 +806,14 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
        (org-narrow-to-subtree)
        ,@body)))
 
+;;;###autoload
 (defun org-jira-browse-issue ()
   "Open the current issue in external browser."
   (interactive)
   (ensure-on-issue
    (browse-url-default-browser (concat jiralib-url "/browse/" (org-jira-id)))))
 
+;;;###autoload
 (defun org-jira-get-issues-from-filter (filter)
   "Get issues from filter which are jql created and saved on the
 server side. Provide this command in case some users are not able
@@ -808,6 +822,7 @@ to use client side jql (maybe because of Jira server version?)."
    (list (completing-read "Filter: " (mapcar 'cdr (jiralib-get-saved-filters)))))
   (org-jira-get-issues (jiralib-get-issues-from-filter (car (rassoc filter (jiralib-get-saved-filters))))))
 
+;;;###autoload
 (defun org-jira-get-issues-from-filter-headonly (filter)
   "Get issues *head only* from saved filter. See `org-jira-get-issues-from-filter'"
   (interactive
