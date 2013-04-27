@@ -39,7 +39,10 @@
 
 (defvar org-jira-working-dir "~/.org-jira"
   "Folder under which to store org-jira working files")
-(defvar org-jira-default-jql "assignee = currentUser() and resolution = unresolved ORDER BY priority DESC, created ASC"
+(defvar org-jira-default-jql
+  "assignee = currentUser() and
+   ((reporter = currentUser() and status != closed) or resolution = unresolved)
+   ORDER BY priority DESC, created ASC"
   "Default jql for querying your Jira tickets")
 (defvar jira-users (list (cons "Full Name" "username"))
   "Jira has not api for discovering all users, so we should provide it somewhere else")
