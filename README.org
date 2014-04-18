@@ -29,7 +29,7 @@ To save the settings in your .emacs, you need only do 2 things:
 
    If you do not set USERNAME here, then it will be prompted using the
    minibuffer; if you set the wrong username/password, then it won't work.
-    
+
 
 
 ** External libraries
@@ -47,6 +47,13 @@ him that emacs-soap-client is bundled with GNU Emacs itself now, and
 he will push the fix into it. So we just need to wait a bit more.
 
 ** Commands supported
+
+Here is the list of commands supported by org-jira, with a simple help
+(the first line of elisp doc). It is created with *C-h a org-jira
+RET* :-)
+
+You can *C-h f* on each command to get more detailed help, or just
+read my ugly source code:-)
 
 #+BEGIN_EXAMPLE
     org-jira-browse-issue         M-x ... RET
