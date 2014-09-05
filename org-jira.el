@@ -1,6 +1,11 @@
 ;;; org-jira.el --- Syncing between Jira and Org-mode.
 
 ;; Author: Bao Haojun <baohaojun@gmail.com>
+;; Maintainer: Bao Haojun <baohaojun@gmail.com>
+;; Version: 0.1
+;; Homepage: https://github.com/baohaojun/org-jira
+
+;; This file is not part of GNU Emacs.
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,8 +32,15 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+;; 02110-1301, USA.
 
+;;; Commentary:
+;;
+;; This provides an extension to org-mode for syncing issues with JIRA
+;; issue servers.
+;;
+;;; Code:
 
 (require 'org)
 (require 'jiralib)
@@ -836,4 +848,6 @@ to use client side jql (maybe because of Jira server version?)."
 (defun org-jira-open (path)
   "Open a Jira Link from PATH."
   (org-jira-get-issues (list (jiralib-get-issue path))))
+
 (provide 'org-jira)
+;;; org-jira.el ends here
