@@ -46,8 +46,9 @@
 (require 'jiralib)
 
 (defgroup org-jira nil
-  "Post to weblogs from Emacs"
-  :group 'org-jira)
+  "Customisation group for org-jira."
+  :tag "Org JIRA"
+  :group 'org)
 
 (defvar org-jira-working-dir "~/.org-jira"
   "Folder under which to store org-jira working files")
