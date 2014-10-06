@@ -422,7 +422,7 @@ to you, but you can customize jql with a prefix argument. See
                     (mapc (lambda (heading-entry)
                             (ensure-on-issue-id
                                 issue-id
-                              (let* ((entry-heading (concat (symbol-name heading-entry) ": " issue-id)))
+                              (let* ((entry-heading (concat (symbol-name heading-entry) (format ": [[%s][%s]]" (concat jiralib-url "/browse/" issue-id) issue-id))))
                                 (setq p (org-find-exact-headline-in-buffer entry-heading))
                                 (if (and p (>= p (point-min))
                                          (<= p (point-max)))
