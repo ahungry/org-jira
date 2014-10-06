@@ -128,6 +128,9 @@ All the other properties are optional. They over-ride the global variables.
 (defvar org-jira-mode-hook nil
   "Hook to run upon entry into mode.")
 
+(defvar org-jira-issue-id-history '()
+  "Prompt history for issue id")
+
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading"
 
@@ -326,6 +329,13 @@ prefix argument you are given the chance to enter your own jql."
                              "assignee = currentUser() and resolution = unresolved")))
     (list (jiralib-do-jql-search jql))))
 
+(defun org-jira-get-issue-by-id (id)
+  "Get an issue by it's id"
+  (interactive (list (read-string "Issue ID: " "IMINAN-" 'org-jira-issue-id-history)))
+  (push id org-jira-issue-id-history)
+  (let ((jql (format "id = %s" id)))
+    (jiralib-do-jql-search jql)))
+
 ;;;###autoload
 (defun org-jira-get-issues-headonly (issues)
   "Get list of issues assigned to you and unresolved, head
@@ -347,6 +357,10 @@ only. With a prefix argument, allow you to customize the jql. See `org-jira-get-
                 (insert (format "- [jira:%s] %s\n" issue-id issue-summary))))
             issues))
     (switch-to-buffer issues-headonly-buffer)))
+
+(defun org-jira-get-issue ()
+  (interactive)
+  (org-jira-get-issues (call-interactively 'org-jira-get-issue-by-id)))
 
 ;;;###autoload
 (defun org-jira-get-issues (issues)
