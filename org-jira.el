@@ -87,6 +87,9 @@ All the other properties are optional. They over-ride the global variables.
   :group 'org-jira
   :type '(alist :value-type plist))
 
+(defcustom org-jira-use-status-as-todo nil
+  "Use the JIRA status as the TODO tag value."
+  :group 'org-jira)
 
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
@@ -396,10 +399,12 @@ to you, but you can customize jql with a prefix argument. See
                       (unless (looking-at "^")
                         (insert "\n"))
                       (insert "* "))
-                    (insert (concat (if (member (org-jira-get-issue-val 'status issue) '("Closed" "Resolved"))
-                                        "DONE "
-                                      "TODO ")
-                                    issue-headline))
+		    (let ((status (org-jira-get-issue-val 'status issue)))
+		      (insert (concat (cond (org-jira-use-status-as-todo
+					     (upcase (replace-regexp-in-string " " "-" status)))
+					    ((member status '("Closed" "Resolved")) "DONE")
+					    ("TODO")) " "
+                                    issue-headline)))
                     (save-excursion
                       (unless (search-forward "\n" (point-max) 1)
                         (insert "\n")))
