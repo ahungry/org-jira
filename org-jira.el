@@ -845,7 +845,7 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
   "Open the current issue in external browser."
   (interactive)
   (ensure-on-issue
-   (browse-url-default-browser (concat jiralib-url "/browse/" (org-jira-id)))))
+   (browse-url (concat jiralib-url "/browse/" (org-jira-id)))))
 
 ;;;###autoload
 (defun org-jira-get-issues-from-filter (filter)
