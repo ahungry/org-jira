@@ -347,7 +347,7 @@ database.  An issue is assumed to be in the format KEY-NUMBER,
 where KEY is a project key and NUMBER is the issue number."
   (unless jiralib-issue-regexp
     (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
-                            (jiralib-call 'getProjectsNoSchemes))))
+                            (jiralib-call "getProjectsNoSchemes"))))
       (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
   jiralib-issue-regexp)
 
@@ -518,19 +518,19 @@ Return nil if the field is not found"
 
 (defun jiralib-add-comment (issue-key comment)
   "Adds a comment to an issue"
-  (jiralib-call 'addComment issue-key `((body . ,comment))))
+  (jiralib-call "addComment" issue-key `((body . ,comment))))
 
 (defun jiralib-edit-comment (comment-id comment)
   "Edit the comment body for comment-id"
-  (jiralib-call 'editComment `((id . ,comment-id)
+  (jiralib-call "editComment" `((id . ,comment-id)
 				      (body . ,comment))))
 
 (defun jiralib-create-issue (r-issue-struct)
   "Creates an issue in JIRALIB from a Hashtable object."
-  (jiralib-call 'createIssue r-issue-struct))
+  (jiralib-call "createIssue" r-issue-struct))
 
 (defun jiralib-create-subtask (r-issue-struct parent-issue-id)
-  (jiralib-call 'createIssueWithParent r-issue-struct parent-issue-id))
+  (jiralib-call "createIssueWithParent" r-issue-struct parent-issue-id))
 
 
 (defvar jiralib-subtask-types-cache nil)
@@ -549,28 +549,28 @@ will cache it."
 
 (defun jiralib-get-comments (issue-key)
   "Returns all comments associated with the issue"
-  (jiralib-call 'getComments issue-key))
+  (jiralib-call "getComments" issue-key))
 
 (defun jiralib-get-components (project-key)
   "Returns all components available in the specified project"
-  (jiralib-make-assoc-list (jiralib-call 'getComponents project-key) 'id 'name))
+  (jiralib-make-assoc-list (jiralib-call "getComponents" project-key) 'id 'name))
 
 (defun jiralib-get-issue (issue-key)
   "Gets an issue from a given issue key."
-  (jiralib-call 'getIssue issue-key))
+  (jiralib-call "getIssue" issue-key))
 
 (defun jiralib-get-issues-from-filter (filter-id)
   "Executes a saved filter"
-  (jiralib-call 'getIssuesFromFilter filter-id))
+  (jiralib-call "getIssuesFromFilter" filter-id))
 
 (defun jiralib-get-issues-from-text-search (search-terms)
   "Find issues using a free text search"
-  (jiralib-call 'getIssuesFromTextSearch search-terms))
+  (jiralib-call "getIssuesFromTextSearch" search-terms))
 
 (defun jiralib-get-issues-from-text-search-with-project
   (project-keys search-terms max-num-results)
   "Find issues using a free text search, limited to certain projects"
-  (jiralib-call 'getIssuesFromTextSearchWithProject
+  (jiralib-call "getIssuesFromTextSearchWithProject"
              (apply 'vector project-keys) search-terms max-num-results))
 
 ;; Modified by Brian Zwahr to use getProjectsNoSchemes instead of getProjects
@@ -582,23 +582,23 @@ will cache it."
 
 (defun jiralib-get-saved-filters ()
   "Gets all saved filters available for the currently logged in user"
-  (jiralib-make-assoc-list (jiralib-call 'getSavedFilters) 'id 'name))
+  (jiralib-make-assoc-list (jiralib-call "getSavedFilters") 'id 'name))
 
 (defun jiralib-get-server-info ()
   "Returns the Server information such as baseUrl, version, edition, buildDate, buildNumber."
-  (jiralib-call 'getServerInfo))
+  (jiralib-call "getServerInfo"))
 
 (defun jiralib-get-sub-task-issue-types ()
   "Returns all visible subtask issue types in the system"
-  (jiralib-call 'getSubTaskIssueTypes))
+  (jiralib-call "getSubTaskIssueTypes"))
 
 (defun jiralib-get-user (username)
   "Returns a user's information given a username"
-  (jiralib-call 'getUser username))
+  (jiralib-call "getUser" username))
 
 (defun jiralib-get-versions (project-key)
   "Returns all versions available in the specified project"
-  (jiralib-call 'getVersions project-key))
+  (jiralib-call "getVersions" project-key))
 
 (defun jiralib-strip-cr (string)
   "Removes carriage returns from a string"
