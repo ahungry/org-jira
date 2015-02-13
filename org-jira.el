@@ -311,7 +311,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
           ((eq key 'type)
            (cdr (assoc tmp (jiralib-get-issue-types))))
           ((eq key 'priority)
-           (cdr (assoc tmp (jiralib-get-prioritys))))
+           (cdr (assoc tmp (jiralib-get-priorities))))
           ((eq key 'description)
            (org-jira-strip-string tmp))
           (t
@@ -564,7 +564,7 @@ to you, but you can customize jql with a prefix argument. See
   "Read priority name"
   (completing-read
    "Priority: "
-   (mapcar 'cdr (jiralib-get-prioritys))
+   (mapcar 'cdr (jiralib-get-priorities))
    nil
    t
    (car org-jira-priority-read-history)
@@ -598,7 +598,7 @@ to you, but you can customize jql with a prefix argument. See
       (error "Must provide all information!"))
   (let* ((project-components (jiralib-get-components project))
          (user (completing-read "Assignee: " (mapcar 'car jira-users)))
-         (priority (car (rassoc (org-jira-read-priority) (jiralib-get-prioritys))))
+         (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
          (ticket-struct (list (cons 'project project)
                              (cons 'type (car (rassoc type (if (and (boundp 'parent-id) parent-id)
                                                                (jiralib-get-subtask-types)
@@ -782,7 +782,7 @@ to you, but you can customize jql with a prefix argument. See
                                                    (list comp-id)
                                                  nil)))
                                            (split-string org-issue-components ",\\s *"))))
-                                  (cons 'priority (car (rassoc org-issue-priority (jiralib-get-prioritys))))
+                                  (cons 'priority (car (rassoc org-issue-priority (jiralib-get-priorities))))
                                   (cons 'description org-issue-description)
                                   (cons 'assignee org-issue-assignee)
                                   (cons 'summary (org-jira-get-issue-val-from-org 'summary))))

@@ -307,7 +307,7 @@ will cache it."
 
 (defvar jiralib-priority-codes-cache nil)
 
-(defun jiralib-get-prioritys ()
+(defun jiralib-get-priorities ()
   "Return an assoc list mapping a priority code to its name.
 NOTE: Priority codes are stored as strings, not numbers.
 
