@@ -379,7 +379,7 @@ This runs the getAvailableActions SOAP method."
 
 (defun jiralib-add-worklog-and-autoadjust-remaining-estimate (issue-key start-date time-spent comment)
   "Log time spent on ISSUE-KEY to its worklog.
-The time worked begings at START-DATE and has a TIME-SPENT
+The time worked begins at START-DATE and has a TIME-SPENT
 duration. JIRA will automatically update the remaining estimate
 by subtracting TIME-SPENT from it.
 
