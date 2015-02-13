@@ -8,7 +8,7 @@
 ;; Brian Zwahr <echosa@gmail.com>
 ;; Dave Benjamin <dave@ramenlabs.com>
 
-;; Authors: 
+;; Authors:
 ;; Bao Haojun <baohaojun@gmail.com>
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
@@ -48,7 +48,7 @@
   "Jiralib customization group."
   :group 'applications)
 
-(defgroup jiralib-faces nil 
+(defgroup jiralib-faces nil
   "Faces for displaying Jiralib information."
   :group 'jiralib)
 
@@ -135,50 +135,50 @@ This is maintained by `jiralib-login'.")
 (defun jiralib-load-wsdl ()
   "Load the JIRA WSDL descriptor."
   (setq jiralib-wsdl (soap-load-wsdl-from-url (if (string-equal jiralib-wsdl-descriptor-url "")
-						(concat jiralib-url "/rpc/soap/jirasoapservice-v2?wsdl")
-					      jiralib-wsdl-descriptor-url))))
+                                                (concat jiralib-url "/rpc/soap/jirasoapservice-v2?wsdl")
+                                              jiralib-wsdl-descriptor-url))))
 
 (defun jiralib-login (username password)
   "Login into JIRA and store the authentication token in `jiralib-token'"
   ;; NOTE that we cannot rely on `jiralib-call' because `jiralib-call' relies on
   ;; us ;-)
-  (interactive 
+  (interactive
    (if (> 24 emacs-major-version)
        (let ((user (read-string "Username for Jira server login? "))
-	     (password (read-passwd "Password for Jira server login? ")))
-	 (list user password))
+             (password (read-passwd "Password for Jira server login? ")))
+         (list user password))
      (let ((found (nth 0 (auth-source-search :max 1
-					     :host (if (string= jiralib-host "")
-						       (url-host (url-generic-parse-url jiralib-url))
-						     jiralib-host)
-					     :port 80
-					     :require '(:user :secret)
-					     :create t)))
-	   user secret)
+                                             :host (if (string= jiralib-host "")
+                                                       (url-host (url-generic-parse-url jiralib-url))
+                                                     jiralib-host)
+                                             :port 80
+                                             :require '(:user :secret)
+                                             :create t)))
+           user secret)
        (when found
-	 (setq user (plist-get found :user)
-	       secret
-	       (let ((sec (plist-get found :secret)))
-		 (if (functionp sec)
-		     (funcall sec)
-		   sec)))
-	 (list user secret)))))
-  (unless jiralib-wsdl 
+         (setq user (plist-get found :user)
+               secret
+               (let ((sec (plist-get found :secret)))
+                 (if (functionp sec)
+                     (funcall sec)
+                   sec)))
+         (list user secret)))))
+  (unless jiralib-wsdl
     (jiralib-load-wsdl))
-  (setq jiralib-token 
+  (setq jiralib-token
         (car (soap-invoke jiralib-wsdl "jirasoapservice-v2" "login" username password)))
   (setq jiralib-user-login-name username)
 
   ;; At this poing, soap-invoke didn't raise an error, so the login
   ;; credentials are OK.  use them to log into the web interface as
   ;; well, as this will be used to link issues (an operation which is
-  ;; not exposed to the SOAP interface.  
+  ;; not exposed to the SOAP interface.
   ;;
   ;; Note that we don't validate the response at all -- not sure how we
   ;; would do it...
-  
+
   (let ((url (concat jiralib-url "/secure/Dashboard.jspa?"
-                     (format "&os_username=%s&os_password=%s&os_cookie=true" 
+                     (format "&os_username=%s&os_password=%s&os_cookie=true"
                              username password))))
     (let ((url-request-method "POST")
           (url-package-name "Emacs jiralib.el")
@@ -194,7 +194,7 @@ This is maintained by `jiralib-login'.")
         (with-current-buffer buffer
           (declare (special url-http-response-status))
           (if (> url-http-response-status 299)
-              (error "Error logging into JIRA Web interface %s" 
+              (error "Error logging into JIRA Web interface %s"
                      url-http-response-status)))
         (kill-buffer buffer)))))
 
@@ -220,21 +220,22 @@ when invoking it through `jiralib-call', the call shoulbe be:
   (unless jiralib-token
     (call-interactively 'jiralib-login))
   (condition-case data
-      (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2" 
+      (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2"
              method jiralib-token params)
     (soap-error
      ;; If we are here, we had a token, but it expired.  Re-login and try
      ;; again.
      (setq jiralib-token nil)
      (call-interactively 'jiralib-login)
-     (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2" 
+     (apply 'soap-invoke jiralib-wsdl "jirasoapservice-v2"
             method jiralib-token params))))
 
 
 ;;;; Some utility functions
+
 (defun jiralib-make-list (data field)
   (loop for element in data
-	collect (cdr (assoc field element))))
+        collect (cdr (assoc field element))))
 (defun jiralib-make-assoc-list (data key-field value-field)
   "Create an association list from a SOAP structure array.
 
@@ -243,12 +244,12 @@ KEY-FIELD is the field to use as the key in the returned alist
 VALUE-FIELD is the field to use as the value in the returned alist"
   (loop for element in data
      collect (cons (cdr (assoc key-field element))
-		   (cdr (assoc value-field element)))))
+                   (cdr (assoc value-field element)))))
 
 (defun jiralib-make-remote-field-values (fields)
   "Transform a (KEY . VALUE) list into a RemoteFieldValue structure.
 
-Each (KEY . VALUE) pair is transformed into 
+Each (KEY . VALUE) pair is transformed into
  ((id . KEY) (values . (VALUE)))
 
 This method exists because Several JIRA methods require a
@@ -268,11 +269,11 @@ emacs-lisp"
         ;; if it is just one value
         (unless (vectorp value)
           (setq value (vector value)))
-        (push `((id . ,name) (values . ,value)) 
+        (push `((id . ,name) (values . ,value))
               remote-field-values)))
-    
-    (apply 'vector (nreverse remote-field-values))))
 
+    (apply 'vector (nreverse remote-field-values))))
+
 ;;;; Wrappers around JIRA methods
 
 (defun jiralib-update-issue (key fields)
@@ -289,7 +290,7 @@ This function will only ask JIRA for the list of codes once, then
 will cache it."
   (unless jiralib-status-codes-cache
     (setq jiralib-status-codes-cache
-	  (jiralib-make-assoc-list (jiralib-call "getStatuses") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getStatuses") 'id 'name)))
   jiralib-status-codes-cache)
 
 (defvar jiralib-issue-types-cache nil)
@@ -302,7 +303,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-issue-types-cache
     (setq jiralib-issue-types-cache
-	  (jiralib-make-assoc-list (jiralib-call "getIssueTypes") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getIssueTypes") 'id 'name)))
   jiralib-issue-types-cache)
 
 (defvar jiralib-priority-codes-cache nil)
@@ -315,7 +316,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-priority-codes-cache
     (setq jiralib-priority-codes-cache
-	  (jiralib-make-assoc-list (jiralib-call "getPriorities") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getPriorities") 'id 'name)))
   jiralib-priority-codes-cache)
 
 (defvar jiralib-resolution-code-cache nil)
@@ -328,7 +329,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-resolution-code-cache
     (setq jiralib-resolution-code-cache
-	  (jiralib-make-assoc-list (jiralib-call "getResolutions") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getResolutions") 'id 'name)))
   jiralib-resolution-code-cache)
 
 (defvar jiralib-issue-regexp nil)
@@ -356,7 +357,7 @@ where KEY is a project key and NUMBER is the issue number."
 LIMIT is the maximum number of queries to return.  Note that JIRA
 has an internal limit of how many queries to return, as such, it
 might not be possible to find *ALL* the issues that match a
-query." 
+query."
   (unless (or limit (numberp limit))
     (setq limit 100))
   (jiralib-call "getIssuesFromJqlSearch" jql limit))
@@ -364,7 +365,7 @@ query."
 (defun jiralib-get-available-actions (issue-key)
   "Return the available workflow actions for ISSUE-KEY.
 This runs the getAvailableActions SOAP method."
-  (jiralib-make-assoc-list 
+  (jiralib-make-assoc-list
    (jiralib-call "getAvailableActions" issue-key)
    'id 'name))
 
@@ -383,7 +384,7 @@ The time worked begins at START-DATE and has a TIME-SPENT
 duration. JIRA will automatically update the remaining estimate
 by subtracting TIME-SPENT from it.
 
-START-DATE should be in the format 2010-02-05T14:30:00Z 
+START-DATE should be in the format 2010-02-05T14:30:00Z
 
 TIME-SPENT can be in one of the following formats: 10m, 120m
 hours; 10h, 120h days; 10d, 120d weeks."
@@ -398,7 +399,7 @@ hours; 10h, 120h days; 10d, 120d weeks."
 LINK-TYPE is a string representing the type of the link, e.g
 \"requires\", \"depends on\", etc.  I believe each JIRA
 installation can define its own link types."
-  
+
   ;; IMPLEMENTATION NOTES: The linking jira issues functionality is
   ;; not exposed through the SOAP api, we must use the web interface
   ;; to do the linking.  Unfortunately, we cannot parse the result, so
@@ -407,13 +408,12 @@ installation can define its own link types."
   ;; ISSUE-KEY and OTHER-ISSUE-KEY.  This will ensure that we are
   ;; logged in (see also jiralib-login) and that both issues exist. We
   ;; don't validate the LINK-TYPE, not sure how to do it.
-  ;;
 
   (let ((issue (jiralib-get-issue issue-key))
         (other-issue (jiralib-get-issue other-issue-key)))
-    (let ((url (concat jiralib-url 
+    (let ((url (concat jiralib-url
                        "/secure/LinkExistingIssue.jspa?"
-                       (format "linkDesc=%s&linkKey=%s&id=%s&Link=Link" 
+                       (format "linkDesc=%s&linkKey=%s&id=%s&Link=Link"
                                link-type other-issue-key (cdr (assq 'id issue))))))
       (let ((url-request-method "POST")
             (url-package-name "Emacs scratch.el")
@@ -426,18 +426,18 @@ installation can define its own link types."
             (url-request-extra-headers '(("X-Atlassian-Token" . "no-check"))))
 
        (let ((buffer (url-retrieve-synchronously url)))
-        ;; This is just a basic check that the page was retrieved
+         ;; This is just a basic check that the page was retrieved
          ;; correctly.  No error does not indicate a success as we
          ;; have to parse the HTML page to find that out...
          (with-current-buffer buffer
            (declare (special url-http-response-status))
            (if (> url-http-response-status 299)
-               (error "Error linking issue through JIRA Web interface %s" 
+               (error "Error linking issue through JIRA Web interface %s"
                       url-http-response-status)))
            (kill-buffer buffer))))))
 
 
-;................................................ issue field accessors ....
+;;;; Issue field accessors
 
 (defun jiralib-issue-key (issue)
   "Return the key of ISSUE."
@@ -459,8 +459,6 @@ Return nil if the field is not found"
     (dolist (field (cdr (assq 'customFieldValues issue)))
       (when (equal (cdr (assq 'customfieldId field)) custom-field)
         (throw 'found (cadr (assq 'values field)))))))
-  
-
 
 (defvar jiralib-current-issue nil
   "This holds the currently selected issue.")
@@ -502,7 +500,6 @@ Return nil if the field is not found"
         (cdr (assoc 'fullname user))))))
 
 
-
 (defun jiralib-get-filter (filter-id)
   "Returns a filter given its filter ID."
   (flet ((id-match (filter)
@@ -523,7 +520,7 @@ Return nil if the field is not found"
 (defun jiralib-edit-comment (comment-id comment)
   "Edit the comment body for comment-id"
   (jiralib-call "editComment" `((id . ,comment-id)
-				      (body . ,comment))))
+                                      (body . ,comment))))
 
 (defun jiralib-create-issue (r-issue-struct)
   "Creates an issue in JIRALIB from a Hashtable object."
@@ -543,7 +540,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-subtask-types-cache
     (setq jiralib-subtask-types-cache
-	  (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes") 'id 'name)))
   jiralib-subtask-types-cache)
 
 
