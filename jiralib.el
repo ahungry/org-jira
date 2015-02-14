@@ -138,8 +138,8 @@ This is maintained by `jiralib-login'.")
 (defun jiralib-load-wsdl ()
   "Load the JIRA WSDL descriptor."
   (setq jiralib-wsdl (soap-load-wsdl-from-url (if (string-equal jiralib-wsdl-descriptor-url "")
-                                                (concat jiralib-url "/rpc/soap/jirasoapservice-v2?wsdl")
-                                              jiralib-wsdl-descriptor-url))))
+                                                  (concat jiralib-url "/rpc/soap/jirasoapservice-v2?wsdl")
+                                                jiralib-wsdl-descriptor-url))))
 
 (defun jiralib-login (username password)
   "Login into JIRA as user USERNAME with PASSWORD.
@@ -254,8 +254,8 @@ DATA is a list of association lists (a SOAP array-of type)
 KEY-FIELD is the field to use as the key in the returned alist
 VALUE-FIELD is the field to use as the value in the returned alist"
   (loop for element in data
-     collect (cons (cdr (assoc key-field element))
-                   (cdr (assoc value-field element)))))
+        collect (cons (cdr (assoc key-field element))
+                      (cdr (assoc value-field element)))))
 
 (defun jiralib-make-remote-field-values (fields)
   "Transform the (KEY . VALUE) list FIELDS into a RemoteFieldValue structure.
@@ -405,10 +405,10 @@ hours; 10h, 120h days; 10d, 120d weeks.
 
 COMMENT will be added to this worklog."
   (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
-                   issue-key
-                   `((startDate . ,start-date)
-                     (timeSpent . ,time-spent)
-                     (comment   . ,comment))))
+                issue-key
+                `((startDate . ,start-date)
+                  (timeSpent . ,time-spent)
+                  (comment   . ,comment))))
 
 (defun jiralib-link-issue (issue-key link-type other-issue-key)
   "Link ISSUE-KEY with a link of type LINK-TYPE to OTHER-ISSUE-KEY.
@@ -441,16 +441,16 @@ installation can define its own link types."
             ;; see http://confluence.atlassian.com/display/JIRA/Form+Token+Handling
             (url-request-extra-headers '(("X-Atlassian-Token" . "no-check"))))
 
-       (let ((buffer (url-retrieve-synchronously url)))
-         ;; This is just a basic check that the page was retrieved
-         ;; correctly.  No error does not indicate a success as we
-         ;; have to parse the HTML page to find that out...
-         (with-current-buffer buffer
-           (declare (special url-http-response-status))
-           (if (> url-http-response-status 299)
-               (error "Error linking issue through JIRA Web interface %s"
-                      url-http-response-status)))
-           (kill-buffer buffer))))))
+        (let ((buffer (url-retrieve-synchronously url)))
+          ;; This is just a basic check that the page was retrieved
+          ;; correctly.  No error does not indicate a success as we
+          ;; have to parse the HTML page to find that out...
+          (with-current-buffer buffer
+            (declare (special url-http-response-status))
+            (if (> url-http-response-status 299)
+                (error "Error linking issue through JIRA Web interface %s"
+                       url-http-response-status)))
+          (kill-buffer buffer))))))
 
 
 ;;;; Issue field accessors
@@ -539,7 +539,7 @@ Return nil if the field is not found"
 (defun jiralib-edit-comment (comment-id comment)
   "Edit comment with COMMENT-ID to reflect the new COMMENT."
   (jiralib-call "editComment" `((id . ,comment-id)
-                                      (body . ,comment))))
+                                (body . ,comment))))
 
 (defun jiralib-create-issue (issue)
   "Create a new ISSUE in JIRALIB.
@@ -589,12 +589,12 @@ will cache it."
   (jiralib-call "getIssuesFromTextSearch" search-terms))
 
 (defun jiralib-get-issues-from-text-search-with-project
-  (project-keys search-terms max-num-results)
+    (project-keys search-terms max-num-results)
   "Find issues in projects PROJECT-KEYS, using free text search SEARCH-TERMS.
 
 Return no more than MAX-NUM-RESULTS."
   (jiralib-call "getIssuesFromTextSearchWithProject"
-             (apply 'vector project-keys) search-terms max-num-results))
+                (apply 'vector project-keys) search-terms max-num-results))
 
 ;; Modified by Brian Zwahr to use getProjectsNoSchemes instead of getProjects
 (defun jiralib-get-projects ()

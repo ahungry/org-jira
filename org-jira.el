@@ -411,12 +411,12 @@ See`org-jira-get-issue-list'"
                       (unless (looking-at "^")
                         (insert "\n"))
                       (insert "* "))
-		    (let ((status (org-jira-get-issue-val 'status issue)))
-		      (insert (concat (cond (org-jira-use-status-as-todo
-					     (upcase (replace-regexp-in-string " " "-" status)))
-					    ((member status '("Closed" "Resolved")) "DONE")
-					    ("TODO")) " "
-                                    issue-headline)))
+                    (let ((status (org-jira-get-issue-val 'status issue)))
+                      (insert (concat (cond (org-jira-use-status-as-todo
+                                             (upcase (replace-regexp-in-string " " "-" status)))
+                                            ((member status '("Closed" "Resolved")) "DONE")
+                                            ("TODO")) " "
+                                            issue-headline)))
                     (save-excursion
                       (unless (search-forward "\n" (point-max) 1)
                         (insert "\n")))
@@ -557,7 +557,7 @@ See`org-jira-get-issue-list'"
   "Get subtasks for the current issue."
   (interactive)
   (ensure-on-issue
-     (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
+   (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
 
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-priority-read-history nil)
@@ -613,16 +613,16 @@ See`org-jira-get-issue-list'"
          (user (completing-read "Assignee: " (mapcar 'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
          (ticket-struct (list (cons 'project project)
-                             (cons 'type (car (rassoc type (if (and (boundp 'parent-id) parent-id)
-                                                               (jiralib-get-subtask-types)
-                                                             (jiralib-get-issue-types)))))
-                             (cons 'summary (format "%s%s" summary
-                                                    (if (and (boundp 'parent-id) parent-id)
-                                                        (format " (subtask of [jira:%s])" parent-id)
-                                                      "")))
-                             (cons 'description description)
-                             (cons 'priority priority)
-                             (cons 'assignee (cdr (assoc user jira-users))))))
+                              (cons 'type (car (rassoc type (if (and (boundp 'parent-id) parent-id)
+                                                                (jiralib-get-subtask-types)
+                                                              (jiralib-get-issue-types)))))
+                              (cons 'summary (format "%s%s" summary
+                                                     (if (and (boundp 'parent-id) parent-id)
+                                                         (format " (subtask of [jira:%s])" parent-id)
+                                                       "")))
+                              (cons 'description description)
+                              (cons 'priority priority)
+                              (cons 'assignee (cdr (assoc user jira-users))))))
     ticket-struct))
 ;;;###autoload
 (defun org-jira-create-issue (project type summary description)
@@ -643,9 +643,9 @@ See`org-jira-get-issue-list'"
 (defun org-jira-create-subtask (project type summary description)
   "Create a subtask issue for PROJECT, of TYPE, with SUMMARY and DESCRIPTION."
   (interactive (ensure-on-issue (list (org-jira-read-project)
-                     (org-jira-read-subtask-type)
-                     (read-string "Summary: ")
-                     (read-string "Description: "))))
+                                      (org-jira-read-subtask-type)
+                                      (read-string "Summary: ")
+                                      (read-string "Description: "))))
   (if (or (equal project "")
           (equal type "")
           (equal summary ""))
@@ -667,16 +667,16 @@ See`org-jira-get-issue-list'"
           (if (looking-at "description: ")
               (org-jira-strip-string (org-get-entry))
             (error "Can not find description field for this issue")))
-        ((eq key 'summary)
-         (ensure-on-issue
-          (org-get-heading t t)))
-        (t
-         (when (symbolp key)
-           (setq key (symbol-name key)))
-         (when (string= key "key")
-           (setq key "ID"))
-         (or (org-entry-get (point) key)
-             "")))))
+         ((eq key 'summary)
+          (ensure-on-issue
+           (org-get-heading t t)))
+         (t
+          (when (symbolp key)
+            (setq key (symbol-name key)))
+          (when (string= key "key")
+            (setq key "ID"))
+          (or (org-entry-get (point) key)
+              "")))))
 
 (defvar org-jira-actions-history nil)
 (defun org-jira-read-action (actions)
@@ -740,8 +740,8 @@ See`org-jira-get-issue-list'"
           (field-key)
           (custom-fields-collector nil)
           (custom-fields (progn
-                           ;delete those elements in fields, which has
-                           ;already been set in custom-fields-collector
+                                        ;delete those elements in fields, which has
+                                        ;already been set in custom-fields-collector
 
                            (while fields
                              (setq fields (delete-if (lambda (strstr)
