@@ -138,7 +138,7 @@ variables.
   "Make sure we are on an issue heading, before executing BODY."
 
   `(save-excursion
-     (while (org-up-heading-safe)) ; goto the top heading
+     (while (org-up-heading-safe)) ; go to the top heading
      (let ((org-jira-id (org-jira-id)))
        (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) org-jira-id))
          (error "Not on a issue region!")))
@@ -740,8 +740,8 @@ See`org-jira-get-issue-list'"
           (field-key)
           (custom-fields-collector nil)
           (custom-fields (progn
-                                        ;delete those elements in fields, which has
-                                        ;already been set in custom-fields-collector
+                                        ; delete those elements in fields, which have
+                                        ; already been set in custom-fields-collector
 
                            (while fields
                              (setq fields (delete-if (lambda (strstr)
@@ -786,7 +786,7 @@ See`org-jira-get-issue-list'"
            (project (org-jira-get-issue-val 'project issue))
            (project-components (jiralib-get-components project)))
 
-      (jiralib-update-issue issue-id ;(jiralib-update-issue "FB-1" '((components . ["10001" "10000"])))
+      (jiralib-update-issue issue-id ; (jiralib-update-issue "FB-1" '((components . ["10001" "10000"])))
                             (list (cons
                                    'components
                                    (apply 'vector
