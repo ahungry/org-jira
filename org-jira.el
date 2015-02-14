@@ -51,22 +51,22 @@
   :group 'org)
 
 (defvar org-jira-working-dir "~/.org-jira"
-  "Folder under which to store org-jira working files")
+  "Folder under which to store org-jira working files.")
 (defvar org-jira-default-jql
   "assignee = currentUser() and
    ((reporter = currentUser() and status != closed) or resolution = unresolved)
    ORDER BY priority DESC, created ASC"
-  "Default jql for querying your Jira tickets")
+  "Default jql for querying your Jira tickets.")
 (defvar jira-users (list (cons "Full Name" "username"))
-  "Jira has not api for discovering all users, so we should provide it somewhere else")
+  "Jira has not api for discovering all users, so we should provide it somewhere else.")
 
 (defcustom org-jira-serv-alist nil
   "Association list to set information for each jira server.
 Each element of the alist is a jira server name.  The CAR of each
-element is a string, uniquely identifying the server.  The CDR
-of each element is a well-formed property list with an even
-number of elements, alternating keys and values, specifying
-parameters for the server.
+element is a string, uniquely identifying the server.  The CDR of
+each element is a well-formed property list with an even number
+of elements, alternating keys and values, specifying parameters
+for the server.
 
      (:property value :property value ... )
 
@@ -76,14 +76,14 @@ variable (if any) during syncing.
 
 Most properties are optional, but some should always be set:
 
-  :url                     soap url of the jira server.
-  :username                username to be used.
-  :host                    hostname of the jira server (TODO: compute it from ~url~).
+  :url        soap url of the jira server.
+  :username   username to be used.
+  :host       hostname of the jira server (TODO: compute it from ~url~).
 
-All the other properties are optional. They over-ride the global variables.
+All the other properties are optional.  They override the global
+variables.
 
-  :password                password to be used, will be prompted if missing.
-"
+  :password   password to be used, will be prompted if missing."
   :group 'org-jira
   :type '(alist :value-type plist))
 
@@ -95,47 +95,47 @@ All the other properties are optional. They over-ride the global variables.
   "Parameters of the currently selected blog.")
 
 (defvar org-jira-serv-name nil
-  "Name of the blog, to pick from `org-jira-serv-alist'")
+  "Name of the blog, to pick from `org-jira-serv-alist'.")
 
 (defvar org-jira-projects-list nil
   "List of jira projects.")
 
 (defvar org-jira-current-project nil
-  "currently selected (i.e., active project).")
+  "Currently selected (i.e., active project).")
 
 (defvar org-jira-issues-list nil
   "List of jira issues under the current project.")
 
 (defvar org-jira-server-rpc-url nil
-  "Jira server soap URL")
+  "Jira server soap URL.")
 
 (defvar org-jira-server-userid nil
-  "Jira server user id")
+  "Jira server user id.")
 
 (defvar org-jira-proj-id nil
-  "Jira project ID")
+  "Jira project ID.")
 
 (defvar org-jira-logged-in nil
-  "Flag whether user is logged-in or not")
+  "Flag whether user is logged-in or not.")
 
 (defvar org-jira-buffer-name "*org-jira-%s*"
-  "Name of the jira buffer")
+  "Name of the jira buffer.")
 
 (defvar org-jira-buffer-kill-prompt t
-  "Ask before killing buffer")
+  "Ask before killing buffer.")
 (make-variable-buffer-local 'org-jira-buffer-kill-prompt)
 
 (defconst org-jira-version "0.1"
-  "Current version of org-jira.el")
+  "Current version of org-jira.el.")
 
 (defvar org-jira-mode-hook nil
   "Hook to run upon entry into mode.")
 
 (defvar org-jira-issue-id-history '()
-  "Prompt history for issue id")
+  "Prompt history for issue id.")
 
 (defmacro ensure-on-issue (&rest body)
-  "Make sure we are on an issue heading"
+  "Make sure we are on an issue heading, before executing BODY."
 
   `(save-excursion
      (while (org-up-heading-safe)) ; goto the top heading
@@ -145,7 +145,7 @@ All the other properties are optional. They over-ride the global variables.
      ,@body))
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
-  "Make sure we are on an issue heading with id ISSUE-ID"
+  "Make sure we are on an issue heading with id ISSUE-ID, before executing BODY."
   (declare (indent 1))
   `(save-excursion
      (save-restriction
@@ -155,13 +155,13 @@ All the other properties are optional. They over-ride the global variables.
        (let (p)
          (setq p (org-find-entry-with-id ,issue-id))
          (unless p
-           (error "issue %s not found!" ,issue-id))
+           (error "Issue %s not found!" ,issue-id))
          (goto-char p)
          (org-narrow-to-subtree)
          ,@body))))
 
 (defmacro ensure-on-todo (&rest body)
-  "Make sure we are on an todo heading"
+  "Make sure we are on an todo heading, before executing BODY."
   `(save-excursion
      (save-restriction
        (let ((continue t)
@@ -177,7 +177,7 @@ All the other properties are optional. They over-ride the global variables.
            ,@body)))))
 
 (defmacro ensure-on-comment (&rest body)
-  "Make sure we are on a comment heading"
+  "Make sure we are on a comment heading, before executing BODY."
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
@@ -191,11 +191,11 @@ All the other properties are optional. They over-ride the global variables.
   "Prompt before killing buffer."
   (if (and org-jira-buffer-kill-prompt
            (not (buffer-file-name)))
-      (if (y-or-n-p "Save Jira?")
+      (if (y-or-n-p "Save Jira? ")
           (progn
             (save-buffer)
             (org-jira-save-details (org-jira-parse-entry) nil
-                                   (y-or-n-p "Published?"))))))
+                                   (y-or-n-p "Published? "))))))
 
 (defvar org-jira-entry-mode-map
   (let ((org-jira-map (make-sparse-keymap)))
@@ -275,13 +275,16 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
               oj-projs)))))
 
 (defun org-jira-get-issue-components (issue)
-  "Return the components the issue belongs to."
+  "Return the components the ISSUE belongs to."
   (mapconcat (lambda (comp)
                (cdr (assoc 'name comp)))
              (cdr (assoc 'components issue)) ", "))
 
 (defun org-jira-transform-time-format (jira-time-str)
-  "Convert \"2012-01-09T08:59:15.000Z\" to \"2012-01-09 16:59:15\", with my timezone being +0800"
+  "Convert JIRA-TIME-STR to format \"%Y-%m-%d %T\".
+
+Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
+16:59:15\", with the current timezone being +0800."
   (condition-case ()
       (format-time-string "%Y-%m-%d %T"
                           (apply
@@ -290,7 +293,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
     (error jira-time-str)))
 
 (defun org-jira-get-comment-val (key comment)
-  "Return the value associated with KEY of COMMENT"
+  "Return the value associated with KEY of COMMENT."
   (let ((tmp  (or (cdr (assoc key comment)) "")))
     (cond ((or (eq key 'created) (eq key 'updated))
            (org-jira-transform-time-format tmp))
@@ -319,9 +322,11 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 
 (defvar org-jira-jql-history nil)
 (defun org-jira-get-issue-list ()
-  "Get list of issues, using jql (jira query language). Default
-is unresolved issues assigned to current login user; with a
-prefix argument you are given the chance to enter your own jql."
+  "Get list of issues, using jql (jira query language).
+
+Default is unresolved issues assigned to current login user; with
+a prefix argument you are given the chance to enter your own
+jql."
   (let ((jql org-jira-default-jql))
     (when current-prefix-arg
       (setq jql (read-string "Jql: "
@@ -333,7 +338,7 @@ prefix argument you are given the chance to enter your own jql."
     (list (jiralib-do-jql-search jql))))
 
 (defun org-jira-get-issue-by-id (id)
-  "Get an issue by it's id"
+  "Get an issue by its ID."
   (interactive (list (read-string "Issue ID: " "IMINAN-" 'org-jira-issue-id-history)))
   (push id org-jira-issue-id-history)
   (let ((jql (format "id = %s" id)))
@@ -341,8 +346,12 @@ prefix argument you are given the chance to enter your own jql."
 
 ;;;###autoload
 (defun org-jira-get-issues-headonly (issues)
-  "Get list of issues assigned to you and unresolved, head
-only. With a prefix argument, allow you to customize the jql. See `org-jira-get-issue-list'"
+  "Get list of ISSUES, head only.
+
+The default behavior is to return issues assigned to you and unresolved.
+
+With a prefix argument, allow you to customize the jql.  See
+`org-jira-get-issue-list'."
 
   (interactive
    (org-jira-get-issue-list))
@@ -362,14 +371,17 @@ only. With a prefix argument, allow you to customize the jql. See `org-jira-get-
     (switch-to-buffer issues-headonly-buffer)))
 
 (defun org-jira-get-issue ()
+  "Get a JIRA issue, allowing you to enter the issue-id first."
   (interactive)
   (org-jira-get-issues (call-interactively 'org-jira-get-issue-by-id)))
 
 ;;;###autoload
 (defun org-jira-get-issues (issues)
-  "Get list of issues. Default is get unfinished issues assigned
-to you, but you can customize jql with a prefix argument. See
-`org-jira-get-issue-list'"
+  "Get list of ISSUES into an org buffer.
+
+Default is get unfinished issues assigned to you, but you can
+customize jql with a prefix argument.
+See`org-jira-get-issue-list'"
 
   (interactive
    (org-jira-get-issue-list))
@@ -452,7 +464,7 @@ to you, but you can customize jql with a prefix argument. See
 
 ;;;###autoload
 (defun org-jira-update-comment ()
-  "update a comment for the current issue"
+  "Update a comment for the current issue."
   (interactive)
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
          (comment-id (org-jira-get-from-org 'comment 'id))
@@ -464,13 +476,13 @@ to you, but you can customize jql with a prefix argument. See
       (org-jira-update-comments-for-current-issue))))
 
 (defun org-jira-delete-current-comment ()
-  "delete the current comment"
+  "Delete the current comment."
   (ensure-on-comment
    (delete-region (point-min) (point-max))))
 
 ;;;###autoload
 (defun org-jira-copy-current-issue-key ()
-  "Copy the current issue's key into clipboard"
+  "Copy the current issue's key into clipboard."
   (interactive)
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
     (with-temp-buffer
@@ -478,6 +490,7 @@ to you, but you can customize jql with a prefix argument. See
       (kill-region (point-min) (point-max)))))
 
 (defun org-jira-update-comments-for-current-issue ()
+  "Update the comments for the current issue."
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
          (comments (jiralib-get-comments issue-id)))
     (mapc (lambda (comment)
@@ -518,16 +531,16 @@ to you, but you can customize jql with a prefix argument. See
 
 ;;;###autoload
 (defun org-jira-update-issue ()
-  "update an issue"
+  "Update an issue."
   (interactive)
   (let ((issue-id (org-jira-parse-issue-id)))
     (if issue-id
         (org-jira-update-issue-details issue-id)
-      (error "not on an issue"))))
+      (error "Not on an issue"))))
 
 ;;;###autoload
 (defun org-jira-todo-to-jira ()
-  "convert an ordinary todo item to a jira ticket"
+  "Convert an ordinary todo item to a jira ticket."
   (interactive)
   (ensure-on-todo
    (when (org-jira-parse-issue-id)
@@ -541,7 +554,7 @@ to you, but you can customize jql with a prefix argument. See
 
 ;;;###autoload
 (defun org-jira-get-subtasks ()
-  "get subtasks for the current issue"
+  "Get subtasks for the current issue."
   (interactive)
   (ensure-on-issue
      (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
@@ -551,7 +564,7 @@ to you, but you can customize jql with a prefix argument. See
 (defvar org-jira-type-read-history nil)
 
 (defun org-jira-read-project ()
-  "Read project name"
+  "Read project name."
   (completing-read
    "Project: "
    (jiralib-make-list (jiralib-get-projects) 'key)
@@ -561,7 +574,7 @@ to you, but you can customize jql with a prefix argument. See
    'org-jira-project-read-history))
 
 (defun org-jira-read-priority ()
-  "Read priority name"
+  "Read priority name."
   (completing-read
    "Priority: "
    (mapcar 'cdr (jiralib-get-priorities))
@@ -571,7 +584,7 @@ to you, but you can customize jql with a prefix argument. See
    'org-jira-priority-read-history))
 
 (defun org-jira-read-issue-type ()
-  "Read issue type name"
+  "Read issue type name."
   (completing-read
    "Type: "
    (mapcar 'cdr (jiralib-get-issue-types))
@@ -581,7 +594,7 @@ to you, but you can customize jql with a prefix argument. See
    'org-jira-type-read-history))
 
 (defun org-jira-read-subtask-type ()
-  "Read issue type name"
+  "Read issue type name."
   (completing-read
    "Type: "
    (mapcar 'cdr (jiralib-get-subtask-types))
@@ -591,7 +604,7 @@ to you, but you can customize jql with a prefix argument. See
    'org-jira-type-read-history))
 
 (defun org-jira-get-issue-struct (project type summary description)
-  "helper function for the struct used in creating issues and subtasks"
+  "Create an issue struct for PROJECT, of TYPE, with SUMMARY and DESCRIPTION."
   (if (or (equal project "")
           (equal type "")
           (equal summary ""))
@@ -613,7 +626,7 @@ to you, but you can customize jql with a prefix argument. See
     ticket-struct))
 ;;;###autoload
 (defun org-jira-create-issue (project type summary description)
-  "create an issue"
+  "Create an issue in PROJECT, of type TYPE, with given SUMMARY and DESCRIPTION."
   (interactive (list (org-jira-read-project)
                      (org-jira-read-issue-type)
                      (read-string "Summary: ")
@@ -628,7 +641,7 @@ to you, but you can customize jql with a prefix argument. See
 
 ;;;###autoload
 (defun org-jira-create-subtask (project type summary description)
-  "create an subtask issue"
+  "Create a subtask issue for PROJECT, of TYPE, with SUMMARY and DESCRIPTION."
   (interactive (ensure-on-issue (list (org-jira-read-project)
                      (org-jira-read-subtask-type)
                      (read-string "Summary: ")
@@ -642,10 +655,11 @@ to you, but you can customize jql with a prefix argument. See
     (org-jira-get-issues (list (jiralib-create-subtask ticket-struct parent-id)))))
 
 (defun org-jira-strip-string (str)
-  "remove the beginning and ending white space for a string"
+  "Remove the beginning and ending white space for a string STR."
   (replace-regexp-in-string "\\`\n+\\|\n+\\'" "" str))
 
 (defun org-jira-get-issue-val-from-org (key)
+  "Return the requested value by KEY from the current issue."
   (ensure-on-issue
    (cond ((eq key 'description)
           (org-goto-first-child)
@@ -666,7 +680,7 @@ to you, but you can customize jql with a prefix argument. See
 
 (defvar org-jira-actions-history nil)
 (defun org-jira-read-action (actions)
-  "Read issue workflow progress actions."
+  "Read issue workflow progress ACTIONS."
   (let ((action (completing-read
                  "Action: "
                  (mapcar 'cdr actions)
@@ -678,7 +692,7 @@ to you, but you can customize jql with a prefix argument. See
 
 (defvar org-jira-fields-history nil)
 (defun org-jira-read-field (fields)
-  "Read (custom) fields for workflow progress"
+  "Read (custom) FIELDS for workflow progress."
   (let ((field-desc (completing-read
                      "More fields to set: "
                      (cons "Thanks, no more fields are *required*." (mapcar 'cdr fields))
@@ -707,7 +721,7 @@ to you, but you can customize jql with a prefix argument. See
 
 ;;;###autoload
 (defun org-jira-refresh-issue ()
-  "Refresh issue from jira to org"
+  "Refresh issue from jira to org."
   (interactive)
   (ensure-on-issue
    (let* ((issue-id (org-jira-id)))
@@ -716,7 +730,7 @@ to you, but you can customize jql with a prefix argument. See
 (defvar org-jira-fields-values-history nil)
 ;;;###autoload
 (defun org-jira-progress-issue ()
-  "Progress issue workflow"
+  "Progress issue workflow."
   (interactive)
   (ensure-on-issue
    (let* ((issue-id (org-jira-id))
@@ -758,6 +772,7 @@ to you, but you can customize jql with a prefix argument. See
 
 
 (defun org-jira-update-issue-details (issue-id)
+  "Update the details of issue ISSUE-ID."
   (ensure-on-issue-id
       issue-id
     (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
@@ -790,7 +805,7 @@ to you, but you can customize jql with a prefix argument. See
 
 
 (defun org-jira-parse-issue-id ()
-  "get issue id from org text"
+  "Get issue id from org text."
   (save-excursion
     (let ((continue t)
           issue-id)
@@ -804,11 +819,12 @@ to you, but you can customize jql with a prefix argument. See
       issue-id)))
 
 (defun org-jira-get-from-org (type entry)
-  "get org ENTRY for heading of TYPE.
+  "Get an org property from the current item.
 
-TYPE can be 'issue, or 'comment.
+TYPE is the type to of the current item, and can be 'issue, or 'comment.
 
-ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted to string"
+ENTRY will vary, and is the name of the property to return.  If
+it is a symbol, it will be converted to string."
 
   (when (symbolp entry)
     (setq entry (symbol-name entry)))
@@ -817,10 +833,10 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
       (org-jira-get-issue-val-from-org entry)
     (if (eq type 'comment)
         (org-jira-get-comment-val-from-org entry)
-      (error "unknown type %s" type))))
+      (error "Unknown type %s" type))))
 
 (defun org-jira-get-comment-val-from-org (entry)
-  "get the jira issue field value for ENTRY of current comment item"
+  "Get the JIRA issue field value ENTRY of the current comment item."
   (ensure-on-comment
    (when (symbolp entry)
      (setq entry (symbol-name entry)))
@@ -829,6 +845,7 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
    (org-entry-get (point) entry)))
 
 (defun org-jira-get-comment-body (&optional comment-id)
+  "Get the comment body of the comment with id COMMENT-ID."
   (ensure-on-comment
    (goto-char (point-min))
    (org-entry-put (point) "ID" comment-id)
@@ -837,7 +854,7 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
    (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
 
 (defun org-jira-id ()
-  "get the ID entry for the current HEADING."
+  "Get the ID entry for the current heading."
   (org-entry-get (point) "ID"))
 
 ;;;###autoload
@@ -849,16 +866,18 @@ ENTRY will vary with regard to the TYPE, if it is a symbol, it will be converted
 
 ;;;###autoload
 (defun org-jira-get-issues-from-filter (filter)
-  "Get issues from filter which are jql created and saved on the
-server side. Provide this command in case some users are not able
-to use client side jql (maybe because of Jira server version?)."
+  "Get issues from the server-side stored filter named FILTER.
+
+Provide this command in case some users are not able to use
+client side jql (maybe because of JIRA server version?)."
   (interactive
    (list (completing-read "Filter: " (mapcar 'cdr (jiralib-get-saved-filters)))))
   (org-jira-get-issues (jiralib-get-issues-from-filter (car (rassoc filter (jiralib-get-saved-filters))))))
 
 ;;;###autoload
 (defun org-jira-get-issues-from-filter-headonly (filter)
-  "Get issues *head only* from saved filter. See `org-jira-get-issues-from-filter'"
+  "Get issues *head only* from saved filter named FILTER.
+See `org-jira-get-issues-from-filter'."
   (interactive
    (list (completing-read "Filter: " (mapcar 'cdr (jiralib-get-saved-filters)))))
   (org-jira-get-issues-headonly (jiralib-get-issues-from-filter (car (rassoc filter (jiralib-get-saved-filters))))))
