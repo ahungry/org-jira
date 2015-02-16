@@ -41,7 +41,7 @@
 ;; JavaDoc for the Jira SOAP service
 ;; http://docs.atlassian.com/software/jira/docs/api/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/JiraSoapService.html
 
-(require 'cl)
+(eval-when-compile (require 'cl))
 (require 'soap-client)
 (require 'url-parse)
 
@@ -521,9 +521,9 @@ Return nil if the field is not found"
 
 (defun jiralib-get-filter (filter-id)
   "Return a filter given its FILTER-ID."
-  (flet ((id-match (filter)
-                   (equal filter-id (cdr (assoc 'id filter)))))
-    (find-if 'id-match (jiralib-get-saved-filters))))
+  (cl-flet ((id-match (filter)
+                      (equal filter-id (cdr (assoc 'id filter)))))
+    (cl-find-if 'id-match (jiralib-get-saved-filters))))
 
 (defun jiralib-get-filter-alist ()
   "Return an association list mapping filter names to IDs."
