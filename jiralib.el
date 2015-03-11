@@ -121,7 +121,7 @@ The default value works if JIRA is located at a hostname named
   :group 'jiralib)
 
 (defcustom jiralib-url
-  "http://bible/jira"
+  "http://localhost:18888/"
   "The address of the jira host."
   :type 'string
   :group 'jiralib)
@@ -157,7 +157,7 @@ After a succesful login, store the authentication token in
                                              :host (if (string= jiralib-host "")
                                                        (url-host (url-generic-parse-url jiralib-url))
                                                      jiralib-host)
-                                             :port 80
+                                             :port (url-port (url-generic-parse-url jiralib-url))
                                              :require '(:user :secret)
                                              :create t)))
            user secret)

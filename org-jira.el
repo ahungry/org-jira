@@ -52,11 +52,20 @@
 
 (defvar org-jira-working-dir "~/.org-jira"
   "Folder under which to store org-jira working files.")
-(defvar org-jira-default-jql
-  "assignee = currentUser() and
-   ((reporter = currentUser() and status != closed) or resolution = unresolved)
-   ORDER BY priority DESC, created ASC"
-  "Default jql for querying your Jira tickets.")
+
+(defcustom org-jira-default-jql
+  "assignee = currentUser() and resolution = unresolved ORDER BY
+  priority DESC, created ASC"
+  "Default jql for querying your Jira tickets."
+  :group 'org-jira
+  :type 'string)
+
+(defcustom org-jira-done-states
+  '("Closed" "Resolved" "Done")
+  "Jira states that should be considered as DONE for `org-mode'."
+  :group 'org-jira
+  :type '(repeat (string :tag "Jira state name:")))
+
 (defvar jira-users (list (cons "Full Name" "username"))
   "Jira has not api for discovering all users, so we should provide it somewhere else.")
 
@@ -414,7 +423,7 @@ See`org-jira-get-issue-list'"
                     (let ((status (org-jira-get-issue-val 'status issue)))
                       (insert (concat (cond (org-jira-use-status-as-todo
                                              (upcase (replace-regexp-in-string " " "-" status)))
-                                            ((member status '("Closed" "Resolved")) "DONE")
+                                            ((member status org-jira-done-states) "DONE")
                                             ("TODO")) " "
                                             issue-headline)))
                     (save-excursion
