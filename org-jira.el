@@ -380,6 +380,7 @@ With a prefix argument, allow you to customize the jql.  See
             issues))
     (switch-to-buffer issues-headonly-buffer)))
 
+;;;###autoload
 (defun org-jira-get-issue ()
   "Get a JIRA issue, allowing you to enter the issue-id first."
   (interactive)
