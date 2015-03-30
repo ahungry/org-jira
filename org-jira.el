@@ -42,6 +42,7 @@
 ;;
 ;;; Code:
 
+(eval-when-compile (load-library "cl-extra"))
 (require 'org)
 (require 'jiralib)
 
@@ -531,7 +532,7 @@ See`org-jira-get-issue-list'"
                     (org-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
                 (insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'body comment)) ""))))))
-          (mapcan (lambda (comment) (if (string= (cdr (assoc 'author comment))
+          (cl-mapcan (lambda (comment) (if (string= (cdr (assoc 'author comment))
                                                  "admin")
                                         nil
                                       (list comment)))
@@ -799,7 +800,7 @@ See`org-jira-get-issue-list'"
                             (list (cons
                                    'components
                                    (apply 'vector
-                                          (mapcan
+                                          (cl-mapcan
                                            (lambda (item)
                                              (let ((comp-id (car (rassoc item project-components))))
                                                (if comp-id
