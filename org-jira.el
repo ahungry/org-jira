@@ -45,6 +45,7 @@
 (eval-when-compile (load-library "cl-extra"))
 (require 'org)
 (require 'jiralib)
+(require 'cl-lib)
 
 (defgroup org-jira nil
   "Customisation group for org-jira."
@@ -755,8 +756,8 @@ See`org-jira-get-issue-list'"
                                         ; already been set in custom-fields-collector
 
                            (while fields
-                             (setq fields (delete-if (lambda (strstr)
-                                                       (member-if (lambda (symstr)
+                             (setq fields (cl-remove-if (lambda (strstr)
+                                                       (cl-member-if (lambda (symstr)
                                                                     (string= (car strstr)  (symbol-name (car symstr))))
                                                                   custom-fields-collector))
                                                      fields))
