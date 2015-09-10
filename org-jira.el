@@ -46,6 +46,7 @@
 (require 'org)
 (require 'jiralib)
 (require 'cl-lib)
+(require 'cl-loop)
 
 (defgroup org-jira nil
   "Customisation group for org-jira."
@@ -235,6 +236,7 @@ variables.
     (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
     (define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
     (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
+    (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklog)
     (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
     org-jira-map))
 
@@ -314,12 +316,20 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
                            (parse-time-string (replace-regexp-in-string "T\\|\\.000" " " jira-time-str))))
     (error jira-time-str)))
 
+(defun org-jira--fix-encode-time-args (arg)
+  "Fix ARG for 3 nil values at the head."
+  (loop
+   for n from 0 to 2 by 1 do
+   (when (not (nth n arg))
+     (setcar (nthcdr n arg) 0)))
+  arg)
+
 (defun org-jira-time-format-to-jira (org-time-str)
   "Convert ORG-TIME-STR back to jira time format."
   (condition-case ()
       (format-time-string "%Y-%m-%dT%T.000Z"
                           (apply 'encode-time
-                                 (parse-time-string org-time-str)) t)
+                                 (org-jira--fix-encode-time-args (parse-time-string org-time-str))) t)
     (error org-time-str)))
 
 (defun org-jira-get-comment-val (key comment)
