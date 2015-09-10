@@ -198,6 +198,17 @@ variables.
        (org-narrow-to-subtree)
        ,@body)))
 
+(defmacro ensure-on-worklog (&rest body)
+  "Make sure we are on a worklog heading, before executing BODY."
+  `(save-excursion
+     (org-back-to-heading)
+     (forward-thing 'whitespace)
+     (unless (looking-at "Worklog:")
+       (error "Not on a worklog region!"))
+     (save-restriction
+       (org-narrow-to-subtree)
+       ,@body)))
+
 (defun org-jira-kill-buffer-hook ()
   "Prompt before killing buffer."
   (if (and org-jira-buffer-kill-prompt
@@ -303,20 +314,28 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
                            (parse-time-string (replace-regexp-in-string "T\\|\\.000" " " jira-time-str))))
     (error jira-time-str)))
 
+(defun org-jira-time-format-to-jira (org-time-str)
+  "Convert ORG-TIME-STR back to jira time format."
+  (condition-case ()
+      (format-time-string "%Y-%m-%dT%T.000Z"
+                          (apply 'encode-time
+                                 (parse-time-string org-time-str)) t)
+    (error org-time-str)))
+
 (defun org-jira-get-comment-val (key comment)
   "Return the value associated with KEY of COMMENT."
-  (let ((tmp  (or (cdr (assoc key comment)) "")))
-    (cond ((or (eq key 'created) (eq key 'updated))
-           (org-jira-transform-time-format tmp))
-          (t
-           tmp))))
+  (org-jira-get-issue-val key comment))
+
+(defun org-jira-get-worklog-val (key WORKLOG)
+  "Return the value associated with KEY of WORKLOG."
+  (org-jira-get-comment-val key WORKLOG))
 
 (defun org-jira-get-issue-val (key issue)
   "Return the value associated with key KEY of issue ISSUE."
   (let ((tmp  (or (cdr (assoc key issue)) "")))
     (cond ((eq key 'components)
            (org-jira-get-issue-components issue))
-          ((or (eq key 'created) (eq key 'updated))
+          ((member key '(created updated startDate))
            (org-jira-transform-time-format tmp))
           ((eq key 'status)
            (cdr (assoc tmp (jiralib-get-statuses))))
@@ -470,6 +489,7 @@ See`org-jira-get-issue-list'"
                                 (insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                           '(description))
                     (org-jira-update-comments-for-current-issue)
+                    (org-jira-update-worklogs-for-current-issue)
                     )))))
           issues)
     (switch-to-buffer project-buffer)))
@@ -487,9 +507,43 @@ See`org-jira-get-issue-list'"
       (org-jira-delete-current-comment)
       (org-jira-update-comments-for-current-issue))))
 
+(defun org-jira-update-worklog ()
+  "Update a worklog for the current issue."
+  (interactive)
+  (let* ((issue-id (org-jira-get-from-org 'issue 'key))
+         (worklog-id (org-jira-get-from-org 'worklog 'id))
+         (timeSpent (org-jira-get-from-org 'worklog 'timeSpent))
+         (timeSpent (if timeSpent
+                        timeSpent
+                      (read-string "Input the time you spent (such as 3w 1d 2h): ")))
+         (timeSpent (replace-regexp-in-string " \\(\\sw\\)\\sw*\\(,\\|$\\)" "\\1" timeSpent))
+         (startDate (org-jira-get-from-org 'worklog 'startDate))
+         (startDate (if startDate
+                        startDate
+                      (org-read-date nil nil nil "Inputh when did you start")))
+         (startDate (org-jira-time-format-to-jira startDate))
+         (comment (replace-regexp-in-string "^  " "" (org-jira-get-worklog-comment worklog-id)))
+         (worklog `((comment . ,comment)
+                    (timeSpent . ,timeSpent)
+                    (timeSpentInSeconds . 10)
+                    (startDate . ,startDate)))
+         (worklog (if worklog-id
+                      (cons `(id . ,(replace-regexp-in-string "^worklog-" "" worklog-id)) worklog)
+                    worklog)))
+    (if worklog-id
+        (jiralib-update-worklog worklog)
+      (jiralib-add-worklog-and-autoadjust-remaining-estimate issue-id startDate timeSpent comment))
+    (org-jira-delete-current-worklog)
+    (org-jira-update-worklogs-for-current-issue)))
+
 (defun org-jira-delete-current-comment ()
   "Delete the current comment."
   (ensure-on-comment
+   (delete-region (point-min) (point-max))))
+
+(defun org-jira-delete-current-worklog ()
+  "Delete the current worklog."
+  (ensure-on-worklog
    (delete-region (point-min) (point-max))))
 
 ;;;###autoload
@@ -514,12 +568,11 @@ See`org-jira-get-issue-list'"
                                          (cdr (assoc 'author comment))))
                      (comment-headline (format "Comment: %s" comment-author)))
                 (setq p (org-find-entry-with-id comment-id))
-                (if (and p (>= p (point-min))
-                         (<= p (point-max)))
-                    (progn
-                      (goto-char p)
-                      (org-narrow-to-subtree)
-                      (delete-region (point-min) (point-max))))
+                (when (and p (>= p (point-min))
+                           (<= p (point-max)))
+                  (goto-char p)
+                  (org-narrow-to-subtree)
+                  (delete-region (point-min) (point-max)))
                 (goto-char (point-max))
                 (unless (looking-at "^")
                   (insert "\n"))
@@ -535,10 +588,46 @@ See`org-jira-get-issue-list'"
                 (goto-char (point-max))
                 (insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'body comment)) ""))))))
           (cl-mapcan (lambda (comment) (if (string= (cdr (assoc 'author comment))
-                                                 "admin")
-                                        nil
-                                      (list comment)))
-                  comments))))
+                                               "admin")
+                                      nil
+                                    (list comment)))
+                     comments))))
+
+(defun org-jira-update-worklogs-for-current-issue ()
+  "Update the worklogs for the current issue."
+  (let* ((issue-id (org-jira-get-from-org 'issue 'key))
+         (worklogs (jiralib-get-worklogs issue-id)))
+    (mapc (lambda (worklog)
+            (ensure-on-issue-id issue-id
+              (let* ((worklog-id (concat "worklog-" (cdr (assoc 'id worklog))))
+                     (worklog-author (or (car (rassoc
+                                               (cdr (assoc 'author worklog))
+                                               jira-users))
+                                         (cdr (assoc 'author worklog))))
+                     (worklog-headline (format "Worklog: %s" worklog-author)))
+                (setq p (org-find-entry-with-id worklog-id))
+                (when (and p (>= p (point-min))
+                           (<= p (point-max)))
+                  (goto-char p)
+                  (org-narrow-to-subtree)
+                  (delete-region (point-min) (point-max)))
+                (goto-char (point-max))
+                (unless (looking-at "^")
+                  (insert "\n"))
+                (insert "** ")
+                (insert worklog-headline "\n")
+                (org-narrow-to-subtree)
+                (org-entry-put (point) "ID" worklog-id)
+                (let ((created (org-jira-get-worklog-val 'created worklog))
+                      (updated (org-jira-get-worklog-val 'updated worklog)))
+                  (org-entry-put (point) "created" created)
+                  (unless (string= created updated)
+                    (org-entry-put (point) "updated" updated)))
+                (org-entry-put (point) "startDate" (org-jira-get-worklog-val 'startDate worklog))
+                (org-entry-put (point) "timeSpent" (org-jira-get-worklog-val 'timeSpent worklog))
+                (goto-char (point-max))
+                (insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'comment worklog)) ""))))))
+          worklogs)))
 
 
 ;;;###autoload
@@ -837,15 +926,16 @@ TYPE is the type to of the current item, and can be 'issue, or 'comment.
 
 ENTRY will vary, and is the name of the property to return.  If
 it is a symbol, it will be converted to string."
-
   (when (symbolp entry)
     (setq entry (symbol-name entry)))
-
-  (if (eq type 'issue)
-      (org-jira-get-issue-val-from-org entry)
-    (if (eq type 'comment)
-        (org-jira-get-comment-val-from-org entry)
-      (error "Unknown type %s" type))))
+  (cond
+   ((eq type 'issue)
+    (org-jira-get-issue-val-from-org entry))
+   ((eq type 'comment)
+    (org-jira-get-comment-val-from-org entry))
+   ((eq type 'worklog)
+    (org-jira-get-worklog-val-from-org entry))
+   (t (error "Unknown type %s" type))))
 
 (defun org-jira-get-comment-val-from-org (entry)
   "Get the JIRA issue field value ENTRY of the current comment item."
@@ -856,11 +946,31 @@ it is a symbol, it will be converted to string."
      (setq entry "ID"))
    (org-entry-get (point) entry)))
 
+(defun org-jira-get-worklog-val-from-org (entry)
+  "Get the JIRA issue field value ENTRY of the current worklog item."
+  (ensure-on-worklog
+   (when (symbolp entry)
+     (setq entry (symbol-name entry)))
+   (when (string= entry "id")
+     (setq entry "ID"))
+   (org-entry-get (point) entry)))
+
 (defun org-jira-get-comment-body (&optional comment-id)
   "Get the comment body of the comment with id COMMENT-ID."
   (ensure-on-comment
    (goto-char (point-min))
+   ;; so that search for :END: won't fail
    (org-entry-put (point) "ID" comment-id)
+   (search-forward ":END:")
+   (forward-line)
+   (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
+
+(defun org-jira-get-worklog-comment (&optional worklog-id)
+  "Get the worklog comment of the worklog with id WORKLOG-ID."
+  (ensure-on-worklog
+   (goto-char (point-min))
+   ;; so that search for :END: won't fail
+   (org-entry-put (point) "ID" worklog-id)
    (search-forward ":END:")
    (forward-line)
    (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))

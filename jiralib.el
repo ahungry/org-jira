@@ -572,6 +572,14 @@ will cache it."
   "Return all comments associated with issue ISSUE-KEY."
   (jiralib-call "getComments" issue-key))
 
+(defun jiralib-get-worklogs (issue-key)
+  "Return all worklogs associated with issue ISSUE-KEY."
+  (jiralib-call "getWorklogs" issue-key))
+
+(defun jiralib-update-worklog (worklog)
+  "Update the WORKLOG, updating the ETA for the related issue."
+  (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" worklog))
+
 (defun jiralib-get-components (project-key)
   "Return all components available in the project PROJECT-KEY."
   (jiralib-make-assoc-list (jiralib-call "getComponents" project-key) 'id 'name))
