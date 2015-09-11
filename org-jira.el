@@ -46,7 +46,7 @@
 (require 'org)
 (require 'jiralib)
 (require 'cl-lib)
-(require 'cl-loop)
+(require 'cl)
 
 (defgroup org-jira nil
   "Customisation group for org-jira."
