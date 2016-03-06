@@ -1,0 +1,218 @@
+; -*- mode: emacs-lisp -*-
+(defun restclient-http-do (method url headers entity &rest handle-args))
+
+(setq x (restclient-http-do "GET" "http://localhost:8081/rest/api/2/issue/SMARTCM-1" '(("Authorization" . "Basic YmFvaGFvanVuQGdtYWlsLmNvbTpIZWxsb1dvcmxkMDAy")) "" nil nil))
+
+(require 'restclient)
+(restclient-http-do "PUT" "http://localhost:8081/rest/api/2/issue/SMARTCM-1" '(("Authorization" . "Basic YmFvaGFvanVuQGdtYWlsLmNvbTpIZWxsb1dvcmxkMDAy") ("Content-Type" . "application/json")) (json-encode '((fields (summary . "this is fun") (description . "funny you 333")))) nil nil)
+
+(jiralib--rest-call-it "rest/api/2/issue/SMARTCM-1"
+:type "PUT"
+:data (json-encode '((fields (summary . "funny you again")
+))))
+
+
+(setq x (request
+         "http://localhost:8081/rest/api/2/issue/SMARTCM-1"
+         :headers `(,jiralib-token ("Authorization" . my-jira-test-passwd))
+         :parser 'json-read
+         :sync t))
+
+(setq x (request-response-data (jiralib--rest-call-it "rest/api/2/issue/SMARTCM-1" :parser 'json-read :sync t)))
+
+(jiralib-update-issue "SMARTCM-1" '((summary . "hello 2 world")))
+
+(request
+ "http://localhost:8081/rest/api/2/issue/SMARTCM-1"
+ :headers '(("Authorization" . my-jira-test-passwd) ("Content-Type" . "application/json"))
+ :sync t
+ :type "PUT"
+ :data (json-encode '((fields (summary . "funny you again")))))
+
+(jiralib--rest-call-it "rest/api/2/project")
+(request
+ "http://localhost:8081/rest/api/2/project"
+ :type "GET"
+ :headers '(("Authorization" . my-jira-test-passwd) ("Content-Type" . "application/json"))
+ :sync t
+ :parser 'json-read
+ )
+
+(let ((jiralib-token nil)
+      (jiralib-use-restapi nil)) (jiralib-call "getAvailableActions" "SMARTCM-1"))
+
+(let ((jiralib-token nil)
+      (jiralib-use-restapi nil)) (jiralib-call "getFieldsForAction" "SMARTCM-1" "11"))
+
+
+(cdr (assoc 'transitions (jiralib-call "getAvailableActions" "SMARTCM-1")))
+
+(jiralib--rest-call-it "/rest/api/2/search" :type "POST" :data (json-encode '(("jql" . "project = SMARTCM"))))
+
+;; {
+;; "jql": "project = HSP",
+;; "startAt": 0,
+;; "maxResults": 15,
+;; "fields": [
+;;            "summary",
+;;            "status",
+;;            "assignee"
+;;            ]
+;; }
+
+(defun jiralib--soap-call-it (&rest args)
+  (let ((jiralib-token nil)
+        (jiralib-use-restapi nil)) (apply #'jiralib-call args)))
+
+(jiralib--soap-call-it "getProjectsNoSchemes")
+(append (jiralib--rest-call-it
+         "/rest/api/2/project") nil)
+
+(jiralib-call "getProjectsNoSchemes")
+
+(let ((jiralib-token nil)
+      (jiralib-use-restapi nil)) (org-jira-get-issue-list))
+
+(jiralib--soap-call-it "getIssuesFromJqlSearch" org-jira-default-jql 100)
+
+(jiralib-call "getIssuesFromJqlSearch" org-jira-default-jql 100)
+
+(append (cdr (assoc 'issues (jiralib--rest-call-it
+                             "/rest/api/2/search"
+                             :type "POST"
+                             :data (json-encode `((jql . ,org-jira-default-jql)
+                                                  (maxResults . ,100)))))) nil)
+
+(list (append (cdaar (org-jira-get-issue-list)) nil))
+
+(jiralib--soap-call-it "getIssue" "SMARTCM-1")((id . "10000")
+                                               (affectsVersions)
+                                               (assignee)
+                                               (attachmentNames)
+                                               (components)
+                                               (created . "2016-02-11T08:42:56.192Z")
+                                               (customFieldValues
+                                                ((customfieldId . "customfield_10009")
+                                                 (key)
+                                                 (values "0|hzzzzz:")))
+                                               (description)
+                                               (duedate)
+                                               (environment)
+                                               (fixVersions)
+                                               (key . "SMARTCM-1")
+                                               (priority . "3")
+                                               (project . "SMARTCM")
+                                               (reporter . "baohaojun@gmail.com")
+                                               (resolution)
+                                               (status . "10000")
+                                               (summary . "hello 2 world")
+                                               (type . "3")
+                                               (updated . "2016-03-05T10:35:39.431Z")
+                                               (votes . 0))
+(let ((jiralib-use-restapi nil)) (setq issue (jiralib--soap-call-it "getIssue" "SMARTCM-1"))
+       (org-jira-get-issue-val 'resolution issue))
+
+(assignee reporter type priority resolution status components created updated)
+(org-jira-get-issue-components issue)
+(mapconcat (lambda (comp) (org-jira-find-value comp 'name)) (org-jira-find-value issue 'fields 'components) ", ")
+
+(progn (setq issue (jiralib-call "getIssue" "SMARTCM-1"))
+       (org-jira-get-issue-val 'type issue))
+
+(progn (setq proj (car (jiralib--soap-call-it "getProjectsNoSchemes")))
+       (cdr (assoc 'url proj)))
+
+(progn (setq proj (car (jiralib-call "getProjectsNoSchemes")))
+       (cdr (assoc 'name (cdr (assoc 'lead proj)))))
+
+
+
+(jiralib--rest-call-it "/rest/api/2/component"
+                       :type "POST"
+                       :data (json-encode '((name . comp2)
+                                            (project . SMARTCM))))
+
+(progn (setq comment (nth 0 (jiralib--soap-call-it "getComments" "SMARTCM-1")))
+       (cdr (assoc 'body comment)))
+
+(progn (setq comment (aref (jiralib-call "getComments" "SMARTCM-1") 0))
+       (org-jira-find-value comment 'author 'name)
+       (cdr (assoc ' comment)))
+
+(jiralib-call "updateIssue" "SMARTCM-1" '((components . []) (priority . "3") (description . #("This is crazy " 0 18 (fontified t))) (assignee . "baohaojun@gmail.com") (summary . #("hello 2 world" 0 13 (fontified t face org-level-1)))))
+
+{"update":{"summary":[{"set":"Bug in business logic"}],"components":[{"set":""}],"timetracking":[{"edit":{"originalEstimate":"1w 1d","remainingEstimate":"4d"}}],"labels":[{"add":"triaged"},{"remove":"blocker"}]},
+"fields":{"summary":"This is a shorthand for a set operation on the summary field","customfield_10010":1,"customfield_10000":"This is a shorthand for a set operation on a text custom field"},
+"historyMetadata":{"type":"myplugin:type","description":"text description","descriptionKey":"plugin.changereason.i18.key","activityDescription":"text description","activityDescriptionKey":"plugin.activity.i18.key","actor":{"id":"tony","displayName":"Tony","type":"mysystem-user","avatarUrl":"http://mysystem/avatar/tony.jpg","url":"http://mysystem/users/tony"},"generator":{"id":"mysystem-1","type":"mysystem-application"},"cause":{"id":"myevent","type":"mysystem-event"},"extraData":{"keyvalue":"extra data","goes":"here"}},"properties":[{"key":"key1","value":'properties' : 'can be set at issue create or update time'},{"key":"key2","value":'and' : 'there can be multiple properties'}]}
+
+(progn
+  (setq myp `("SMARTCM-1"
+              ((description . "funny you 333 yyy  again")
+               (assignee . ,(jiralib-get-user "baohaojun@gmail.com"))
+               '(priority . ((id . "3")
+                             (name . "Medium")))
+               (components .
+                           [((name . "comp1")
+                             (id . "10000"))
+                            ((name . "comp2")
+                             (id . "10001"))])
+               (summary ."funny you again and again"))))
+  (setq params myp)
+  (jiralib--rest-call-it
+   (format "/rest/api/2/issue/%s" (first params))
+   :type "PUT"
+   :data (json-encode `((fields . ,(second params))))))
+
+
+
+(let ((jiralib-token nil)
+      (jiralib-use-restapi nil))
+  (jiralib-get-user "baohaojun@gmail.com"))
+
+(jiralib--rest-call-it "rest/api/2/issue/SCM-1/transitions"
+                       :params '((expand . "transitions.fields")))
+
+(jiralib--rest-call-it "rest/api/2/issue/SMATRCM-1/transitions"
+                       :params '((expand . "transitions.fields")))
+(jiralib--rest-call-it "rest/api/2/issue/SCM-1/transitions"
+                       :type "POST"
+                       :data (json-encode '((transition (id . "2"))
+                                            (fields (resolution (name . "Fixed"))))))
+
+(progn (setq myp '("SCM-1"
+                   ((transition
+                     (id . "2")))
+                   ((fields
+                     ((resolution (name . "Fixed")))))))
+       (jiralib--rest-call-it "rest/api/2/issue/SCM-1/transitions"
+                              :type "POST"
+                              :data (json-encode (append (second myp) (third myp))
+                                                 )))
+((transition
+  (id . "2"))
+ (fields
+  ((resolution
+    (name . "Fixed")))))
+
+((transition (id . "2"))
+ (fields (resolution (name . "Fixed"))))
+
+(setq myp '((assignee . "baohaojun@gmail.com")
+            (resolution name . "Fixed")))
+
+(progn (setq myp '("SCM-1"
+                   ((transition
+                     (id . "2")))
+                   ((fields
+                     (assignee
+                      (name . "baohaojun@gmail.com"))
+                     (resolution
+                      (name . "Fixed")))))
+             params myp)
+       `(,(car (second params)) ,(car (third params))))
+(progn (setq issue-key "SCM-1" mya "2" myp '((assignee
+                                              (name . "baohaojun@gmail.com"))
+                                             (resolution
+                                              (name . "Fixed"))))
+       (jiralib-call "progressWorkflowAction" issue-key `((transition (id . ,mya)))
+                     `((fields . ,myp))))

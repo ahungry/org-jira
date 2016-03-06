@@ -1,0 +1,54 @@
+"{\"transition\":{\"id\":\"11\"},\"fields\":{\"resolution\":{\"name\":\"Fixed\"},\"assignee\":{\"name\":\"baohaojun@gmail.com\"}}}"
+{
+  "update": {
+    "comment": [
+      {
+        "add": {
+          "body": "Bug has been fixed."
+        }
+      }
+    ]
+  },
+  "fields": {
+    "assignee": {
+      "name": "bob"
+    },
+    "resolution": {
+      "name": "Fixed"
+    }
+  },
+  "transition": {
+    "id": "5"
+  },
+  "historyMetadata": {
+    "type": "myplugin:type",
+    "description": "text description",
+    "descriptionKey": "plugin.changereason.i18.key",
+    "activityDescription": "text description",
+    "activityDescriptionKey": "plugin.activity.i18.key",
+    "actor": {
+      "id": "tony",
+      "displayName": "Tony",
+      "type": "mysystem-user",
+      "avatarUrl": "http://mysystem/avatar/tony.jpg",
+      "url": "http://mysystem/users/tony"
+    },
+    "generator": {
+      "id": "mysystem-1",
+      "type": "mysystem-application"
+    },
+    "cause": {
+      "id": "myevent",
+      "type": "mysystem-event"
+    },
+    "extraData": {
+      "keyvalue": "extra data",
+      "goes": "here"
+    }
+  }
+}
+
+{"expand":"transitions","transitions":[{"id":"11","name":"To Do","to":{"self":"http://localhost:8081/rest/api/2/status/10000","description":"","iconUrl":"http://localhost:8081/images/icons/subtask.gif","name":"To Do","id":"10000","statusCategory":{"self":"http://localhost:8081/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To Do"}},"fields":{}},{"id":"21","name":"In Progress","to":{"self":"http://localhost:8081/rest/api/2/status/3","description":"This issue is being actively worked on at the moment by the assignee.","iconUrl":"http://localhost:8081/images/icons/statuses/inprogress.png","name":"In Progress","id":"3","statusCategory":{"self":"http://localhost:8081/rest/api/2/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In Progress"}},"fields":{}},{"id":"31","name":"Done","to":{"self":"http://localhost:8081/rest/api/2/status/10001","description":"","iconUrl":"http://localhost:8081/images/icons/subtask.gif","name":"Done","id":"10001","statusCategory":{"self":"http://localhost:8081/rest/api/2/statuscategory/3","id":3,"key":"done","colorName":"green","name":"Done"}},"fields":{}}]}
+
+
+{"expand":"transitions","transitions":[{"id":"11","name":"To Do","to":{"self":"http://localhost:8081/rest/api/2/status/10000","description":"","iconUrl":"http://localhost:8081/images/icons/subtask.gif","name":"To Do","id":"10000","statusCategory":{"self":"http://localhost:8081/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To Do"}},"fields":{}},{"id":"21","name":"In Progress","to":{"self":"http://localhost:8081/rest/api/2/status/3","description":"This issue is being actively worked on at the moment by the assignee.","iconUrl":"http://localhost:8081/images/icons/statuses/inprogress.png","name":"In Progress","id":"3","statusCategory":{"self":"http://localhost:8081/rest/api/2/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In Progress"}},"fields":{}},{"id":"31","name":"Done","to":{"self":"http://localhost:8081/rest/api/2/status/10001","description":"","iconUrl":"http://localhost:8081/images/icons/subtask.gif","name":"Done","id":"10001","statusCategory":{"self":"http://localhost:8081/rest/api/2/statuscategory/3","id":3,"key":"done","colorName":"green","name":"Done"}},"fields":{}}]}

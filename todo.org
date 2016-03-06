@@ -1,0 +1,67 @@
+
+
+* TODO addWorklogAndAutoAdjustRemainingEstimate
+  :LOGBOOK:
+  - State "TODO"       from ""           [2016-03-05 Sat 18:23]
+  :END:
+
+* TODO createIssueWithParent
+  :LOGBOOK:
+  - State "TODO"       from ""           [2016-03-05 Sat 18:27]
+  :END:
+
+* [[https://developer.atlassian.com/jiradev/latest-updates/soap-and-xml-rpc-api-deprecation-notice/jira-soap-to-rest-migration-guide][useful link]]
+
+
+* DONE getFieldsForAction
+  CLOSED: [2016-03-06 Sun 12:00]
+  :LOGBOOK:
+  - State "DONE"       from "TODO"       [2016-03-06 Sun 12:00]
+  - State "TODO"       from "TODO"       [2016-03-06 Sun 12:00]
+  - State "TODO"       from ""           [2016-03-05 Sat 20:53]
+  :END:
+# getIssuesFromFilter
+# getIssuesFromJqlSearch
+* TODO getIssuesFromTextSearch
+  :LOGBOOK:
+  - State "TODO"       from ""           [2016-03-05 Sat 21:16]
+  :END:
+* TODO getIssuesFromTextSearchWithProject
+  :LOGBOOK:
+  - State "TODO"       from "TODO"       [2016-03-05 Sat 21:28]
+  - State "TODO"       from ""           [2016-03-05 Sat 21:16]
+  :END:
+# getIssueTypes
+# getPriorities
+# getProjectsNoSchemes
+# getResolutions
+* TODO getSavedFilters
+  :LOGBOOK:
+  - State "TODO"       from ""           [2016-03-05 Sat 21:28]
+  :END:
+* CANCELLED getServerInfo
+  CLOSED: [2016-03-05 Sat 21:28]
+  :LOGBOOK:
+  - State "CANCELLED"  from ""           [2016-03-05 Sat 21:28]
+  :END:
+# getStatuses
+* TODO getSubTaskIssueTypes
+  :LOGBOOK:
+  - State "TODO"       from ""           [2016-03-05 Sat 21:29]
+  :END:
+
+* TODO getWorklogs
+  :LOGBOOK:  
+  - State "TODO"       from ""           [2016-03-06 Sun 00:10]
+  :END:      
+* DONE progressWorkflowAction
+  CLOSED: [2016-03-06 Sun 12:00]
+  :LOGBOOK:
+  - State "DONE"       from "TODO"       [2016-03-06 Sun 12:00]
+  - State "TODO"       from ""           [2016-03-05 Sat 21:30]
+  :END:
+# updateIssue
+* TODO updateWorklogAndAutoAdjustRemainingEstimate
+  :LOGBOOK:
+  - State "TODO"       from ""           [2016-03-05 Sat 21:32]
+  :END:
