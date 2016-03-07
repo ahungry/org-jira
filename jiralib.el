@@ -243,7 +243,7 @@ when invoking it through `jiralib-call', the call shoulbe be:
       ('getWorklogs nil) ; fixme
       ('addComment (jiralib--rest-call-it
                     (format "/rest/api/2/issue/%s/comment" (first params))
-                    :type "PUT"
+                    :type "POST"
                     :data (json-encode (second params))))
       ('createIssue (jiralib--rest-call-it
                      "/rest/api/2/issue"
