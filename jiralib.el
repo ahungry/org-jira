@@ -44,7 +44,6 @@
 
 (eval-when-compile (require 'cl))
 (require 'soap-client)
-(require-package 'request)
 (require 'request)
 (require 'json)
 (require 'url-parse)
