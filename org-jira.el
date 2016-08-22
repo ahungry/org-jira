@@ -152,7 +152,7 @@ variables.
   `(save-excursion
      (while (org-up-heading-safe)) ; go to the top heading
      (let ((org-jira-id (org-jira-id)))
-       (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) org-jira-id))
+       (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) (downcase org-jira-id)))
          (error "Not on a issue region!")))
      ,@body))
 
