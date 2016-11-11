@@ -69,6 +69,12 @@
   :group 'org-jira
   :type 'string)
 
+(defcustom org-jira-ignore-comment-user-list
+  '("admin")
+  "Jira usernames that should have comments ignored."
+  :group 'org-jira
+  :type '(repeat (string :tag "Jira username:")))
+
 (defcustom org-jira-done-states
   '("Closed" "Resolved" "Done")
   "Jira states that should be considered as DONE for `org-mode'."
@@ -653,11 +659,16 @@ See`org-jira-get-issue-list'"
                     (org-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
                 (insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
-          (cl-mapcan (lambda (comment) (if (string= (org-jira-get-comment-author comment)
-                                               "admin")
-                                      nil
-                                    (list comment)))
-                     comments))))
+          (cl-mapcan
+           (lambda (comment)
+             ;; Allow user to specify a list of excluded usernames for
+             ;; comment displaying.
+             (if (member-ignore-case
+                  (org-jira-get-comment-author comment)
+                  org-jira-ignore-comment-user-list)
+                 nil
+               (list comment)))
+           comments))))
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
