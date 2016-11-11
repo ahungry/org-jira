@@ -278,8 +278,11 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                       :params '((expand . "description,lead,url,projectKeys"))) nil))
       ('getResolutions (append (jiralib--rest-call-it
                                 "/rest/api/2/resolution") nil))
-      ('getAvailableActions (mapcar (lambda (trans) `(,(assoc 'name trans) ,(assoc 'id trans))) (cdar (jiralib--rest-call-it
-                                                                                                  (format "/rest/api/2/issue/%s/transitions" (first params))))))
+      ('getAvailableActions
+       (mapcar
+        (lambda (trans)
+          `(,(assoc 'name trans) ,(assoc 'id trans)))
+        (cdadr (jiralib--rest-call-it (format "/rest/api/2/issue/%s/transitions" (first params))))))
       ('getFieldsForAction (org-jira-find-value (car (let ((issue (first params))
                                                            (action (second params)))
                                                        (seq-filter (lambda (trans)
