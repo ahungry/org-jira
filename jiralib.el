@@ -1,5 +1,6 @@
-;;; jiralib.el -- Provide connectivity to JIRA SOAP service
+;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services
 
+;; Copyright (C) 2016 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
 ;; original Copyright (C) 2009 Alex Harsanyi
 
@@ -9,6 +10,7 @@
 ;; Dave Benjamin <dave@ramenlabs.com>
 
 ;; Authors:
+;; Matthew Carter <m@ahungry.com>
 ;; Bao Haojun <baohaojun@gmail.com>
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
@@ -37,6 +39,10 @@
 
 ;; Jira References:
 ;;
+;; Primary reference (on current Jira, only REST is supported):
+;; https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis
+;;
+;; Legacy reference (unsupported and deprecated/unavailable):
 ;; http://confluence.atlassian.com/display/JIRA/Creating+a+SOAP+Client
 ;;
 ;; JavaDoc for the Jira SOAP service
