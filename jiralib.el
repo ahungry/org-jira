@@ -288,7 +288,7 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                                        (seq-filter (lambda (trans)
                                                                      (or (string-equal action (org-jira-find-value trans 'id))
                                                                          (string-equal action (org-jira-find-value trans 'name))))
-                                                                   (cdar (jiralib--rest-call-it
+                                                                   (cdadr (jiralib--rest-call-it
                                                                           (format "/rest/api/2/issue/%s/transitions" (first params))
                                                                           :params '((expand . "transitions.fields")))))))
                                                 'fields))
