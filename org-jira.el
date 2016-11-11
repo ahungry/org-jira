@@ -262,7 +262,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
       (run-mode-hooks 'org-jira-mode-hook)))
 
 (defun org-jira-get-project-name (proj)
-  (org-jira-find-value proj 'name))
+  (org-jira-find-value proj 'key))
 
 (defun org-jira-find-value (l &rest keys)
   (let* (key exists)
@@ -364,7 +364,7 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
 
 (defun org-jira-get-issue-val (key issue)
   "Return the value associated with key KEY of issue ISSUE."
-  (let ((tmp  (or (org-jira-find-value issue 'fields key 'name) "")))
+  (let ((tmp  (or (org-jira-find-value issue 'fields key 'key) ""))) ;; For project, we need a key, not the name...
     (unless (stringp tmp)
       (setq tmp (or (org-jira-find-value issue key) "")))
     (unless (stringp tmp)
@@ -454,7 +454,7 @@ With a prefix argument, allow you to customize the jql.  See
 
 ;;;###autoload
 (defun org-jira-get-issue-project (issue)
-  (org-jira-find-value issue 'fields 'project 'name))
+  (org-jira-find-value issue 'fields 'project 'key))
 
 (defun org-jira-get-issue-key (issue)
   (org-jira-find-value issue 'key))
@@ -840,8 +840,14 @@ See`org-jira-get-issue-list'"
             (setq key (symbol-name key)))
           (when (string= key "key")
             (setq key "ID"))
-          (or (org-entry-get (point) key)
-              "")))))
+          ;; The variable `org-special-properties' will mess this up
+          ;; if our search, such as 'priority' is within there, so
+          ;; don't bother with it for this (since we only ever care
+          ;; about the local properties, not any hierarchal or special
+          ;; ones).
+          (let ((org-special-properties nil))
+            (or (org-entry-get (point) key)
+                ""))))))
 
 (defvar org-jira-actions-history nil)
 (defun org-jira-read-action (actions)
