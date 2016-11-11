@@ -660,6 +660,10 @@ Return nil if the field is not found"
   "Create a new ISSUE in JIRALIB.
 
 ISSUE is a Hashtable object."
+  ;; @todo need in format here
+;;json-encode '((fields (project (key . "EX")) (issuetype (id . "10003")) (summary . "hi") (description . "HI") (priority (id . "4")) (assignee (name . "admin"))))
+  ;; current format is:
+  ;; (json-encode '((project . "EX") (type . "10003") (summary . "hi") (description . "HI") (priority . "4") (assignee . "admin")))
   (jiralib-call "createIssue" issue))
 
 (defun jiralib-create-subtask (subtask parent-issue-id)
