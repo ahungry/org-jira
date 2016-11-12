@@ -1,5 +1,6 @@
-;;; jiralib.el -- Provide connectivity to JIRA SOAP service
+;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services
 
+;; Copyright (C) 2016 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
 ;; original Copyright (C) 2009 Alex Harsanyi
 
@@ -9,6 +10,7 @@
 ;; Dave Benjamin <dave@ramenlabs.com>
 
 ;; Authors:
+;; Matthew Carter <m@ahungry.com>
 ;; Bao Haojun <baohaojun@gmail.com>
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
@@ -37,6 +39,10 @@
 
 ;; Jira References:
 ;;
+;; Primary reference (on current Jira, only REST is supported):
+;; https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis
+;;
+;; Legacy reference (unsupported and deprecated/unavailable):
 ;; http://confluence.atlassian.com/display/JIRA/Creating+a+SOAP+Client
 ;;
 ;; JavaDoc for the Jira SOAP service
@@ -244,10 +250,15 @@ when invoking it through `jiralib-call', the call shoulbe be:
                     (format "/rest/api/2/issue/%s/comment" (first params))
                     :type "POST"
                     :data (json-encode (second params))))
-      ('createIssue (jiralib--rest-call-it
-                     "/rest/api/2/issue"
-                     :type "POST"
-                     :data (json-encode (first params))))
+      ('createIssue
+       ;; Creating the issue doesn't return it, a second call must be
+       ;; made to pull it in by using the self key in response.
+       (let ((response (jiralib--rest-call-it
+                        "/rest/api/2/issue"
+                        :type "POST"
+                        :data (json-encode (first params)))))
+         (jiralib--rest-call-it (cdr (assoc 'self response)) :type "GET")
+         ))
       ('createIssueWithParent (jiralib--rest-call-it
                                ))
       ('editComment (jiralib--rest-call-it
@@ -267,19 +278,23 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                                                                    (maxResults . ,(second params))))))) nil))
       ('getPriorities (jiralib--rest-call-it
                        "/rest/api/2/priority"))
+      ('getProjects (jiralib--rest-call-it "rest/api/2/project"))
       ('getProjectsNoSchemes (append (jiralib--rest-call-it
                                       "/rest/api/2/project"
                                       :params '((expand . "description,lead,url,projectKeys"))) nil))
       ('getResolutions (append (jiralib--rest-call-it
                                 "/rest/api/2/resolution") nil))
-      ('getAvailableActions (mapcar (lambda (trans) `(,(assoc 'name trans) ,(assoc 'id trans))) (cdar (jiralib--rest-call-it
-                                                                                                  (format "/rest/api/2/issue/%s/transitions" (first params))))))
+      ('getAvailableActions
+       (mapcar
+        (lambda (trans)
+          `(,(assoc 'name trans) ,(assoc 'id trans)))
+        (cdadr (jiralib--rest-call-it (format "/rest/api/2/issue/%s/transitions" (first params))))))
       ('getFieldsForAction (org-jira-find-value (car (let ((issue (first params))
                                                            (action (second params)))
                                                        (seq-filter (lambda (trans)
                                                                      (or (string-equal action (org-jira-find-value trans 'id))
                                                                          (string-equal action (org-jira-find-value trans 'name))))
-                                                                   (cdar (jiralib--rest-call-it
+                                                                   (cdadr (jiralib--rest-call-it
                                                                           (format "/rest/api/2/issue/%s/transitions" (first params))
                                                                           :params '((expand . "transitions.fields")))))))
                                                 'fields))
@@ -287,6 +302,9 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                 (format "/rest/api/2/issue/%s/transitions" (first params))
                                 :type "POST"
                                 :data (json-encode `(,(car (second params)) ,(car (third params))))))
+      ('getUsers
+       (jiralib--rest-call-it (format "/rest/api/2/user/assignable/search?project=%s" (first params))
+                              :type "GET"))
       ('updateIssue (jiralib--rest-call-it
                      (format "/rest/api/2/issue/%s" (first params))
                      :type "PUT"
@@ -299,8 +317,9 @@ when invoking it through `jiralib-call', the call shoulbe be:
 (defun jiralib--rest-call-it (api &rest args)
   "Invoke the corresponding jira rest method API, passing ARGS to REQUEST."
   (append (request-response-data
-           (apply #'request (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
-                                    (replace-regexp-in-string "^/*" "" api))
+           (apply #'request (if (string-match "^http[s]*://" api) api ;; If an absolute path, use it
+                              (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
+                                      (replace-regexp-in-string "^/*" "" api)))
                   :sync t
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
                   :parser 'json-read
@@ -716,9 +735,9 @@ Return no more than MAX-NUM-RESULTS."
   (if jiralib-projects-list
       jiralib-projects-list
     (setq jiralib-projects-list
-          (if (not jiralib-use-restapi)
-              (jiralib-call "getProjectsNoSchemes")
-            (jiralib--rest-call-it "rest/api/2/project")))))
+          (if jiralib-use-restapi
+              (jiralib-call "getProjects")
+              (jiralib-call "getProjectsNoSchemes")))))
 
 (defun jiralib-get-saved-filters ()
   "Get all saved filters available for the currently logged in user."
@@ -735,6 +754,10 @@ Return no more than MAX-NUM-RESULTS."
 (defun jiralib-get-user (username)
   "Return a user's information given their USERNAME."
   (jiralib-call "getUser" username))
+
+(defun jiralib-get-users (project-key)
+  "Return assignable users information given the PROJECT-KEY."
+  (jiralib-call "getUsers" project-key))
 
 (defun jiralib-get-versions (project-key)
   "Return all versions available in project PROJECT-KEY."

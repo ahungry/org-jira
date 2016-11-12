@@ -1,8 +1,14 @@
 ;;; org-jira.el --- Syncing between Jira and Org-mode.
 
-;; Author: Bao Haojun <baohaojun@gmail.com>
+;; Copyright (C) 2016 Matthew Carter <m@ahungry.com>
+;; Copyright (C) 2011 Bao Haojun
+;;
+;; Authors:
+;; Matthew Carter <m@ahungry.com>
+;; Bao Haojun <baohaojun@gmail.com>
+;;
 ;; Maintainer: Bao Haojun <baohaojun@gmail.com>
-;; Version: 0.1
+;; Version: 1.0.0
 ;; Homepage: https://github.com/baohaojun/org-jira
 
 ;; This file is not part of GNU Emacs.
@@ -63,14 +69,23 @@
   :group 'org-jira
   :type 'string)
 
+(defcustom org-jira-ignore-comment-user-list
+  '("admin")
+  "Jira usernames that should have comments ignored."
+  :group 'org-jira
+  :type '(repeat (string :tag "Jira username:")))
+
 (defcustom org-jira-done-states
   '("Closed" "Resolved" "Done")
   "Jira states that should be considered as DONE for `org-mode'."
   :group 'org-jira
   :type '(repeat (string :tag "Jira state name:")))
 
-(defvar jira-users (list (cons "Full Name" "username"))
-  "Jira has not api for discovering all users, so we should provide it somewhere else.")
+(defcustom org-jira-users
+  '(("Full Name" . "username"))
+  "A list of displayName and key pairs."
+  :group 'org-jira
+  :type 'list)
 
 (defcustom org-jira-serv-alist nil
   "Association list to set information for each jira server.
@@ -262,7 +277,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
       (run-mode-hooks 'org-jira-mode-hook)))
 
 (defun org-jira-get-project-name (proj)
-  (org-jira-find-value proj 'name))
+  (org-jira-find-value proj 'key))
 
 (defun org-jira-find-value (l &rest keys)
   (let* (key exists)
@@ -284,6 +299,15 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 
 (defun org-jira-get-project-lead (proj)
   (org-jira-find-value proj 'lead 'name))
+
+(defun org-jira-get-assignable-users (project-key)
+  "Get the list of assignable users for PROJECT-KEY, adding user set jira-users first."
+  (append
+   org-jira-users
+   (mapcar (lambda (user)
+             (cons (cdr (assoc 'displayName user))
+                   (cdr (assoc 'key user))))
+           (jiralib-get-users project-key))))
 
 ;;;###autoload
 (defun org-jira-get-projects ()
@@ -364,7 +388,7 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
 
 (defun org-jira-get-issue-val (key issue)
   "Return the value associated with key KEY of issue ISSUE."
-  (let ((tmp  (or (org-jira-find-value issue 'fields key 'name) "")))
+  (let ((tmp  (or (org-jira-find-value issue 'fields key 'key) ""))) ;; For project, we need a key, not the name...
     (unless (stringp tmp)
       (setq tmp (or (org-jira-find-value issue key) "")))
     (unless (stringp tmp)
@@ -415,7 +439,6 @@ jql."
 
 (defun org-jira-get-issue-by-id (id)
   "Get an issue by its ID."
-  (interactive (list (read-string "Issue ID: " "IMINAN-" 'org-jira-issue-id-history)))
   (push id org-jira-issue-id-history)
   (let ((jql (format "id = %s" id)))
     (jiralib-do-jql-search jql)))
@@ -447,14 +470,14 @@ With a prefix argument, allow you to customize the jql.  See
     (switch-to-buffer issues-headonly-buffer)))
 
 ;;;###autoload
-(defun org-jira-get-issue ()
+(defun org-jira-get-issue (id)
   "Get a JIRA issue, allowing you to enter the issue-id first."
-  (interactive)
-  (org-jira-get-issues (call-interactively 'org-jira-get-issue-by-id)))
+  (interactive (list (read-string "Issue ID: " "" 'org-jira-issue-id-history)))
+  (org-jira-get-issues (org-jira-get-issue-by-id id)))
 
 ;;;###autoload
 (defun org-jira-get-issue-project (issue)
-  (org-jira-find-value issue 'fields 'project 'name))
+  (org-jira-find-value issue 'fields 'project 'key))
 
 (defun org-jira-get-issue-key (issue)
   (org-jira-find-value issue 'key))
@@ -624,7 +647,7 @@ See`org-jira-get-issue-list'"
               (let* ((comment-id (org-jira-get-comment-id comment))
                      (comment-author (or (car (rassoc
                                                (org-jira-get-comment-author comment)
-                                               jira-users))
+                                               org-jira-users))
                                          (org-jira-get-comment-author comment)))
                      (comment-headline (format "Comment: %s" comment-author)))
                 (setq p (org-find-entry-with-id comment-id))
@@ -647,11 +670,16 @@ See`org-jira-get-issue-list'"
                     (org-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
                 (insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
-          (cl-mapcan (lambda (comment) (if (string= (org-jira-get-comment-author comment)
-                                               "admin")
-                                      nil
-                                    (list comment)))
-                     comments))))
+          (cl-mapcan
+           (lambda (comment)
+             ;; Allow user to specify a list of excluded usernames for
+             ;; comment displaying.
+             (if (member-ignore-case
+                  (org-jira-get-comment-author comment)
+                  org-jira-ignore-comment-user-list)
+                 nil
+               (list comment)))
+           comments))))
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
@@ -662,7 +690,7 @@ See`org-jira-get-issue-list'"
               (let* ((worklog-id (concat "worklog-" (cdr (assoc 'id worklog))))
                      (worklog-author (or (car (rassoc
                                                (cdr (assoc 'author worklog))
-                                               jira-users))
+                                               org-jira-users))
                                          (cdr (assoc 'author worklog))))
                      (worklog-headline (format "Worklog: %s" worklog-author)))
                 (setq p (org-find-entry-with-id worklog-id))
@@ -775,19 +803,22 @@ See`org-jira-get-issue-list'"
           (equal summary ""))
       (error "Must provide all information!"))
   (let* ((project-components (jiralib-get-components project))
+         (jira-users (org-jira-get-assignable-users project))
          (user (completing-read "Assignee: " (mapcar 'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
-         (ticket-struct (list (cons 'project project)
-                              (cons 'type (car (rassoc type (if (and (boundp 'parent-id) parent-id)
-                                                                (jiralib-get-subtask-types)
-                                                              (jiralib-get-issue-types)))))
-                              (cons 'summary (format "%s%s" summary
-                                                     (if (and (boundp 'parent-id) parent-id)
-                                                         (format " (subtask of [jira:%s])" parent-id)
-                                                       "")))
-                              (cons 'description description)
-                              (cons 'priority priority)
-                              (cons 'assignee (cdr (assoc user jira-users))))))
+         (ticket-struct
+          `((fields
+             (project (key . ,project))
+             (issuetype (id . ,(car (rassoc type (if (and (boundp 'parent-id) parent-id)
+                                                     (jiralib-get-subtask-types)
+                                                   (jiralib-get-issue-types))))))
+             (summary . ,(format "%s%s" summary
+                                 (if (and (boundp 'parent-id) parent-id)
+                                     (format " (subtask of [jira:%s])" parent-id)
+                                   "")))
+             (description . ,description)
+             (priority (id . ,priority))
+             (assignee (name . ,(or (cdr (assoc user jira-users)) user)))))))
     ticket-struct))
 ;;;###autoload
 (defun org-jira-create-issue (project type summary description)
@@ -840,8 +871,14 @@ See`org-jira-get-issue-list'"
             (setq key (symbol-name key)))
           (when (string= key "key")
             (setq key "ID"))
-          (or (org-entry-get (point) key)
-              "")))))
+          ;; The variable `org-special-properties' will mess this up
+          ;; if our search, such as 'priority' is within there, so
+          ;; don't bother with it for this (since we only ever care
+          ;; about the local properties, not any hierarchal or special
+          ;; ones).
+          (let ((org-special-properties nil))
+            (or (org-entry-get (point) key)
+                ""))))))
 
 (defvar org-jira-actions-history nil)
 (defun org-jira-read-action (actions)

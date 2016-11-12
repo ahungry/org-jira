@@ -34,6 +34,12 @@ To save the settings in your .emacs, you need only do 2 things:
 
 ** External libraries
 
+*Please note the SOAP support in Jira is no longer present* (in any
+current Jira version; cloud or server)
+
+There is an attempt at the moment to rewrite this library for rest
+support in the _restapi_ branch of the repository.
+
 The [[http://code.google.com/p/emacs-soap-client/source/checkout][emacs-soap-client]] package is required, I used to bundle it
 together with org-jira (because I had a patch for adding comments in
 Chinese), but [[https://github.com/baohaojun/org-jira/issues/8][tarsius]] pointed out to me it is not a good idea. So
