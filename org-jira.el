@@ -427,7 +427,6 @@ jql."
 
 (defun org-jira-get-issue-by-id (id)
   "Get an issue by its ID."
-  (interactive (list (read-string "Issue ID: " "IMINAN-" 'org-jira-issue-id-history)))
   (push id org-jira-issue-id-history)
   (let ((jql (format "id = %s" id)))
     (jiralib-do-jql-search jql)))
@@ -459,10 +458,10 @@ With a prefix argument, allow you to customize the jql.  See
     (switch-to-buffer issues-headonly-buffer)))
 
 ;;;###autoload
-(defun org-jira-get-issue ()
+(defun org-jira-get-issue (id)
   "Get a JIRA issue, allowing you to enter the issue-id first."
-  (interactive)
-  (org-jira-get-issues (call-interactively 'org-jira-get-issue-by-id)))
+  (interactive (list (read-string "Issue ID: " "" 'org-jira-issue-id-history)))
+  (org-jira-get-issues (org-jira-get-issue-by-id id)))
 
 ;;;###autoload
 (defun org-jira-get-issue-project (issue)
@@ -794,17 +793,19 @@ See`org-jira-get-issue-list'"
   (let* ((project-components (jiralib-get-components project))
          (user (completing-read "Assignee: " (mapcar 'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
-         (ticket-struct (list (cons 'project project)
-                              (cons 'type (car (rassoc type (if (and (boundp 'parent-id) parent-id)
-                                                                (jiralib-get-subtask-types)
-                                                              (jiralib-get-issue-types)))))
-                              (cons 'summary (format "%s%s" summary
-                                                     (if (and (boundp 'parent-id) parent-id)
-                                                         (format " (subtask of [jira:%s])" parent-id)
-                                                       "")))
-                              (cons 'description description)
-                              (cons 'priority priority)
-                              (cons 'assignee (cdr (assoc user jira-users))))))
+         (ticket-struct
+          `((fields
+             (project (key . ,project))
+             (issuetype (id . ,(car (rassoc type (if (and (boundp 'parent-id) parent-id)
+                                                     (jiralib-get-subtask-types)
+                                                   (jiralib-get-issue-types))))))
+             (summary . ,(format "%s%s" summary
+                                 (if (and (boundp 'parent-id) parent-id)
+                                     (format " (subtask of [jira:%s])" parent-id)
+                                   "")))
+             (description . ,description)
+             (priority (id . ,priority))
+             (assignee (name . ,(or (cdr (assoc user jira-users)) user)))))))
     ticket-struct))
 ;;;###autoload
 (defun org-jira-create-issue (project type summary description)
