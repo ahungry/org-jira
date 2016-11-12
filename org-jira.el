@@ -81,8 +81,11 @@
   :group 'org-jira
   :type '(repeat (string :tag "Jira state name:")))
 
-(defvar jira-users (list (cons "Full Name" "username"))
-  "Jira has not api for discovering all users, so we should provide it somewhere else.")
+(defcustom org-jira-users
+  '(("Full Name" . "username"))
+  "A list of displayName and key pairs."
+  :group 'org-jira
+  :type 'list)
 
 (defcustom org-jira-serv-alist nil
   "Association list to set information for each jira server.
@@ -296,6 +299,15 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 
 (defun org-jira-get-project-lead (proj)
   (org-jira-find-value proj 'lead 'name))
+
+(defun org-jira-get-assignable-users (project-key)
+  "Get the list of assignable users for PROJECT-KEY, adding user set jira-users first."
+  (append
+   org-jira-users
+   (mapcar (lambda (user)
+             (cons (cdr (assoc 'displayName user))
+                   (cdr (assoc 'key user))))
+           (jiralib-get-users project-key))))
 
 ;;;###autoload
 (defun org-jira-get-projects ()
@@ -635,7 +647,7 @@ See`org-jira-get-issue-list'"
               (let* ((comment-id (org-jira-get-comment-id comment))
                      (comment-author (or (car (rassoc
                                                (org-jira-get-comment-author comment)
-                                               jira-users))
+                                               org-jira-users))
                                          (org-jira-get-comment-author comment)))
                      (comment-headline (format "Comment: %s" comment-author)))
                 (setq p (org-find-entry-with-id comment-id))
@@ -678,7 +690,7 @@ See`org-jira-get-issue-list'"
               (let* ((worklog-id (concat "worklog-" (cdr (assoc 'id worklog))))
                      (worklog-author (or (car (rassoc
                                                (cdr (assoc 'author worklog))
-                                               jira-users))
+                                               org-jira-users))
                                          (cdr (assoc 'author worklog))))
                      (worklog-headline (format "Worklog: %s" worklog-author)))
                 (setq p (org-find-entry-with-id worklog-id))
@@ -791,6 +803,7 @@ See`org-jira-get-issue-list'"
           (equal summary ""))
       (error "Must provide all information!"))
   (let* ((project-components (jiralib-get-components project))
+         (jira-users (org-jira-get-assignable-users project))
          (user (completing-read "Assignee: " (mapcar 'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
          (ticket-struct

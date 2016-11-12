@@ -280,6 +280,7 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                                                                    (maxResults . ,(second params))))))) nil))
       ('getPriorities (jiralib--rest-call-it
                        "/rest/api/2/priority"))
+      ('getProjects (jiralib--rest-call-it "rest/api/2/project"))
       ('getProjectsNoSchemes (append (jiralib--rest-call-it
                                       "/rest/api/2/project"
                                       :params '((expand . "description,lead,url,projectKeys"))) nil))
@@ -303,6 +304,9 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                 (format "/rest/api/2/issue/%s/transitions" (first params))
                                 :type "POST"
                                 :data (json-encode `(,(car (second params)) ,(car (third params))))))
+      ('getUsers
+       (jiralib--rest-call-it (format "/rest/api/2/user/assignable/search?project=%s" (first params))
+                              :type "GET"))
       ('updateIssue (jiralib--rest-call-it
                      (format "/rest/api/2/issue/%s" (first params))
                      :type "PUT"
@@ -733,9 +737,9 @@ Return no more than MAX-NUM-RESULTS."
   (if jiralib-projects-list
       jiralib-projects-list
     (setq jiralib-projects-list
-          (if (not jiralib-use-restapi)
-              (jiralib-call "getProjectsNoSchemes")
-            (jiralib--rest-call-it "rest/api/2/project")))))
+          (if jiralib-use-restapi
+              (jiralib-call "getProjects")
+              (jiralib-call "getProjectsNoSchemes")))))
 
 (defun jiralib-get-saved-filters ()
   "Get all saved filters available for the currently logged in user."
@@ -752,6 +756,10 @@ Return no more than MAX-NUM-RESULTS."
 (defun jiralib-get-user (username)
   "Return a user's information given their USERNAME."
   (jiralib-call "getUser" username))
+
+(defun jiralib-get-users (project-key)
+  "Return assignable users information given the PROJECT-KEY."
+  (jiralib-call "getUsers" project-key))
 
 (defun jiralib-get-versions (project-key)
   "Return all versions available in project PROJECT-KEY."
