@@ -251,15 +251,16 @@ when invoking it through `jiralib-call', the call shoulbe be:
                     :type "POST"
                     :data (json-encode (second params))))
       ('createIssue
-       ;; Creating the issue doesn't return it, a second call must be made to pull it in
+       ;; Creating the issue doesn't return it, a second call must be
+       ;; made to pull it in by using the self key in response.
        (let ((response (jiralib--rest-call-it
                         "/rest/api/2/issue"
                         :type "POST"
                         :data (json-encode (first params)))))
          (print "Created issue")
          (print response)
-         (jiralib--rest-call-it (format "/rest/api/2/issue/%s" (cdr (assoc 'id response))) :type "GET"))
-       )
+         (jiralib--rest-call-it (cdr (assoc 'self response)) :type "GET")
+         ))
       ('createIssueWithParent (jiralib--rest-call-it
                                ))
       ('editComment (jiralib--rest-call-it
@@ -314,8 +315,9 @@ when invoking it through `jiralib-call', the call shoulbe be:
 (defun jiralib--rest-call-it (api &rest args)
   "Invoke the corresponding jira rest method API, passing ARGS to REQUEST."
   (append (request-response-data
-           (apply #'request (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
-                                    (replace-regexp-in-string "^/*" "" api))
+           (apply #'request (if (string-match "^http[s]*://" api) api ;; If an absolute path, use it
+                              (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
+                                      (replace-regexp-in-string "^/*" "" api)))
                   :sync t
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
                   :parser 'json-read
