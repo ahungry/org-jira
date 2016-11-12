@@ -257,8 +257,6 @@ when invoking it through `jiralib-call', the call shoulbe be:
                         "/rest/api/2/issue"
                         :type "POST"
                         :data (json-encode (first params)))))
-         (print "Created issue")
-         (print response)
          (jiralib--rest-call-it (cdr (assoc 'self response)) :type "GET")
          ))
       ('createIssueWithParent (jiralib--rest-call-it
