@@ -250,10 +250,16 @@ when invoking it through `jiralib-call', the call shoulbe be:
                     (format "/rest/api/2/issue/%s/comment" (first params))
                     :type "POST"
                     :data (json-encode (second params))))
-      ('createIssue (jiralib--rest-call-it
-                     "/rest/api/2/issue"
-                     :type "POST"
-                     :data (json-encode (first params))))
+      ('createIssue
+       ;; Creating the issue doesn't return it, a second call must be made to pull it in
+       (let ((response (jiralib--rest-call-it
+                        "/rest/api/2/issue"
+                        :type "POST"
+                        :data (json-encode (first params)))))
+         (print "Created issue")
+         (print response)
+         (jiralib--rest-call-it (format "/rest/api/2/issue/%s" (cdr (assoc 'id response))) :type "GET"))
+       )
       ('createIssueWithParent (jiralib--rest-call-it
                                ))
       ('editComment (jiralib--rest-call-it
@@ -660,10 +666,6 @@ Return nil if the field is not found"
   "Create a new ISSUE in JIRALIB.
 
 ISSUE is a Hashtable object."
-  ;; @todo need in format here
-;;json-encode '((fields (project (key . "EX")) (issuetype (id . "10003")) (summary . "hi") (description . "HI") (priority (id . "4")) (assignee (name . "admin"))))
-  ;; current format is:
-  ;; (json-encode '((project . "EX") (type . "10003") (summary . "hi") (description . "HI") (priority . "4") (assignee . "admin")))
   (jiralib-call "createIssue" issue))
 
 (defun jiralib-create-subtask (subtask parent-issue-id)
