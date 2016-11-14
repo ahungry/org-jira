@@ -29,7 +29,6 @@
 
 ;; Author: Alexandru Harsanyi (AlexHarsanyi@gmail.com)
 ;; Created: December, 2009
-;; Package-Requires: ((request "0.2.0"))
 ;; Keywords: soap, web-services, jira
 ;; Homepage: http://code.google.com/p/emacs-soap-client
 
