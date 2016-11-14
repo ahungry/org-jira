@@ -10,6 +10,7 @@
 ;; Maintainer: Bao Haojun <baohaojun@gmail.com>
 ;; Version: 1.0.0
 ;; Homepage: https://github.com/baohaojun/org-jira
+;; Package-Requires: ((cl-lib "0.5") (request "0.2.0"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -48,11 +49,9 @@
 ;;
 ;;; Code:
 
-(eval-when-compile (load-library "cl-extra"))
 (require 'org)
 (require 'jiralib)
 (require 'cl-lib)
-(require 'cl)
 
 (defgroup org-jira nil
   "Customisation group for org-jira."
@@ -364,7 +363,7 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
 
 (defun org-jira--fix-encode-time-args (arg)
   "Fix ARG for 3 nil values at the head."
-  (loop
+  (cl-loop
    for n from 0 to 2 by 1 do
    (when (not (nth n arg))
      (setcar (nthcdr n arg) 0)))
