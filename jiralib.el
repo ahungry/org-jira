@@ -302,7 +302,7 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                 :type "POST"
                                 :data (json-encode `(,(car (second params)) ,(car (third params))))))
       ('getUsers
-       (jiralib--rest-call-it (format "/rest/api/2/user/assignable/search?project=%s" (first params))
+       (jiralib--rest-call-it (format "/rest/api/2/user/assignable/search?project=%s&maxResults=10000" (first params))
                               :type "GET"))
       ('updateIssue (jiralib--rest-call-it
                      (format "/rest/api/2/issue/%s" (first params))
