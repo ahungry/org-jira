@@ -336,7 +336,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
                       (unless (looking-at "^")
                         (insert "\n"))
                       (insert "* ")
-                      (insert proj-headline)
+                      (org-jira-insert proj-headline)
                       (org-narrow-to-subtree))
                     (org-entry-put (point) "name" (org-jira-get-project-name proj))
                     (org-entry-put (point) "key" (org-jira-find-value proj 'key))
@@ -348,6 +348,15 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 (defun org-jira-get-issue-components (issue)
   "Return the components the ISSUE belongs to."
   (mapconcat (lambda (comp) (org-jira-find-value comp 'name)) (org-jira-find-value issue 'fields 'components) ", "))
+
+(defun org-jira-insert (text &optional coding-system)
+  "Set coding to `TEXT' when insert in buffer, optional set other `CODING-SYSTEM'."
+  (unless coding-system
+    (setq coding-system (if (boundp 'buffer-file-coding-system)
+                            buffer-file-coding-system 'utf-8
+                            default-buffer-file-coding-system)))
+  (insert (decode-coding-string
+           (string-make-unibyte text) coding-system)))
 
 (defun org-jira-transform-time-format (jira-time-str)
   "Convert JIRA-TIME-STR to format \"%Y-%m-%d %T\".
@@ -464,7 +473,7 @@ With a prefix argument, allow you to customize the jql.  See
       (mapc (lambda (issue)
               (let ((issue-id (org-jira-get-issue-key issue))
                     (issue-summary (org-jira-get-issue-summary issue)))
-                (insert (format "- [jira:%s] %s\n" issue-id issue-summary))))
+                (org-jira-insert (format "- [jira:%s] %s\n" issue-id issue-summary))))
             issues))
     (switch-to-buffer issues-headonly-buffer)))
 
@@ -519,11 +528,11 @@ See`org-jira-get-issue-list'"
                         (insert "\n"))
                       (insert "* "))
                     (let ((status (org-jira-get-issue-val 'status issue)))
-                      (insert (concat (cond (org-jira-use-status-as-todo
-                                             (upcase (replace-regexp-in-string " " "-" status)))
-                                            ((member status org-jira-done-states) "DONE")
-                                            ("TODO")) " "
-                                            issue-headline)))
+                      (org-jira-insert (concat (cond (org-jira-use-status-as-todo
+                                                      (upcase (replace-regexp-in-string " " "-" status)))
+                                                     ((member status org-jira-done-states) "DONE")
+                                                     ("TODO")) " "
+                                                     issue-headline)))
                     (save-excursion
                       (unless (search-forward "\n" (point-max) 1)
                         (insert "\n")))
@@ -560,9 +569,9 @@ See`org-jira-get-issue-list'"
                                       (org-insert-heading)
                                     (goto-char (point-max))
                                     (org-insert-subheading t))
-                                  (insert entry-heading "\n"))
+                                  (org-jira-insert (concat entry-heading "\n")))
 
-                                (insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
+                                (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                           '(description))
                     (org-jira-update-comments-for-current-issue)
                     (org-jira-update-worklogs-for-current-issue)
@@ -659,7 +668,7 @@ See`org-jira-get-issue-list'"
                 (unless (looking-at "^")
                   (insert "\n"))
                 (insert "** ")
-                (insert comment-headline "\n")
+                (org-jira-insert (concat comment-headline "\n"))
                 (org-narrow-to-subtree)
                 (org-entry-put (point) "ID" comment-id)
                 (let ((created (org-jira-get-comment-val 'created comment))
@@ -668,7 +677,7 @@ See`org-jira-get-issue-list'"
                   (unless (string= created updated)
                     (org-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
-                (insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
+                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
           (cl-mapcan
            (lambda (comment)
              ;; Allow user to specify a list of excluded usernames for
@@ -702,7 +711,7 @@ See`org-jira-get-issue-list'"
                 (unless (looking-at "^")
                   (insert "\n"))
                 (insert "** ")
-                (insert worklog-headline "\n")
+                (org-jira-insert (concat worklog-headline "\n"))
                 (org-narrow-to-subtree)
                 (org-entry-put (point) "ID" worklog-id)
                 (let ((created (org-jira-get-worklog-val 'created worklog))
@@ -713,7 +722,7 @@ See`org-jira-get-issue-list'"
                 (org-entry-put (point) "startDate" (org-jira-get-worklog-val 'startDate worklog))
                 (org-entry-put (point) "timeSpent" (org-jira-get-worklog-val 'timeSpent worklog))
                 (goto-char (point-max))
-                (insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'comment worklog)) ""))))))
+                (org-jira-insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'comment worklog)) ""))))))
           worklogs)))
 
 
