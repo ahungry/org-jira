@@ -117,6 +117,10 @@ variables.
   "Use the JIRA status as the TODO tag value."
   :group 'org-jira)
 
+(defcustom org-jira-coding-system nil
+  "Use custom coding system on org-jira buffers."
+  :group 'org-jira)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -349,14 +353,14 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   "Return the components the ISSUE belongs to."
   (mapconcat (lambda (comp) (org-jira-find-value comp 'name)) (org-jira-find-value issue 'fields 'components) ", "))
 
-(defun org-jira-insert (text &optional coding-system)
-  "Set coding to `TEXT' when insert in buffer, optional set other `CODING-SYSTEM'."
-  (unless coding-system
-    (setq coding-system (if (boundp 'buffer-file-coding-system)
-                            buffer-file-coding-system 'utf-8
-                            default-buffer-file-coding-system)))
-  (insert (decode-coding-string
-           (string-make-unibyte text) coding-system)))
+(defun org-jira-insert (&rest args)
+  "Set coding to text provide by `ARGS' when insert in buffer."
+  (let ((coding-system (or org-jira-coding-system
+                           (if (boundp 'buffer-file-coding-system)
+                               buffer-file-coding-system 'utf-8
+                               default-buffer-file-coding-system))))
+    (insert (decode-coding-string
+             (string-make-unibyte (apply #'concat args)) coding-system))))
 
 (defun org-jira-transform-time-format (jira-time-str)
   "Convert JIRA-TIME-STR to format \"%Y-%m-%d %T\".
@@ -569,7 +573,7 @@ See`org-jira-get-issue-list'"
                                       (org-insert-heading)
                                     (goto-char (point-max))
                                     (org-insert-subheading t))
-                                  (org-jira-insert (concat entry-heading "\n")))
+                                  (org-jira-insert entry-heading "\n"))
 
                                 (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                           '(description))
@@ -668,7 +672,7 @@ See`org-jira-get-issue-list'"
                 (unless (looking-at "^")
                   (insert "\n"))
                 (insert "** ")
-                (org-jira-insert (concat comment-headline "\n"))
+                (org-jira-insert comment-headline "\n")
                 (org-narrow-to-subtree)
                 (org-entry-put (point) "ID" comment-id)
                 (let ((created (org-jira-get-comment-val 'created comment))
@@ -711,7 +715,7 @@ See`org-jira-get-issue-list'"
                 (unless (looking-at "^")
                   (insert "\n"))
                 (insert "** ")
-                (org-jira-insert (concat worklog-headline "\n"))
+                (org-jira-insert worklog-headline "\n")
                 (org-narrow-to-subtree)
                 (org-entry-put (point) "ID" worklog-id)
                 (let ((created (org-jira-get-worklog-val 'created worklog))
