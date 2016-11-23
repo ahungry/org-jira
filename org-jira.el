@@ -461,7 +461,7 @@ jql."
   (interactive)
   (let ((jira_id (thing-at-point 'symbol)))
     (forward-symbol 1)
-    (insert (format " - %s" 
+    (insert (format " - %s"
       (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira_id))))))))
 
 ;;;###autoload
@@ -471,7 +471,7 @@ jql."
   (let ((jira_id (thing-at-point 'symbol)))
     (sp-kill-symbol 1)
     (insert (format "[[%s][%s]] - %s"
-      (concatenate 'string jiralib-url "browse/" jira_id) jira_id  
+      (concatenate 'string jiralib-url "browse/" jira_id) jira_id
       (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira_id))))))))
 
 ;;;###autoload
@@ -1020,6 +1020,12 @@ See`org-jira-get-issue-list'"
    (org-jira-refresh-issue)))
 
 
+(defun get-id-name-alist (name ids-to-names)
+  (let ((id (car (rassoc name ids-to-names))))
+    `((id . ,id)
+      (name . ,name))))
+
+
 (defun org-jira-update-issue-details (issue-id)
   "Update the details of issue ISSUE-ID."
   (ensure-on-issue-id
@@ -1047,12 +1053,13 @@ See`org-jira-get-issue-list'"
                                                      (name . item))
                                                  nil)))
                                            (split-string org-issue-components ",\\s *"))))
-                                  (cons 'priority (let ((id (car (rassoc org-issue-priority (jiralib-get-priorities)))))
-                                                    `((id . ,id)
-                                                      (name . ,org-issue-priority))))
+                                  (cons 'priority (get-id-name-alist org-issue-priority
+                                                                     (jiralib-get-priorities)))
                                   (cons 'description org-issue-description)
                                   (cons 'assignee (jiralib-get-user org-issue-assignee))
-                                  (cons 'summary (org-jira-get-issue-val-from-org 'summary))))
+                                  (cons 'summary (org-jira-get-issue-val-from-org 'summary))
+                                  (cons 'issuetype (get-id-name-alist org-issue-type
+                                                                      (jiralib-get-issue-types)))))
       (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
 
 
