@@ -1020,7 +1020,8 @@ See`org-jira-get-issue-list'"
    (org-jira-refresh-issue)))
 
 
-(defun get-id-name-alist (name ids-to-names)
+(defun org-jira-get-id-name-alist (name ids-to-names)
+  "Finds the id corresponding to NAME in IDS-TO-NAMES and returns an alist with id and name as keys"
   (let ((id (car (rassoc name ids-to-names))))
     `((id . ,id)
       (name . ,name))))
@@ -1053,12 +1054,12 @@ See`org-jira-get-issue-list'"
                                                      (name . item))
                                                  nil)))
                                            (split-string org-issue-components ",\\s *"))))
-                                  (cons 'priority (get-id-name-alist org-issue-priority
+                                  (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                                      (jiralib-get-priorities)))
                                   (cons 'description org-issue-description)
                                   (cons 'assignee (jiralib-get-user org-issue-assignee))
                                   (cons 'summary (org-jira-get-issue-val-from-org 'summary))
-                                  (cons 'issuetype (get-id-name-alist org-issue-type
+                                  (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
                                                                       (jiralib-get-issue-types)))))
       (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
 
