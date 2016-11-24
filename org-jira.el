@@ -166,6 +166,7 @@ variables.
 
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
+  (declare (debug (body)))
 
   `(save-excursion
      (while (org-up-heading-safe)) ; go to the top heading
@@ -176,6 +177,7 @@ variables.
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Make sure we are on an issue heading with id ISSUE-ID, before executing BODY."
+  (declare (debug (body)))
   (declare (indent 1))
   `(save-excursion
      (save-restriction
@@ -192,6 +194,7 @@ variables.
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."
+  (declare (debug (body)))
   `(save-excursion
      (save-restriction
        (let ((continue t)
@@ -208,6 +211,7 @@ variables.
 
 (defmacro ensure-on-comment (&rest body)
   "Make sure we are on a comment heading, before executing BODY."
+  (declare (debug (body)))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
@@ -219,6 +223,7 @@ variables.
 
 (defmacro ensure-on-worklog (&rest body)
   "Make sure we are on a worklog heading, before executing BODY."
+  (declare (debug (body)))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
