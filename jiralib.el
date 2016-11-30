@@ -221,6 +221,34 @@ After a succesful login, store the authentication token in
                      url-http-response-status)))
         (kill-buffer buffer)))))
 
+(defvar jiralib-read-complete-callback
+  (lambda (&rest data &allow-other-keys)
+    (let* ((json-data (getf data :data))
+           (json-key (cdr (assoc 'key json-data)))
+           (buffer-name (concat "*tmp-org-jira-" json-key "*")))
+      (generate-new-buffer buffer-name)
+      (switch-to-buffer buffer-name)
+      (save-excursion
+        (delete-region (point-min) (point-max))
+        (insert (json-encode json-data))
+        )
+      ))
+  "This callback should drop the data off in a buffer, for retrieval.
+The buffer name will follow the format *tmp-org-jira-ISSUE-KEY*.
+The retrieval mechanism should be via another callback that decides
+where this data should be passed along after it is retrieved.")
+
+(defun jiralib-call-async (method &rest params)
+  "Invokes METHOD from jiralib-call passing PARAMS."
+  ;; @todo Need to do some toggling here to only have the callback
+  ;; active / enabled when the jiralib--rest-call-it is invoked
+  ;; through this route, not via the basic jiralib-call.  This should
+  ;; allow us to migrate changes as we go along to have events that
+  ;; truly do not require async (no parsing of response) to run async,
+  ;; and run the other events that do require data from the server
+  ;; with sync until the full callback system is implemented.
+  (jiralib-call method params))
+
 (defun jiralib-call (method &rest params)
   "Invoke the JIRA METHOD with supplied PARAMS.
 
@@ -314,15 +342,20 @@ when invoking it through `jiralib-call', the call shoulbe be:
         (jiralib-use-restapi nil)) (apply #'jiralib-call args)))
 
 (defun jiralib--rest-call-it (api &rest args)
-  "Invoke the corresponding jira rest method API, passing ARGS to REQUEST."
+  "Invoke the corresponding jira rest method API.
+Invoking COMPLETE-CALLBACK when the
+JIRALIB-REST-COMPLETE-CALLBACK is non-nil, request finishes, and
+passing ARGS to REQUEST."
   (append (request-response-data
            (apply #'request (if (string-match "^http[s]*://" api) api ;; If an absolute path, use it
                               (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
                                       (replace-regexp-in-string "^/*" "" api)))
-                  :sync t
+                  :sync (not 'jiralib-rest-complete-callback)
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
                   :parser 'json-read
-                  args)) nil))
+                  :complete jiralib-read-complete-callback
+                  args))
+          nil))
 
 (defun jiralib--call-it (method &rest params)
   "Invoke the JIRA METHOD with supplied PARAMS.
