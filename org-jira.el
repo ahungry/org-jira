@@ -438,8 +438,8 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
            tmp))))
 
 (defvar org-jira-jql-history nil)
-(defun org-jira-get-issue-list ()
-  "Get list of issues, using jql (jira query language).
+(defun org-jira-get-issue-list (&optional callback)
+  "Get list of issues, using jql (jira query language), invoke CALLBACK after.
 
 Default is unresolved issues assigned to current login user; with
 a prefix argument you are given the chance to enter your own
@@ -452,7 +452,7 @@ jql."
                                "assignee = currentUser() and resolution = unresolved")
                              'org-jira-jql-history
                              "assignee = currentUser() and resolution = unresolved")))
-    (list (jiralib-do-jql-search jql))))
+    (list (jiralib-do-jql-search jql nil callback))))
 
 (defun org-jira-get-issue-by-id (id)
   "Get an issue by its ID."
@@ -527,8 +527,13 @@ With a prefix argument, allow you to customize the jql.  See
 Default is get unfinished issues assigned to you, but you can
 customize jql with a prefix argument.
 See`org-jira-get-issue-list'"
+  ;; If the user doesn't provide a default, async call to build an issue list
+  ;; from the JQL style query
   (interactive
-   (org-jira-get-issue-list))
+   (org-jira-get-issue-list
+    (lambda (&rest data &allow-other-keys)
+      (let ((issues (append (cdr (assoc 'issues (getf data :data))) nil)))
+        (org-jira-get-issues issues)))))
   (let (project-buffer)
     (mapc (lambda (issue)
             (let* ((proj-key (org-jira-get-issue-project issue))

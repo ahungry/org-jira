@@ -517,7 +517,7 @@ where KEY is a project key and NUMBER is the issue number."
       (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
   jiralib-issue-regexp)
 
-(defun jiralib-do-jql-search (jql &optional limit)
+(defun jiralib-do-jql-search (jql &optional limit callback)
   "Run a JQL query and return the list of issues that matched.
 LIMIT is the maximum number of queries to return.  Note that JIRA
 has an internal limit of how many queries to return, as such, it
@@ -525,7 +525,7 @@ might not be possible to find *ALL* the issues that match a
 query."
   (unless (or limit (numberp limit))
     (setq limit 100))
-  (jiralib-call "getIssuesFromJqlSearch" nil jql limit))
+  (jiralib-call "getIssuesFromJqlSearch" callback jql limit))
 
 (defun jiralib-get-available-actions (issue-key)
   "Return the available workflow actions for ISSUE-KEY.
