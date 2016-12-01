@@ -464,20 +464,20 @@ jql."
 (defun org-jira-get-summary ()
   "Get issue summary from point and place next to issue id from jira"
   (interactive)
-  (let ((jira_id (thing-at-point 'symbol)))
+  (let ((jira-id (thing-at-point 'symbol)))
     (forward-symbol 1)
     (insert (format " - %s"
-      (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira_id))))))))
+      (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira-id))))))))
 
 ;;;###autoload
 (defun org-jira-get-summary-url ()
   "Get issue summary from point and place next to issue id from jira, and make issue id a link"
   (interactive)
-  (let ((jira_id (thing-at-point 'symbol)))
+  (let ((jira-id (thing-at-point 'symbol)))
     (sp-kill-symbol 1)
     (insert (format "[[%s][%s]] - %s"
-      (concatenate 'string jiralib-url "browse/" jira_id) jira_id
-      (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira_id))))))))
+      (concatenate 'string jiralib-url "browse/" jira-id) jira-id
+      (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira-id))))))))
 
 ;;;###autoload
 (defun org-jira-get-issues-headonly (issues)
