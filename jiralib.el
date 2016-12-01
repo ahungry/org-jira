@@ -221,7 +221,7 @@ After a succesful login, store the authentication token in
                      url-http-response-status)))
         (kill-buffer buffer)))))
 
-(defvar jiralib-read-complete-callback
+(defvar jiralib-complete-callback
   (lambda (&rest data &allow-other-keys)
     (message "BASE GLobAL  CB INVOKED")
     (org-jira-get-issues (list (getf data :data))))
@@ -258,7 +258,7 @@ This produces a noticeable slowdown and is not recommended by
 request.el, so if at all possible, it should be avoided."
   ;; @todo Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
-  (setq jiralib-read-complete-callback callback)
+  (setq jiralib-complete-callback callback)
   (if (not jiralib-use-restapi)
       (car (apply 'jiralib--call-it method params))
     (unless jiralib-token
@@ -343,16 +343,16 @@ Pass ARGS to jiralib-call."
 (defun jiralib--rest-call-it (api &rest args)
   "Invoke the corresponding jira rest method API.
 Invoking COMPLETE-CALLBACK when the
-JIRALIB-REST-COMPLETE-CALLBACK is non-nil, request finishes, and
+JIRALIB-COMPLETE-CALLBACK is non-nil, request finishes, and
 passing ARGS to REQUEST."
   (append (request-response-data
            (apply #'request (if (string-match "^http[s]*://" api) api ;; If an absolute path, use it
                               (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
                                       (replace-regexp-in-string "^/*" "" api)))
-                  :sync (not 'jiralib-rest-complete-callback)
+                  :sync (not jiralib-complete-callback)
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
                   :parser 'json-read
-                  :complete jiralib-read-complete-callback
+                  :complete jiralib-complete-callback
                   args))
           nil))
 
