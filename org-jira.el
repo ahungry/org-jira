@@ -680,21 +680,18 @@ See`org-jira-get-issue-list'"
 (defun org-jira-get-comment-author (comment)
   (org-jira-find-value comment 'author 'name))
 
-;; @todo May need to handle passing this around vs getting it from global
-(defvar org-jira-comment-issue-id nil "Store the issue-id we need in the callback.")
-
 (defun org-jira-update-comments-for-current-issue ()
   "Update the comments for the current issue."
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
-    ;; Bind the global
-    (setq org-jira-comment-issue-id issue-id)
-
     ;; Run the call
     (jiralib-get-comments
      issue-id
      (lambda (&rest data &allow-other-keys)
        (let ((comments (org-jira-find-value (getf data :data) 'comments))
-             (issue-id org-jira-comment-issue-id))
+             (issue-id (replace-regexp-in-string
+                        ".*issue\\/\\(.*\\)\\/comment"
+                        "\\1"
+                        (request-response-url (getf data :response)))))
          (mapc
           (lambda (comment)
             (ensure-on-issue-id
