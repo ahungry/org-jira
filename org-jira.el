@@ -613,12 +613,18 @@ See`org-jira-get-issue-list'"
   (interactive)
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
          (comment-id (org-jira-get-from-org 'comment 'id))
-         (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id))))
+         (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id)))
+         (callback-edit
+          (lambda (&rest data &allow-other-keys)
+            (org-jira-update-comments-for-current-issue)))
+         (callback-add
+          (lambda (&rest data &allow-other-keys)
+            ;; @todo Has to be a better way to do this than delete region (like update the unmarked one)
+            (org-jira-delete-current-comment)
+            (org-jira-update-comments-for-current-issue))))
     (if comment-id
-        (jiralib-edit-comment issue-id comment-id comment)
-      (jiralib-add-comment issue-id comment)
-      (org-jira-delete-current-comment)
-      (org-jira-update-comments-for-current-issue))))
+        (jiralib-edit-comment issue-id comment-id comment callback-edit)
+      (jiralib-add-comment issue-id comment callback-add))))
 
 (defun org-jira-update-worklog ()
   "Update a worklog for the current issue."

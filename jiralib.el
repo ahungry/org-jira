@@ -696,16 +696,16 @@ Return nil if the field is not found"
                   (cdr (assoc 'id filter))))
           (jiralib-get-saved-filters)))
 
-(defun jiralib-add-comment (issue-key comment)
-  "Add to issue with ISSUE-KEY the given COMMENT."
-  (jiralib-call "addComment" nil issue-key `((body . ,comment))))
+(defun jiralib-add-comment (issue-key comment &optional callback)
+  "Add to issue with ISSUE-KEY the given COMMENT, invoke CALLBACK."
+  (jiralib-call "addComment" callback issue-key `((body . ,comment))))
 
-(defun jiralib-edit-comment (issue-id comment-id comment)
-  "Edit ISSUE-ID's comment COMMENT-ID to reflect the new COMMENT."
+(defun jiralib-edit-comment (issue-id comment-id comment &optional callback)
+  "Edit ISSUE-ID's comment COMMENT-ID to reflect the new COMMENT, invoke CALLBACK."
   (if (not jiralib-use-restapi)
-      (jiralib-call "editComment" nil `((id . ,comment-id)
+      (jiralib-call "editComment" callback `((id . ,comment-id)
                                     (body . ,comment)))
-    (jiralib-call "editComment" nil issue-id comment-id comment)))
+    (jiralib-call "editComment" callback issue-id comment-id comment)))
 
 (defun jiralib-create-issue (issue)
   "Create a new ISSUE in JIRALIB.
