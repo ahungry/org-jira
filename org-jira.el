@@ -972,8 +972,12 @@ See`org-jira-get-issue-list'"
   "Refresh issue from jira to org."
   (interactive)
   (ensure-on-issue
-   (let* ((issue-id (org-jira-id)))
-     (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
+   (let* ((issue-id (org-jira-id))
+          (callback
+           (lambda (&rest data &allow-other-keys)
+             (message "org-jira-refresh-issue cb")
+             (org-jira-get-issues (list (getf data :data))))))
+     (jiralib-get-issue issue-id callback))))
 
 (defvar org-jira-fields-values-history nil)
 ;;;###autoload
@@ -984,7 +988,7 @@ See`org-jira-get-issue-list'"
    (let* ((issue-id (org-jira-id))
           (actions (jiralib-get-available-actions issue-id))
           (action (org-jira-read-action actions))
-          (rest-fieds (jiralib-call "getFieldsForAction" issue-id action))
+          (rest-fieds (jiralib-call "getFieldsForAction" nil issue-id action))
           (fields (jiralib-get-fields-for-action issue-id action))
           (field-key)
           (custom-fields-collector nil)

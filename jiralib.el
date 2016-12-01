@@ -223,34 +223,13 @@ After a succesful login, store the authentication token in
 
 (defvar jiralib-read-complete-callback
   (lambda (&rest data &allow-other-keys)
-    (let* ((json-data (getf data :data))
-           (json-key (cdr (assoc 'key json-data)))
-           (buffer-name (concat "*tmp-org-jira-" json-key "*")))
-      (generate-new-buffer buffer-name)
-      (switch-to-buffer buffer-name)
-      (save-excursion
-        (delete-region (point-min) (point-max))
-        (insert (json-encode json-data))
-        )
-      ))
-  "This callback should drop the data off in a buffer, for retrieval.
-The buffer name will follow the format *tmp-org-jira-ISSUE-KEY*.
-The retrieval mechanism should be via another callback that decides
-where this data should be passed along after it is retrieved.")
+    (message "BASE GLobAL  CB INVOKED")
+    (org-jira-get-issues (list (getf data :data))))
+  ;; @todo Fix this CB to pass through chains to avoid concurrency issues.
+  "This callback needs to be passed around and not global.")
 
-(defun jiralib-call-async (method &rest params)
-  "Invokes METHOD from jiralib-call passing PARAMS."
-  ;; @todo Need to do some toggling here to only have the callback
-  ;; active / enabled when the jiralib--rest-call-it is invoked
-  ;; through this route, not via the basic jiralib-call.  This should
-  ;; allow us to migrate changes as we go along to have events that
-  ;; truly do not require async (no parsing of response) to run async,
-  ;; and run the other events that do require data from the server
-  ;; with sync until the full callback system is implemented.
-  (jiralib-call method params))
-
-(defun jiralib-call (method &rest params)
-  "Invoke the JIRA METHOD with supplied PARAMS.
+(defun jiralib-call (method callback &rest params)
+  "Invoke the Jira METHOD, then CALLBACK with supplied PARAMS.
 
 This function should be used for all JIRA interface calls, as the
 method ensures the user is logged in and invokes `soap-invoke'
@@ -260,9 +239,26 @@ All JIRA inteface methods take an authentication token as the
 first argument.  The authentication token is supplied by this
 function, so PARAMS should omit this parameter.  For example, the
 \"getIssue\" method takes two parameters: auth and key, however,
-when invoking it through `jiralib-call', the call shoulbe be:
+when invoking it through `jiralib-call', the call should be:
 
-  (jiralib-call \"getIssue\" KEY)"
+  (jiralib-call \"getIssue\" KEY)
+
+CALLBACK should be the post processing function to run with the
+completed data from the request result, which can be accessed with:
+
+  (getf data :data)
+
+as such, the CALLBACK should follow this type of form:
+
+  (lambda (&rest data &allow-other-keys)
+    (print (getf data :data)))
+
+If CALLBACK is set to nil then the request will occur with sync.
+This produces a noticeable slowdown and is not recommended by
+request.el, so if at all possible, it should be avoided."
+  ;; @todo Probably pass this all the way down, but I think
+  ;; it may be OK at the moment to just set the variable each time.
+  (setq jiralib-read-complete-callback callback)
   (if (not jiralib-use-restapi)
       (car (apply 'jiralib--call-it method params))
     (unless jiralib-token
@@ -338,8 +334,11 @@ when invoking it through `jiralib-call', the call shoulbe be:
                      :data (json-encode `((fields . ,(second params)))))))))
 
 (defun jiralib--soap-call-it (&rest args)
+  "Deprecated SOAP call endpoint.  Will be removed soon.
+Pass ARGS to jiralib-call."
   (let ((jiralib-token nil)
-        (jiralib-use-restapi nil)) (apply #'jiralib-call args)))
+        (jiralib-use-restapi nil))
+    (apply #'jiralib-call args)))
 
 (defun jiralib--rest-call-it (api &rest args)
   "Invoke the corresponding jira rest method API.
@@ -430,11 +429,12 @@ emacs-lisp"
 
 (defun jiralib-update-issue (key fields)
   "Update the issue with id KEY with the values in FIELDS."
-
-  (jiralib-call "updateIssue" key (if jiralib-use-restapi
-                                      fields
-                                    (jiralib-make-remote-field-values fields))))
-
+  (jiralib-call
+   "updateIssue"
+   nil
+   key (if jiralib-use-restapi
+           fields
+         (jiralib-make-remote-field-values fields))))
 
 (defvar jiralib-status-codes-cache nil)
 
@@ -446,7 +446,7 @@ This function will only ask JIRA for the list of codes once, then
 will cache it."
   (unless jiralib-status-codes-cache
     (setq jiralib-status-codes-cache
-          (jiralib-make-assoc-list (jiralib-call "getStatuses") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getStatuses" nil) 'id 'name)))
   jiralib-status-codes-cache)
 
 (defvar jiralib-issue-types-cache nil)
@@ -459,7 +459,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-issue-types-cache
     (setq jiralib-issue-types-cache
-          (jiralib-make-assoc-list (jiralib-call "getIssueTypes") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getIssueTypes" nil) 'id 'name)))
   jiralib-issue-types-cache)
 
 (defvar jiralib-priority-codes-cache nil)
@@ -472,7 +472,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-priority-codes-cache
     (setq jiralib-priority-codes-cache
-          (jiralib-make-assoc-list (jiralib-call "getPriorities") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getPriorities" nil) 'id 'name)))
   jiralib-priority-codes-cache)
 
 (defvar jiralib-resolution-code-cache nil)
@@ -485,7 +485,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-resolution-code-cache
     (setq jiralib-resolution-code-cache
-          (jiralib-make-assoc-list (jiralib-call "getResolutions") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getResolutions" nil) 'id 'name)))
   jiralib-resolution-code-cache)
 
 (defvar jiralib-issue-regexp nil)
@@ -505,7 +505,7 @@ database.  An issue is assumed to be in the format KEY-NUMBER,
 where KEY is a project key and NUMBER is the issue number."
   (unless jiralib-issue-regexp
     (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
-                            (jiralib-call "getProjectsNoSchemes"))))
+                            (jiralib-call "getProjectsNoSchemes" nil))))
       (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
   jiralib-issue-regexp)
 
@@ -517,19 +517,19 @@ might not be possible to find *ALL* the issues that match a
 query."
   (unless (or limit (numberp limit))
     (setq limit 100))
-  (jiralib-call "getIssuesFromJqlSearch" jql limit))
+  (jiralib-call "getIssuesFromJqlSearch" nil jql limit))
 
 (defun jiralib-get-available-actions (issue-key)
   "Return the available workflow actions for ISSUE-KEY.
 This runs the getAvailableActions SOAP method."
   (jiralib-make-assoc-list
-   (jiralib-call "getAvailableActions" issue-key)
+   (jiralib-call "getAvailableActions" nil issue-key)
    'id 'name))
 
 (defun jiralib-get-fields-for-action (issue-key action-id)
   "Return the required fields to change ISSUE-KEY to ACTION-ID."
   (if jiralib-use-restapi
-      (let ((fields (jiralib-call "getFieldsForAction" issue-key action-id)))
+      (let ((fields (jiralib-call "getFieldsForAction" nil issue-key action-id)))
         (mapcar (lambda (field)
                   (cons (symbol-name (car field)) (format "%s (required: %s)"
                                                           (org-jira-find-value field 'name)
@@ -537,15 +537,15 @@ This runs the getAvailableActions SOAP method."
                                                               "nil"
                                                             "t")))) fields))
     (jiralib-make-assoc-list
-     (jiralib-call "getFieldsForAction" issue-key action-id)
+     (jiralib-call "getFieldsForAction" nil issue-key action-id)
      'id 'name)))
 
 (defun jiralib-progress-workflow-action (issue-key action-id params)
   "Progress issue with ISSUE-KEY to action ACTION-ID, and provide the needed PARAMS."
   (if jiralib-use-restapi
-      (jiralib-call "progressWorkflowAction" issue-key `((transition (id . ,action-id)))
+      (jiralib-call "progressWorkflowAction" nil issue-key `((transition (id . ,action-id)))
                     `((fields . ,params)))
-    (jiralib-call "progressWorkflowAction" issue-key action-id (jiralib-make-remote-field-values params))))
+    (jiralib-call "progressWorkflowAction" nil issue-key action-id (jiralib-make-remote-field-values params))))
 
 (defun jiralib-add-worklog-and-autoadjust-remaining-estimate (issue-key start-date time-spent comment)
   "Log time spent on ISSUE-KEY to its worklog.
@@ -560,6 +560,7 @@ hours; 10h, 120h days; 10d, 120d weeks.
 
 COMMENT will be added to this worklog."
   (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
+                nil
                 issue-key
                 `((startDate . ,start-date)
                   (timeSpent . ,time-spent)
@@ -689,26 +690,26 @@ Return nil if the field is not found"
 
 (defun jiralib-add-comment (issue-key comment)
   "Add to issue with ISSUE-KEY the given COMMENT."
-  (jiralib-call "addComment" issue-key `((body . ,comment))))
+  (jiralib-call "addComment" nil issue-key `((body . ,comment))))
 
 (defun jiralib-edit-comment (issue-id comment-id comment)
   "Edit ISSUE-ID's comment COMMENT-ID to reflect the new COMMENT."
   (if (not jiralib-use-restapi)
-      (jiralib-call "editComment" `((id . ,comment-id)
+      (jiralib-call "editComment" nil `((id . ,comment-id)
                                     (body . ,comment)))
-    (jiralib-call "editComment" issue-id comment-id comment)))
+    (jiralib-call "editComment" nil issue-id comment-id comment)))
 
 (defun jiralib-create-issue (issue)
   "Create a new ISSUE in JIRALIB.
 
 ISSUE is a Hashtable object."
-  (jiralib-call "createIssue" issue))
+  (jiralib-call "createIssue" nil issue))
 
 (defun jiralib-create-subtask (subtask parent-issue-id)
   "Create SUBTASK for issue with PARENT-ISSUE-ID.
 
 SUBTASK is a Hashtable object."
-  (jiralib-call "createIssueWithParent" subtask parent-issue-id))
+  (jiralib-call "createIssueWithParent" nil subtask parent-issue-id))
 
 
 (defvar jiralib-subtask-types-cache nil)
@@ -721,37 +722,38 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-subtask-types-cache
     (setq jiralib-subtask-types-cache
-          (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes" nil) 'id 'name)))
   jiralib-subtask-types-cache)
 
 
 (defun jiralib-get-comments (issue-key)
   "Return all comments associated with issue ISSUE-KEY."
-  (jiralib-call "getComments" issue-key))
+  (jiralib-call "getComments" nil issue-key))
 
 (defun jiralib-get-worklogs (issue-key)
   "Return all worklogs associated with issue ISSUE-KEY."
-  (jiralib-call "getWorklogs" issue-key))
+  (jiralib-call "getWorklogs" nil issue-key))
 
 (defun jiralib-update-worklog (worklog)
   "Update the WORKLOG, updating the ETA for the related issue."
-  (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" worklog))
+  (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" nil worklog))
 
 (defun jiralib-get-components (project-key)
   "Return all components available in the project PROJECT-KEY."
-  (jiralib-make-assoc-list (jiralib-call "getComponents" project-key) 'id 'name))
+  (jiralib-make-assoc-list
+   (jiralib-call "getComponents" nil project-key) 'id 'name))
 
-(defun jiralib-get-issue (issue-key)
-  "Get the issue with key ISSUE-KEY."
-  (jiralib-call "getIssue" issue-key))
+(defun jiralib-get-issue (issue-key &optional callback)
+  "Get the issue with key ISSUE-KEY, running CALLBACK after."
+  (jiralib-call "getIssue" callback issue-key))
 
 (defun jiralib-get-issues-from-filter (filter-id)
   "Get the issues from applying saved filter FILTER-ID."
-  (jiralib-call "getIssuesFromFilter" filter-id))
+  (jiralib-call "getIssuesFromFilter" nil filter-id))
 
 (defun jiralib-get-issues-from-text-search (search-terms)
   "Find issues using free text search SEARCH-TERMS."
-  (jiralib-call "getIssuesFromTextSearch" search-terms))
+  (jiralib-call "getIssuesFromTextSearch" nil search-terms))
 
 (defun jiralib-get-issues-from-text-search-with-project
     (project-keys search-terms max-num-results)
@@ -759,6 +761,7 @@ will cache it."
 
 Return no more than MAX-NUM-RESULTS."
   (jiralib-call "getIssuesFromTextSearchWithProject"
+                nil
                 (apply 'vector project-keys) search-terms max-num-results))
 
 ;; Modified by Brian Zwahr to use getProjectsNoSchemes instead of getProjects
@@ -768,32 +771,32 @@ Return no more than MAX-NUM-RESULTS."
       jiralib-projects-list
     (setq jiralib-projects-list
           (if jiralib-use-restapi
-              (jiralib-call "getProjects")
-              (jiralib-call "getProjectsNoSchemes")))))
+              (jiralib-call "getProjects" nil)
+              (jiralib-call "getProjectsNoSchemes" nil)))))
 
 (defun jiralib-get-saved-filters ()
   "Get all saved filters available for the currently logged in user."
-  (jiralib-make-assoc-list (jiralib-call "getSavedFilters") 'id 'name))
+  (jiralib-make-assoc-list (jiralib-call "getSavedFilters" nil) 'id 'name))
 
 (defun jiralib-get-server-info ()
   "Return the Server information such as baseUrl, version, edition, buildDate, buildNumber."
-  (jiralib-call "getServerInfo"))
+  (jiralib-call "getServerInfo" nil))
 
 (defun jiralib-get-sub-task-issue-types ()
   "Return all visible subtask issue types in the system."
-  (jiralib-call "getSubTaskIssueTypes"))
+  (jiralib-call "getSubTaskIssueTypes" nil))
 
 (defun jiralib-get-user (username)
   "Return a user's information given their USERNAME."
-  (jiralib-call "getUser" username))
+  (jiralib-call "getUser" nil username))
 
 (defun jiralib-get-users (project-key)
   "Return assignable users information given the PROJECT-KEY."
-  (jiralib-call "getUsers" project-key))
+  (jiralib-call "getUsers" nil project-key))
 
 (defun jiralib-get-versions (project-key)
   "Return all versions available in project PROJECT-KEY."
-  (jiralib-call "getVersions" project-key))
+  (jiralib-call "getVersions" nil project-key))
 
 (defun jiralib-strip-cr (string)
   "Remove carriage returns from STRING."
