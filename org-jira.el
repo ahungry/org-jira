@@ -674,38 +674,51 @@ See`org-jira-get-issue-list'"
 (defun org-jira-get-comment-author (comment)
   (org-jira-find-value comment 'author 'name))
 
+;; @todo May need to handle passing this around vs getting it from global
+(defvar org-jira-comment-issue-id nil "Store the issue-id we need in the callback.")
+
 (defun org-jira-update-comments-for-current-issue ()
   "Update the comments for the current issue."
-  (let* ((issue-id (org-jira-get-from-org 'issue 'key))
-         (comments (jiralib-get-comments issue-id)))
-    (mapc (lambda (comment)
-            (ensure-on-issue-id issue-id
-              (let* ((comment-id (org-jira-get-comment-id comment))
-                     (comment-author (or (car (rassoc
-                                               (org-jira-get-comment-author comment)
-                                               org-jira-users))
-                                         (org-jira-get-comment-author comment)))
-                     (comment-headline (format "Comment: %s" comment-author)))
-                (setq p (org-find-entry-with-id comment-id))
-                (when (and p (>= p (point-min))
-                           (<= p (point-max)))
-                  (goto-char p)
-                  (org-narrow-to-subtree)
-                  (delete-region (point-min) (point-max)))
-                (goto-char (point-max))
-                (unless (looking-at "^")
-                  (insert "\n"))
-                (insert "** ")
-                (org-jira-insert comment-headline "\n")
-                (org-narrow-to-subtree)
-                (org-entry-put (point) "ID" comment-id)
-                (let ((created (org-jira-get-comment-val 'created comment))
-                      (updated (org-jira-get-comment-val 'updated comment)))
-                  (org-entry-put (point) "created" created)
-                  (unless (string= created updated)
-                    (org-entry-put (point) "updated" updated)))
-                (goto-char (point-max))
-                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
+  (let ((issue-id (org-jira-get-from-org 'issue 'key)))
+    ;; Bind the global
+    (setq org-jira-comment-issue-id issue-id)
+
+    ;; Run the call
+    (jiralib-get-comments
+     issue-id
+     (lambda (&rest data &allow-other-keys)
+       (let ((comments (org-jira-find-value (getf data :data) 'comments))
+             (issue-id org-jira-comment-issue-id))
+         (mapc
+          (lambda (comment)
+            (ensure-on-issue-id
+             issue-id
+             (let* ((comment-id (org-jira-get-comment-id comment))
+                    (comment-author (or (car (rassoc
+                                              (org-jira-get-comment-author comment)
+                                              org-jira-users))
+                                        (org-jira-get-comment-author comment)))
+                    (comment-headline (format "Comment: %s" comment-author)))
+               (setq p (org-find-entry-with-id comment-id))
+               (when (and p (>= p (point-min))
+                          (<= p (point-max)))
+                 (goto-char p)
+                 (org-narrow-to-subtree)
+                 (delete-region (point-min) (point-max)))
+               (goto-char (point-max))
+               (unless (looking-at "^")
+                 (insert "\n"))
+               (insert "** ")
+               (org-jira-insert comment-headline "\n")
+               (org-narrow-to-subtree)
+               (org-entry-put (point) "ID" comment-id)
+               (let ((created (org-jira-get-comment-val 'created comment))
+                     (updated (org-jira-get-comment-val 'updated comment)))
+                 (org-entry-put (point) "created" created)
+                 (unless (string= created updated)
+                   (org-entry-put (point) "updated" updated)))
+               (goto-char (point-max))
+               (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
           (cl-mapcan
            (lambda (comment)
              ;; Allow user to specify a list of excluded usernames for
@@ -715,7 +728,7 @@ See`org-jira-get-issue-list'"
                   org-jira-ignore-comment-user-list)
                  nil
                (list comment)))
-           comments))))
+           comments)))))))
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."

@@ -296,7 +296,8 @@ request.el, so if at all possible, it should be avoided."
                      :data (json-encode `((body . ,(third params))))
                      :type "PUT"))
       ('getComments (org-jira-find-value (jiralib--rest-call-it
-                                          (format "/rest/api/2/issue/%s/comment" (first params))) 'comments))
+                                          (format "/rest/api/2/issue/%s/comment" (first params)))
+                                         'comments))
       ('getComponents (jiralib--rest-call-it
                        (format "/rest/api/2/project/%s/components" (first params))))
       ('getIssue (jiralib--rest-call-it
@@ -305,7 +306,8 @@ request.el, so if at all possible, it should be avoided."
                                                               "/rest/api/2/search"
                                                               :type "POST"
                                                               :data (json-encode `((jql . ,(first params))
-                                                                                   (maxResults . ,(second params))))))) nil))
+                                                                                   (maxResults . ,(second params)))))))
+                                        nil))
       ('getPriorities (jiralib--rest-call-it
                        "/rest/api/2/priority"))
       ('getProjects (jiralib--rest-call-it "rest/api/2/project"))
@@ -732,9 +734,9 @@ will cache it."
   jiralib-subtask-types-cache)
 
 
-(defun jiralib-get-comments (issue-key)
-  "Return all comments associated with issue ISSUE-KEY."
-  (jiralib-call "getComments" nil issue-key))
+(defun jiralib-get-comments (issue-key &optional callback)
+  "Return all comments associated with issue ISSUE-KEY, invoking CALLBACK."
+  (jiralib-call "getComments" callback issue-key))
 
 (defun jiralib-get-worklogs (issue-key)
   "Return all worklogs associated with issue ISSUE-KEY."
