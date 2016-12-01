@@ -221,12 +221,7 @@ After a succesful login, store the authentication token in
                      url-http-response-status)))
         (kill-buffer buffer)))))
 
-(defvar jiralib-complete-callback
-  (lambda (&rest data &allow-other-keys)
-    (message "BASE GLobAL  CB INVOKED")
-    (org-jira-get-issues (list (getf data :data))))
-  ;; @todo Fix this CB to pass through chains to avoid concurrency issues.
-  "This callback needs to be passed around and not global.")
+(defvar jiralib-complete-callback nil)
 
 (defun jiralib-call (method callback &rest params)
   "Invoke the Jira METHOD, then CALLBACK with supplied PARAMS.
@@ -259,6 +254,18 @@ request.el, so if at all possible, it should be avoided."
   ;; @todo Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
   (setq jiralib-complete-callback callback)
+
+  ;; If we don't have a regex set, ensure it is set BEFORE any async
+  ;; calls are processing, or we're going to have a bad time.
+  ;; This should only end up running once per session.
+  (unless jiralib-issue-regexp
+    (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
+                            (append (jiralib--rest-call-it
+                                     "/rest/api/2/project"
+                                     :params '((expand . "description,lead,url,projectKeys"))) nil)
+                            )))
+      (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
+
   (if (not jiralib-use-restapi)
       (car (apply 'jiralib--call-it method params))
     (unless jiralib-token
@@ -490,13 +497,12 @@ will cache it."
 
 (defvar jiralib-issue-regexp nil)
 
-;; NOTE: it is not such a good ideea to use this, as it needs a JIRA
+;; NOTE: it is not such a good idea to use this, as it needs a JIRA
 ;; connection to construct the regexp (the user might be prompted for a JIRA
 ;; username and password).
 ;;
 ;; The best use of this function is to generate the regexp once-off and
 ;; persist it somewhere.
-
 (defun jiralib-get-issue-regexp ()
   "Return a regexp that will match an issue id.
 
@@ -790,9 +796,14 @@ Return no more than MAX-NUM-RESULTS."
   "Return a user's information given their USERNAME."
   (jiralib-call "getUser" nil username))
 
+(defvar jiralib-users-cache nil "Cached list of users.")
+
 (defun jiralib-get-users (project-key)
   "Return assignable users information given the PROJECT-KEY."
-  (jiralib-call "getUsers" nil project-key))
+  (unless jiralib-users-cache
+    (setq jiralib-users-cache
+          (jiralib-call "getUsers" nil project-key)))
+  jiralib-users-cache)
 
 (defun jiralib-get-versions (project-key)
   "Return all versions available in project PROJECT-KEY."
