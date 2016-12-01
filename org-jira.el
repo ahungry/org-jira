@@ -1040,6 +1040,7 @@ See`org-jira-get-issue-list'"
   "Update the details of issue ISSUE-ID."
   (ensure-on-issue-id
       issue-id
+      ;; Set up a bunch of values from the org content
     (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
            (org-issue-description (replace-regexp-in-string "^  " "" (org-jira-get-issue-val-from-org 'description)))
            (org-issue-resolution (org-jira-get-issue-val-from-org 'resolution))
@@ -1047,31 +1048,41 @@ See`org-jira-get-issue-list'"
            (org-issue-type (org-jira-get-issue-val-from-org 'type))
            (org-issue-assignee (org-jira-get-issue-val-from-org 'assignee))
            (org-issue-status (org-jira-get-issue-val-from-org 'status))
-           (issue (jiralib-get-issue issue-id))
-           (project (org-jira-get-issue-val 'project issue))
+           (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
            (project-components (jiralib-get-components project)))
 
-      (jiralib-update-issue issue-id ; (jiralib-update-issue "FB-1" '((components . ["10001" "10000"])))
-                            (list (cons
-                                   'components
-                                   (apply 'vector
-                                          (cl-mapcan
-                                           (lambda (item)
-                                             (let ((comp-id (car (rassoc item project-components))))
-                                               (if comp-id
-                                                   `((id . comp-id)
-                                                     (name . item))
-                                                 nil)))
-                                           (split-string org-issue-components ",\\s *"))))
-                                  (cons 'priority (org-jira-get-id-name-alist org-issue-priority
-                                                                     (jiralib-get-priorities)))
-                                  (cons 'description org-issue-description)
-                                  (cons 'assignee (jiralib-get-user org-issue-assignee))
-                                  (cons 'summary (org-jira-get-issue-val-from-org 'summary))
-                                  (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
-                                                                      (jiralib-get-issue-types)))))
-      (org-jira-get-issues (list (jiralib-get-issue issue-id))))))
-
+      ;; Send the update to jira
+      (jiralib-update-issue
+       issue-id ; (jiralib-update-issue "FB-1" '((components . ["10001" "10000"])))
+       (list (cons
+              'components
+              (apply 'vector
+                     (cl-mapcan
+                      (lambda (item)
+                        (let ((comp-id (car (rassoc item project-components))))
+                          (if comp-id
+                              `((id . comp-id)
+                                (name . item))
+                            nil)))
+                      (split-string org-issue-components ",\\s *"))))
+             (cons 'priority (org-jira-get-id-name-alist org-issue-priority
+                                                         (jiralib-get-priorities)))
+             (cons 'description org-issue-description)
+             (cons 'assignee (jiralib-get-user org-issue-assignee))
+             (cons 'summary (org-jira-get-issue-val-from-org 'summary))
+             (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
+                                                          (jiralib-get-issue-types))))
+       ;; This callback occurs on success
+       (lambda (&rest data &allow-other-keys)
+         (message "Issue updated!")
+         ;; Another chained async call, feels like javascript now...
+         (jiralib-get-issue
+          issue-id
+          (lambda (&rest data &allow-other-keys)
+            (org-jira-get-issues (list (getf data :data)))))
+         )
+       )
+      )))
 
 (defun org-jira-parse-issue-id ()
   "Get issue id from org text."

@@ -434,11 +434,11 @@ emacs-lisp"
   "Return jira rest api for issue KEY."
   (concat "rest/api/2/issue/" key))
 
-(defun jiralib-update-issue (key fields)
-  "Update the issue with id KEY with the values in FIELDS."
+(defun jiralib-update-issue (key fields &optional callback)
+  "Update the issue with id KEY with the values in FIELDS, invoking CALLBACK."
   (jiralib-call
    "updateIssue"
-   nil
+   callback
    key (if jiralib-use-restapi
            fields
          (jiralib-make-remote-field-values fields))))
@@ -744,10 +744,16 @@ will cache it."
   "Update the WORKLOG, updating the ETA for the related issue."
   (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" nil worklog))
 
+(defvar jiralib-components-cache nil "An alist of project components.")
+
 (defun jiralib-get-components (project-key)
   "Return all components available in the project PROJECT-KEY."
-  (jiralib-make-assoc-list
-   (jiralib-call "getComponents" nil project-key) 'id 'name))
+  (unless (assoc project-key jiralib-components-cache)
+    (push (cons project-key
+                (jiralib-make-assoc-list
+                 (jiralib-call "getComponents" nil project-key) 'id 'name))
+          jiralib-components-cache))
+  (cdr (assoc project-key jiralib-components-cache)))
 
 (defun jiralib-get-issue (issue-key &optional callback)
   "Get the issue with key ISSUE-KEY, running CALLBACK after."
