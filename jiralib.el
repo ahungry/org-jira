@@ -41,6 +41,9 @@
 ;; Primary reference (on current Jira, only REST is supported):
 ;; https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis
 ;;
+;; Full API list reference:
+;; https://docs.atlassian.com/jira/REST/cloud/
+;;
 ;; Legacy reference (unsupported and deprecated/unavailable):
 ;; http://confluence.atlassian.com/display/JIRA/Creating+a+SOAP+Client
 ;;
