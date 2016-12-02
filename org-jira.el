@@ -1111,7 +1111,7 @@ See`org-jira-get-issue-list'"
              (org-jira-get-issues (list (getf data :data)))))
           ))
       )
-     ))))
+     )))
 
 (defun org-jira-parse-issue-id ()
   "Get issue id from org text."
