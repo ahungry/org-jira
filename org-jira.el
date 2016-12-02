@@ -980,7 +980,7 @@ See`org-jira-get-issue-list'"
                          'org-jira-resolution-history
                          (car org-jira-resolution-history))))
         (car (rassoc resolution (jiralib-get-resolutions))))
-    (let* ((resolutions (org-jira-find-value rest-fieds 'resolution 'allowedValues))
+    (let* ((resolutions (org-jira-find-value rest-fields 'resolution 'allowedValues))
            (resolution-name (completing-read
                              "Resolution: "
                              (mapcar (lambda (resolution)
@@ -1007,45 +1007,50 @@ See`org-jira-get-issue-list'"
   (interactive)
   (ensure-on-issue
    (let* ((issue-id (org-jira-id))
-          (actions (jiralib-get-available-actions issue-id (org-jira-get-issue-val-from-org 'status)))
+          (actions (jiralib-get-available-actions
+                    issue-id
+                    (org-jira-get-issue-val-from-org 'status)))
           (action (org-jira-read-action actions))
-          (rest-fieds (jiralib-call "getFieldsForAction" nil issue-id action))
+          (rest-fields (jiralib-call "getFieldsForAction" nil issue-id action))
           (fields (jiralib-get-fields-for-action issue-id action))
           (field-key)
           (custom-fields-collector nil)
-          (custom-fields (progn
+          (custom-fields
+           (progn
                                         ; delete those elements in fields, which have
                                         ; already been set in custom-fields-collector
 
-                           (while fields
-                             (setq fields (cl-remove-if (lambda (strstr)
-                                                          (cl-member-if (lambda (symstr)
-                                                                          (string= (car strstr)  (symbol-name (car symstr))))
-                                                                        custom-fields-collector))
-                                                        fields))
-                             (setq field-key (org-jira-read-field fields))
-                             (if (not field-key)
-                                 (setq fields nil)
-                               (setq custom-fields-collector
-                                     (cons
-                                      (funcall (if jiralib-use-restapi
-                                                   #'list
-                                                 #'cons) field-key
-                                                 (if (eq field-key 'resolution)
-                                                     (org-jira-read-resolution)
-                                                   (let ((field-value (completing-read
-                                                                       (format "Please enter %s's value: "
-                                                                               (cdr (assoc (symbol-name field-key) fields)))
-                                                                       org-jira-fields-values-history
-                                                                       nil
-                                                                       nil
-                                                                       nil
-                                                                       'org-jira-fields-values-history)))
-                                                     (if jiralib-use-restapi
-                                                         (cons 'name field-value)
-                                                       field-value))))
-                                      custom-fields-collector))))
-                           custom-fields-collector)))
+             (while fields
+               (setq fields
+                     (cl-remove-if
+                      (lambda (strstr)
+                        (cl-member-if (lambda (symstr)
+                                        (string= (car strstr)  (symbol-name (car symstr))))
+                                                          custom-fields-collector))
+                                          fields))
+               (setq field-key (org-jira-read-field fields))
+               (if (not field-key)
+                   (setq fields nil)
+                 (setq custom-fields-collector
+                       (cons
+                        (funcall (if jiralib-use-restapi
+                                     #'list
+                                   #'cons) field-key
+                                   (if (eq field-key 'resolution)
+                                       (org-jira-read-resolution)
+                                     (let ((field-value (completing-read
+                                                         (format "Please enter %s's value: "
+                                                                 (cdr (assoc (symbol-name field-key) fields)))
+                                                         org-jira-fields-values-history
+                                                         nil
+                                                         nil
+                                                         nil
+                                                         'org-jira-fields-values-history)))
+                                       (if jiralib-use-restapi
+                                           (cons 'name field-value)
+                                         field-value))))
+                        custom-fields-collector))))
+             custom-fields-collector)))
      (jiralib-progress-workflow-action issue-id action custom-fields))
    (org-jira-refresh-issue)))
 
