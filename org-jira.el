@@ -7,9 +7,9 @@
 ;; Matthew Carter <m@ahungry.com>
 ;; Bao Haojun <baohaojun@gmail.com>
 ;;
-;; Maintainer: Bao Haojun <baohaojun@gmail.com>
-;; Version: 1.0.0
-;; Homepage: https://github.com/baohaojun/org-jira
+;; Maintainer: Matthew Carter <m@ahungry.com>
+;; Version: 2.0.0
+;; Homepage: https://github.com/ahungry/org-jira
 ;; Package-Requires: ((cl-lib "0.5") (request "0.2.0"))
 
 ;; This file is not part of GNU Emacs.
@@ -25,28 +25,22 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License
-;; as published by the Free Software Foundation; either version 2
-;; of the License, or (at your option) any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program; if not, write to the Free Software
+;; along with this program.  If not, see
+;; <http://www.gnu.org/licenses/> or write to the Free Software
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 ;; 02110-1301, USA.
 
 ;;; Commentary:
-;;
+
 ;; This provides an extension to org-mode for syncing issues with JIRA
 ;; issue servers.
-;;
+
+;;; News:
+
+;;;; Changes since 1.0.1:
+;; - Converted many calls to async
+;; - Removed minor annoyances (position resets etc.)
+
 ;;; Code:
 
 (require 'org)
@@ -155,7 +149,7 @@ variables.
   "Ask before killing buffer.")
 (make-variable-buffer-local 'org-jira-buffer-kill-prompt)
 
-(defconst org-jira-version "0.1"
+(defconst org-jira-version "2.0.0"
   "Current version of org-jira.el.")
 
 (defvar org-jira-mode-hook nil

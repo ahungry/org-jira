@@ -1,4 +1,4 @@
-;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services
+;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services.
 
 ;; Copyright (C) 2016 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
@@ -14,6 +14,12 @@
 ;; Bao Haojun <baohaojun@gmail.com>
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
+;; Maintainer: Matthew Carter <m@ahungry.com>
+;; Version: 2.0.0
+;; Homepage: https://github.com/ahungry/org-jira
+
+;; This file is not part of GNU Emacs.
+
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -25,7 +31,10 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see
+;; <http://www.gnu.org/licenses/> or write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+;; 02110-1301, USA.
 
 ;; Author: Alexandru Harsanyi (AlexHarsanyi@gmail.com)
 ;; Created: December, 2009
@@ -33,22 +42,31 @@
 ;; Homepage: http://code.google.com/p/emacs-soap-client
 
 ;;; Commentary:
+
 ;; This file provides a programatic interface to JIRA.  It provides access to
 ;; JIRA from other programs, but no user level functionality.
 
 ;; Jira References:
-;;
+
 ;; Primary reference (on current Jira, only REST is supported):
 ;; https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis
-;;
+
 ;; Full API list reference:
 ;; https://docs.atlassian.com/jira/REST/cloud/
-;;
+
 ;; Legacy reference (unsupported and deprecated/unavailable):
 ;; http://confluence.atlassian.com/display/JIRA/Creating+a+SOAP+Client
-;;
+
 ;; JavaDoc for the Jira SOAP service
 ;; http://docs.atlassian.com/software/jira/docs/api/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/JiraSoapService.html
+
+;;; News:
+
+;;;; Changes since 0.0.0:
+;; - Converted many calls to async
+;; - Converted many calls to make use of caching
+
+;;; Code:
 
 (eval-when-compile (require 'cl))
 (require 'soap-client)
