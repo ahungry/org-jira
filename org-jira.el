@@ -521,10 +521,11 @@ With a prefix argument, allow you to customize the jql.  See
 (defun org-jira-get-issue-summary (issue)
   (org-jira-find-value issue 'fields 'summary))
 
-(defun org-jira-get-issue-list-callback (&rest data &allow-other-keys)
-  "Callback for async, DATA is the response from the request call."
-  (let ((issues (append (cdr (assoc 'issues (getf data :data))) nil)))
-    (org-jira-get-issues issues)))
+(defvar org-jira-get-issue-list-callback
+  (lambda (&rest data &allow-other-keys)
+    "Callback for async, DATA is the response from the request call."
+    (let ((issues (append (cdr (assoc 'issues (getf data :data))) nil)))
+      (org-jira-get-issues issues))))
 
 (defun org-jira-get-issues (issues)
   "Get list of ISSUES into an org buffer.
@@ -535,7 +536,7 @@ See`org-jira-get-issue-list'"
   ;; If the user doesn't provide a default, async call to build an issue list
   ;; from the JQL style query
   (interactive
-   (org-jira-get-issue-list 'org-jira-get-issue-list-callback))
+   (org-jira-get-issue-list org-jira-get-issue-list-callback))
   (let (project-buffer)
     (mapc (lambda (issue)
             (let* ((proj-key (org-jira-get-issue-project issue))
