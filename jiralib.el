@@ -335,8 +335,8 @@ request.el, so if at all possible, it should be avoided."
                                                                      (or (string-equal action (org-jira-find-value trans 'id))
                                                                          (string-equal action (org-jira-find-value trans 'name))))
                                                                    (cdadr (jiralib--rest-call-it
-                                                                          (format "/rest/api/2/issue/%s/transitions" (first params))
-                                                                          :params '((expand . "transitions.fields")))))))
+                                                                           (format "/rest/api/2/issue/%s/transitions" (first params))
+                                                                           :params '((expand . "transitions.fields")))))))
                                                 'fields))
       ('progressWorkflowAction (jiralib--rest-call-it
                                 (format "/rest/api/2/issue/%s/transitions" (first params))
@@ -770,7 +770,7 @@ Return nil if the field is not found"
   "Edit ISSUE-ID's comment COMMENT-ID to reflect the new COMMENT, invoke CALLBACK."
   (if (not jiralib-use-restapi)
       (jiralib-call "editComment" callback `((id . ,comment-id)
-                                    (body . ,comment)))
+                                             (body . ,comment)))
     (jiralib-call "editComment" callback issue-id comment-id comment)))
 
 (defun jiralib-create-issue (issue)
@@ -852,7 +852,7 @@ Return no more than MAX-NUM-RESULTS."
     (setq jiralib-projects-list
           (if jiralib-use-restapi
               (jiralib-call "getProjects" nil)
-              (jiralib-call "getProjectsNoSchemes" nil)))))
+            (jiralib-call "getProjectsNoSchemes" nil)))))
 
 (defun jiralib-get-saved-filters ()
   "Get all saved filters available for the currently logged in user."
