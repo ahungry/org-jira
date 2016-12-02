@@ -1007,7 +1007,7 @@ See`org-jira-get-issue-list'"
   (interactive)
   (ensure-on-issue
    (let* ((issue-id (org-jira-id))
-          (actions (jiralib-get-available-actions issue-id))
+          (actions (jiralib-get-available-actions issue-id (org-jira-get-issue-val-from-org 'status)))
           (action (org-jira-read-action actions))
           (rest-fieds (jiralib-call "getFieldsForAction" nil issue-id action))
           (fields (jiralib-get-fields-for-action issue-id action))

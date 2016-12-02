@@ -270,7 +270,9 @@ request.el, so if at all possible, it should be avoided."
                                      :params '((expand . "description,lead,url,projectKeys")))
                                     nil)
                             )))
-      (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
+      (when projects
+        (setq jiralib-issue-regexp
+              (concat "\\<" (regexp-opt projects) "-[0-9]+\\>")))))
 
   (if (not jiralib-use-restapi)
       (car (apply 'jiralib--call-it method params))
@@ -533,12 +535,41 @@ query."
     (setq limit 100))
   (jiralib-call "getIssuesFromJqlSearch" callback jql limit))
 
-(defun jiralib-get-available-actions (issue-key)
+;; @todo Do I need to start with * to enable describe-variable
+(defcustom jiralib-available-actions-cache-p t
+  "*Set to t to enable caching for jiralib-get-available-actions.
+
+If nil, will disable caching for this endpoint.
+
+Possible side-effects:
+
+  - If the server has the project workflow updated, the cache
+saved here will be incorrect.
+
+  - If the issue is not up to date with the remote, the wrong
+cache key may be queried."
+  :type 'boolean
+  :group 'jiralib)
+
+(defvar jiralib-available-actions-cache nil "An alist of available actions.")
+
+(defun jiralib-get-available-actions (issue-key &optional status)
   "Return the available workflow actions for ISSUE-KEY.
+This uses STATUS as the cache key.
 This runs the getAvailableActions SOAP method."
-  (jiralib-make-assoc-list
-   (jiralib-call "getAvailableActions" nil issue-key)
-   'id 'name))
+  (if (and jiralib-available-actions-cache-p status)
+      (progn
+        (unless (assoc status jiralib-available-actions-cache)
+          (push (cons status
+                      (jiralib-make-assoc-list
+                       (jiralib-call "getAvailableActions" nil issue-key)
+                       'id 'name))
+                jiralib-available-actions-cache))
+        (cdr (assoc status jiralib-available-actions-cache)))
+    (progn
+      (jiralib-make-assoc-list
+       (jiralib-call "getAvailableActions" nil issue-key)
+       'id 'name))))
 
 (defun jiralib-get-fields-for-action (issue-key action-id)
   "Return the required fields to change ISSUE-KEY to ACTION-ID."
