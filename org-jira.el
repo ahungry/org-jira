@@ -1099,15 +1099,19 @@ See`org-jira-get-issue-list'"
                                                          (jiralib-get-issue-types))))
       ;; This callback occurs on success
       (lambda (&rest data &allow-other-keys)
-        (message "Issue updated!")
-        ;; Another chained async call, feels like javascript now...
-        (jiralib-get-issue
-         issue-id
-         (lambda (&rest data &allow-other-keys)
-           (org-jira-get-issues (list (getf data :data)))))
-        )
+        ;; We have to snag issue-id out of the response because the callback can't see it.
+        (let ((issue-id (replace-regexp-in-string
+                         ".*issue\\/\\(.*\\)"
+                         "\\1"
+                         (request-response-url (getf data :response)))))
+          (message (format "Issue '%s' updated!" issue-id))
+          (jiralib-get-issue
+           issue-id
+           (lambda (&rest data &allow-other-keys)
+             (org-jira-get-issues (list (getf data :data)))))
+          ))
       )
-     )))
+     ))))
 
 (defun org-jira-parse-issue-id ()
   "Get issue id from org text."
