@@ -535,9 +535,8 @@ query."
     (setq limit 100))
   (jiralib-call "getIssuesFromJqlSearch" callback jql limit))
 
-;; @todo Do I need to start with * to enable describe-variable
 (defcustom jiralib-available-actions-cache-p t
-  "*Set to t to enable caching for jiralib-get-available-actions.
+  "Set to t to enable caching for jiralib-get-available-actions.
 
 If nil, will disable caching for this endpoint.
 
@@ -571,18 +570,44 @@ This runs the getAvailableActions SOAP method."
        (jiralib-call "getAvailableActions" nil issue-key)
        'id 'name))))
 
+(defcustom jiralib-fields-for-action-cache-p t
+  "Set to t to enable caching for jiralib-get-fields-for-action.
+
+If nil, will disable caching for this endpoint.
+
+Possible side-effects:
+
+  - If many tasks have different workflows, you may want to disable this."
+  :type 'boolean
+  :group 'jiralib)
+
+(defvar jiralib-fields-for-action-cache nil "An alist of available fields.")
+
+(defun jiralib-get-fields-for-action-with-cache (issue-key action-id)
+  "Return the required fields to change ISSUE-KEY to ACTION-ID."
+  (if (and jiralib-fields-for-action-cache-p action-id)
+      (progn
+        (unless (assoc action-id jiralib-fields-for-action-cache)
+          (push (cons action-id
+                      (jiralib-call "getFieldsForAction" nil issue-key action-id))
+                jiralib-fields-for-action-cache))
+        (cdr (assoc action-id jiralib-fields-for-action-cache)))
+    (jiralib-call "getFieldsForAction" nil issue-key action-id)))
+
 (defun jiralib-get-fields-for-action (issue-key action-id)
   "Return the required fields to change ISSUE-KEY to ACTION-ID."
   (if jiralib-use-restapi
-      (let ((fields (jiralib-call "getFieldsForAction" nil issue-key action-id)))
+      (let ((fields (jiralib-get-fields-for-action-with-cache issue-key action-id)))
         (mapcar (lambda (field)
-                  (cons (symbol-name (car field)) (format "%s (required: %s)"
-                                                          (org-jira-find-value field 'name)
-                                                          (if (eq (org-jira-find-value field 'required) :json-false)
-                                                              "nil"
-                                                            "t")))) fields))
+                  (cons (symbol-name (car field))
+                        (format "%s (required: %s)"
+                                (org-jira-find-value field 'name)
+                                (if (eq (org-jira-find-value field 'required) :json-false)
+                                    "nil"
+                                  "t"))))
+                fields))
     (jiralib-make-assoc-list
-     (jiralib-call "getFieldsForAction" nil issue-key action-id)
+     (jiralib-get-fields-for-action-with-cache issue-key action-id)
      'id 'name)))
 
 (defun jiralib-progress-workflow-action (issue-key action-id params)

@@ -1011,7 +1011,6 @@ See`org-jira-get-issue-list'"
                     issue-id
                     (org-jira-get-issue-val-from-org 'status)))
           (action (org-jira-read-action actions))
-          (rest-fields (jiralib-call "getFieldsForAction" nil issue-id action))
           (fields (jiralib-get-fields-for-action issue-id action))
           (field-key)
           (custom-fields-collector nil)
