@@ -256,7 +256,9 @@ This produces a noticeable slowdown and is not recommended by
 request.el, so if at all possible, it should be avoided."
   ;; @todo Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
-  (setq jiralib-complete-callback callback)
+  (setq jiralib-complete-callback
+        ;; Don't run with async if we don't have a login token yet.
+        (if jiralib-token callback nil))
 
   ;; If we don't have a regex set, ensure it is set BEFORE any async
   ;; calls are processing, or we're going to have a bad time.
@@ -265,7 +267,8 @@ request.el, so if at all possible, it should be avoided."
     (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
                             (append (jiralib--rest-call-it
                                      "/rest/api/2/project"
-                                     :params '((expand . "description,lead,url,projectKeys"))) nil)
+                                     :params '((expand . "description,lead,url,projectKeys")))
+                                    nil)
                             )))
       (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
 
