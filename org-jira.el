@@ -1034,7 +1034,8 @@ See`org-jira-get-issue-list'"
                        (cons
                         (funcall (if jiralib-use-restapi
                                      #'list
-                                   #'cons) field-key
+                                   #'cons)
+                                 field-key
                                    (if (eq field-key 'resolution)
                                        (org-jira-read-resolution)
                                      (let ((field-value (completing-read
@@ -1050,9 +1051,12 @@ See`org-jira-get-issue-list'"
                                          field-value))))
                         custom-fields-collector))))
              custom-fields-collector)))
-     (jiralib-progress-workflow-action issue-id action custom-fields))
-   (org-jira-refresh-issue)))
-
+     (jiralib-progress-workflow-action
+      issue-id
+      action
+      custom-fields
+      (lambda (&rest data &allow-other-keys)
+        (org-jira-refresh-issue))))))
 
 (defun org-jira-get-id-name-alist (name ids-to-names)
   "Finds the id corresponding to NAME in IDS-TO-NAMES and returns an alist with id and name as keys"

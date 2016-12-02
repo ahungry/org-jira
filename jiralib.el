@@ -610,12 +610,16 @@ Possible side-effects:
      (jiralib-get-fields-for-action-with-cache issue-key action-id)
      'id 'name)))
 
-(defun jiralib-progress-workflow-action (issue-key action-id params)
-  "Progress issue with ISSUE-KEY to action ACTION-ID, and provide the needed PARAMS."
+(defun jiralib-progress-workflow-action (issue-key action-id params &optional callback)
+  "Progress issue with ISSUE-KEY to action ACTION-ID, and provide the needed PARAMS.
+
+When CALLBACK is present, this will run async."
   (if jiralib-use-restapi
-      (jiralib-call "progressWorkflowAction" nil issue-key `((transition (id . ,action-id)))
+      (jiralib-call "progressWorkflowAction"
+                    callback issue-key `((transition (id . ,action-id)))
                     `((fields . ,params)))
-    (jiralib-call "progressWorkflowAction" nil issue-key action-id (jiralib-make-remote-field-values params))))
+    (jiralib-call "progressWorkflowAction"
+                  callback issue-key action-id (jiralib-make-remote-field-values params))))
 
 (defun jiralib-add-worklog-and-autoadjust-remaining-estimate (issue-key start-date time-spent comment)
   "Log time spent on ISSUE-KEY to its worklog.
