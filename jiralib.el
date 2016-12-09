@@ -1,4 +1,4 @@
-;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services
+;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services.
 
 ;; Copyright (C) 2016 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
@@ -14,6 +14,12 @@
 ;; Bao Haojun <baohaojun@gmail.com>
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
+;; Maintainer: Matthew Carter <m@ahungry.com>
+;; Version: 2.0.0
+;; Homepage: https://github.com/ahungry/org-jira
+
+;; This file is not part of GNU Emacs.
+
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -25,7 +31,10 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see
+;; <http://www.gnu.org/licenses/> or write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+;; 02110-1301, USA.
 
 ;; Author: Alexandru Harsanyi (AlexHarsanyi@gmail.com)
 ;; Created: December, 2009
@@ -33,19 +42,31 @@
 ;; Homepage: http://code.google.com/p/emacs-soap-client
 
 ;;; Commentary:
+
 ;; This file provides a programatic interface to JIRA.  It provides access to
 ;; JIRA from other programs, but no user level functionality.
 
 ;; Jira References:
-;;
+
 ;; Primary reference (on current Jira, only REST is supported):
 ;; https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis
-;;
+
+;; Full API list reference:
+;; https://docs.atlassian.com/jira/REST/cloud/
+
 ;; Legacy reference (unsupported and deprecated/unavailable):
 ;; http://confluence.atlassian.com/display/JIRA/Creating+a+SOAP+Client
-;;
+
 ;; JavaDoc for the Jira SOAP service
 ;; http://docs.atlassian.com/software/jira/docs/api/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/JiraSoapService.html
+
+;;; News:
+
+;;;; Changes since 0.0.0:
+;; - Converted many calls to async
+;; - Converted many calls to make use of caching
+
+;;; Code:
 
 (eval-when-compile (require 'cl))
 (require 'soap-client)
@@ -221,8 +242,10 @@ After a succesful login, store the authentication token in
                      url-http-response-status)))
         (kill-buffer buffer)))))
 
-(defun jiralib-call (method &rest params)
-  "Invoke the JIRA METHOD with supplied PARAMS.
+(defvar jiralib-complete-callback nil)
+
+(defun jiralib-call (method callback &rest params)
+  "Invoke the Jira METHOD, then CALLBACK with supplied PARAMS.
 
 This function should be used for all JIRA interface calls, as the
 method ensures the user is logged in and invokes `soap-invoke'
@@ -232,9 +255,43 @@ All JIRA inteface methods take an authentication token as the
 first argument.  The authentication token is supplied by this
 function, so PARAMS should omit this parameter.  For example, the
 \"getIssue\" method takes two parameters: auth and key, however,
-when invoking it through `jiralib-call', the call shoulbe be:
+when invoking it through `jiralib-call', the call should be:
 
-  (jiralib-call \"getIssue\" KEY)"
+  (jiralib-call \"getIssue\" KEY)
+
+CALLBACK should be the post processing function to run with the
+completed data from the request result, which can be accessed with:
+
+  (getf data :data)
+
+as such, the CALLBACK should follow this type of form:
+
+  (lambda (&rest data &allow-other-keys)
+    (print (getf data :data)))
+
+If CALLBACK is set to nil then the request will occur with sync.
+This produces a noticeable slowdown and is not recommended by
+request.el, so if at all possible, it should be avoided."
+  ;; @todo Probably pass this all the way down, but I think
+  ;; it may be OK at the moment to just set the variable each time.
+  (setq jiralib-complete-callback
+        ;; Don't run with async if we don't have a login token yet.
+        (if jiralib-token callback nil))
+
+  ;; If we don't have a regex set, ensure it is set BEFORE any async
+  ;; calls are processing, or we're going to have a bad time.
+  ;; This should only end up running once per session.
+  (unless jiralib-issue-regexp
+    (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
+                            (append (jiralib--rest-call-it
+                                     "/rest/api/2/project"
+                                     :params '((expand . "description,lead,url,projectKeys")))
+                                    nil)
+                            )))
+      (when projects
+        (setq jiralib-issue-regexp
+              (concat "\\<" (regexp-opt projects) "-[0-9]+\\>")))))
+
   (if (not jiralib-use-restapi)
       (car (apply 'jiralib--call-it method params))
     (unless jiralib-token
@@ -265,7 +322,8 @@ when invoking it through `jiralib-call', the call shoulbe be:
                      :data (json-encode `((body . ,(third params))))
                      :type "PUT"))
       ('getComments (org-jira-find-value (jiralib--rest-call-it
-                                          (format "/rest/api/2/issue/%s/comment" (first params))) 'comments))
+                                          (format "/rest/api/2/issue/%s/comment" (first params)))
+                                         'comments))
       ('getComponents (jiralib--rest-call-it
                        (format "/rest/api/2/project/%s/components" (first params))))
       ('getIssue (jiralib--rest-call-it
@@ -274,7 +332,8 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                                               "/rest/api/2/search"
                                                               :type "POST"
                                                               :data (json-encode `((jql . ,(first params))
-                                                                                   (maxResults . ,(second params))))))) nil))
+                                                                                   (maxResults . ,(second params)))))))
+                                        nil))
       ('getPriorities (jiralib--rest-call-it
                        "/rest/api/2/priority"))
       ('getProjects (jiralib--rest-call-it "rest/api/2/project"))
@@ -294,8 +353,8 @@ when invoking it through `jiralib-call', the call shoulbe be:
                                                                      (or (string-equal action (org-jira-find-value trans 'id))
                                                                          (string-equal action (org-jira-find-value trans 'name))))
                                                                    (cdadr (jiralib--rest-call-it
-                                                                          (format "/rest/api/2/issue/%s/transitions" (first params))
-                                                                          :params '((expand . "transitions.fields")))))))
+                                                                           (format "/rest/api/2/issue/%s/transitions" (first params))
+                                                                           :params '((expand . "transitions.fields")))))))
                                                 'fields))
       ('progressWorkflowAction (jiralib--rest-call-it
                                 (format "/rest/api/2/issue/%s/transitions" (first params))
@@ -310,19 +369,27 @@ when invoking it through `jiralib-call', the call shoulbe be:
                      :data (json-encode `((fields . ,(second params)))))))))
 
 (defun jiralib--soap-call-it (&rest args)
+  "Deprecated SOAP call endpoint.  Will be removed soon.
+Pass ARGS to jiralib-call."
   (let ((jiralib-token nil)
-        (jiralib-use-restapi nil)) (apply #'jiralib-call args)))
+        (jiralib-use-restapi nil))
+    (apply #'jiralib-call args)))
 
 (defun jiralib--rest-call-it (api &rest args)
-  "Invoke the corresponding jira rest method API, passing ARGS to REQUEST."
+  "Invoke the corresponding jira rest method API.
+Invoking COMPLETE-CALLBACK when the
+JIRALIB-COMPLETE-CALLBACK is non-nil, request finishes, and
+passing ARGS to REQUEST."
   (append (request-response-data
            (apply #'request (if (string-match "^http[s]*://" api) api ;; If an absolute path, use it
                               (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
                                       (replace-regexp-in-string "^/*" "" api)))
-                  :sync t
+                  :sync (not jiralib-complete-callback)
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
                   :parser 'json-read
-                  args)) nil))
+                  :complete jiralib-complete-callback
+                  args))
+          nil))
 
 (defun jiralib--call-it (method &rest params)
   "Invoke the JIRA METHOD with supplied PARAMS.
@@ -395,13 +462,14 @@ emacs-lisp"
   "Return jira rest api for issue KEY."
   (concat "rest/api/2/issue/" key))
 
-(defun jiralib-update-issue (key fields)
-  "Update the issue with id KEY with the values in FIELDS."
-
-  (jiralib-call "updateIssue" key (if jiralib-use-restapi
-                                      fields
-                                    (jiralib-make-remote-field-values fields))))
-
+(defun jiralib-update-issue (key fields &optional callback)
+  "Update the issue with id KEY with the values in FIELDS, invoking CALLBACK."
+  (jiralib-call
+   "updateIssue"
+   callback
+   key (if jiralib-use-restapi
+           fields
+         (jiralib-make-remote-field-values fields))))
 
 (defvar jiralib-status-codes-cache nil)
 
@@ -413,7 +481,7 @@ This function will only ask JIRA for the list of codes once, then
 will cache it."
   (unless jiralib-status-codes-cache
     (setq jiralib-status-codes-cache
-          (jiralib-make-assoc-list (jiralib-call "getStatuses") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getStatuses" nil) 'id 'name)))
   jiralib-status-codes-cache)
 
 (defvar jiralib-issue-types-cache nil)
@@ -426,7 +494,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-issue-types-cache
     (setq jiralib-issue-types-cache
-          (jiralib-make-assoc-list (jiralib-call "getIssueTypes") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getIssueTypes" nil) 'id 'name)))
   jiralib-issue-types-cache)
 
 (defvar jiralib-priority-codes-cache nil)
@@ -439,7 +507,7 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-priority-codes-cache
     (setq jiralib-priority-codes-cache
-          (jiralib-make-assoc-list (jiralib-call "getPriorities") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getPriorities" nil) 'id 'name)))
   jiralib-priority-codes-cache)
 
 (defvar jiralib-resolution-code-cache nil)
@@ -452,18 +520,17 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-resolution-code-cache
     (setq jiralib-resolution-code-cache
-          (jiralib-make-assoc-list (jiralib-call "getResolutions") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getResolutions" nil) 'id 'name)))
   jiralib-resolution-code-cache)
 
 (defvar jiralib-issue-regexp nil)
 
-;; NOTE: it is not such a good ideea to use this, as it needs a JIRA
+;; NOTE: it is not such a good idea to use this, as it needs a JIRA
 ;; connection to construct the regexp (the user might be prompted for a JIRA
 ;; username and password).
 ;;
 ;; The best use of this function is to generate the regexp once-off and
 ;; persist it somewhere.
-
 (defun jiralib-get-issue-regexp ()
   "Return a regexp that will match an issue id.
 
@@ -472,11 +539,11 @@ database.  An issue is assumed to be in the format KEY-NUMBER,
 where KEY is a project key and NUMBER is the issue number."
   (unless jiralib-issue-regexp
     (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
-                            (jiralib-call "getProjectsNoSchemes"))))
+                            (jiralib-call "getProjectsNoSchemes" nil))))
       (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
   jiralib-issue-regexp)
 
-(defun jiralib-do-jql-search (jql &optional limit)
+(defun jiralib-do-jql-search (jql &optional limit callback)
   "Run a JQL query and return the list of issues that matched.
 LIMIT is the maximum number of queries to return.  Note that JIRA
 has an internal limit of how many queries to return, as such, it
@@ -484,35 +551,93 @@ might not be possible to find *ALL* the issues that match a
 query."
   (unless (or limit (numberp limit))
     (setq limit 100))
-  (jiralib-call "getIssuesFromJqlSearch" jql limit))
+  (jiralib-call "getIssuesFromJqlSearch" callback jql limit))
 
-(defun jiralib-get-available-actions (issue-key)
+(defcustom jiralib-available-actions-cache-p t
+  "Set to t to enable caching for jiralib-get-available-actions.
+
+If nil, will disable caching for this endpoint.
+
+Possible side-effects:
+
+  - If the server has the project workflow updated, the cache
+saved here will be incorrect.
+
+  - If the issue is not up to date with the remote, the wrong
+cache key may be queried."
+  :type 'boolean
+  :group 'jiralib)
+
+(defvar jiralib-available-actions-cache nil "An alist of available actions.")
+
+(defun jiralib-get-available-actions (issue-key &optional status)
   "Return the available workflow actions for ISSUE-KEY.
+This uses STATUS as the cache key.
 This runs the getAvailableActions SOAP method."
-  (jiralib-make-assoc-list
-   (jiralib-call "getAvailableActions" issue-key)
-   'id 'name))
+  (if (and jiralib-available-actions-cache-p status)
+      (progn
+        (unless (assoc status jiralib-available-actions-cache)
+          (push (cons status
+                      (jiralib-make-assoc-list
+                       (jiralib-call "getAvailableActions" nil issue-key)
+                       'id 'name))
+                jiralib-available-actions-cache))
+        (cdr (assoc status jiralib-available-actions-cache)))
+    (progn
+      (jiralib-make-assoc-list
+       (jiralib-call "getAvailableActions" nil issue-key)
+       'id 'name))))
+
+(defcustom jiralib-fields-for-action-cache-p t
+  "Set to t to enable caching for jiralib-get-fields-for-action.
+
+If nil, will disable caching for this endpoint.
+
+Possible side-effects:
+
+  - If many tasks have different workflows, you may want to disable this."
+  :type 'boolean
+  :group 'jiralib)
+
+(defvar jiralib-fields-for-action-cache nil "An alist of available fields.")
+
+(defun jiralib-get-fields-for-action-with-cache (issue-key action-id)
+  "Return the required fields to change ISSUE-KEY to ACTION-ID."
+  (if (and jiralib-fields-for-action-cache-p action-id)
+      (progn
+        (unless (assoc action-id jiralib-fields-for-action-cache)
+          (push (cons action-id
+                      (jiralib-call "getFieldsForAction" nil issue-key action-id))
+                jiralib-fields-for-action-cache))
+        (cdr (assoc action-id jiralib-fields-for-action-cache)))
+    (jiralib-call "getFieldsForAction" nil issue-key action-id)))
 
 (defun jiralib-get-fields-for-action (issue-key action-id)
   "Return the required fields to change ISSUE-KEY to ACTION-ID."
   (if jiralib-use-restapi
-      (let ((fields (jiralib-call "getFieldsForAction" issue-key action-id)))
+      (let ((fields (jiralib-get-fields-for-action-with-cache issue-key action-id)))
         (mapcar (lambda (field)
-                  (cons (symbol-name (car field)) (format "%s (required: %s)"
-                                                          (org-jira-find-value field 'name)
-                                                          (if (eq (org-jira-find-value field 'required) :json-false)
-                                                              "nil"
-                                                            "t")))) fields))
+                  (cons (symbol-name (car field))
+                        (format "%s (required: %s)"
+                                (org-jira-find-value field 'name)
+                                (if (eq (org-jira-find-value field 'required) :json-false)
+                                    "nil"
+                                  "t"))))
+                fields))
     (jiralib-make-assoc-list
-     (jiralib-call "getFieldsForAction" issue-key action-id)
+     (jiralib-get-fields-for-action-with-cache issue-key action-id)
      'id 'name)))
 
-(defun jiralib-progress-workflow-action (issue-key action-id params)
-  "Progress issue with ISSUE-KEY to action ACTION-ID, and provide the needed PARAMS."
+(defun jiralib-progress-workflow-action (issue-key action-id params &optional callback)
+  "Progress issue with ISSUE-KEY to action ACTION-ID, and provide the needed PARAMS.
+
+When CALLBACK is present, this will run async."
   (if jiralib-use-restapi
-      (jiralib-call "progressWorkflowAction" issue-key `((transition (id . ,action-id)))
+      (jiralib-call "progressWorkflowAction"
+                    callback issue-key `((transition (id . ,action-id)))
                     `((fields . ,params)))
-    (jiralib-call "progressWorkflowAction" issue-key action-id (jiralib-make-remote-field-values params))))
+    (jiralib-call "progressWorkflowAction"
+                  callback issue-key action-id (jiralib-make-remote-field-values params))))
 
 (defun jiralib-add-worklog-and-autoadjust-remaining-estimate (issue-key start-date time-spent comment)
   "Log time spent on ISSUE-KEY to its worklog.
@@ -527,6 +652,7 @@ hours; 10h, 120h days; 10d, 120d weeks.
 
 COMMENT will be added to this worklog."
   (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
+                nil
                 issue-key
                 `((startDate . ,start-date)
                   (timeSpent . ,time-spent)
@@ -654,28 +780,28 @@ Return nil if the field is not found"
                   (cdr (assoc 'id filter))))
           (jiralib-get-saved-filters)))
 
-(defun jiralib-add-comment (issue-key comment)
-  "Add to issue with ISSUE-KEY the given COMMENT."
-  (jiralib-call "addComment" issue-key `((body . ,comment))))
+(defun jiralib-add-comment (issue-key comment &optional callback)
+  "Add to issue with ISSUE-KEY the given COMMENT, invoke CALLBACK."
+  (jiralib-call "addComment" callback issue-key `((body . ,comment))))
 
-(defun jiralib-edit-comment (issue-id comment-id comment)
-  "Edit ISSUE-ID's comment COMMENT-ID to reflect the new COMMENT."
+(defun jiralib-edit-comment (issue-id comment-id comment &optional callback)
+  "Edit ISSUE-ID's comment COMMENT-ID to reflect the new COMMENT, invoke CALLBACK."
   (if (not jiralib-use-restapi)
-      (jiralib-call "editComment" `((id . ,comment-id)
-                                    (body . ,comment)))
-    (jiralib-call "editComment" issue-id comment-id comment)))
+      (jiralib-call "editComment" callback `((id . ,comment-id)
+                                             (body . ,comment)))
+    (jiralib-call "editComment" callback issue-id comment-id comment)))
 
 (defun jiralib-create-issue (issue)
   "Create a new ISSUE in JIRALIB.
 
 ISSUE is a Hashtable object."
-  (jiralib-call "createIssue" issue))
+  (jiralib-call "createIssue" nil issue))
 
 (defun jiralib-create-subtask (subtask parent-issue-id)
   "Create SUBTASK for issue with PARENT-ISSUE-ID.
 
 SUBTASK is a Hashtable object."
-  (jiralib-call "createIssueWithParent" subtask parent-issue-id))
+  (jiralib-call "createIssueWithParent" nil subtask parent-issue-id))
 
 
 (defvar jiralib-subtask-types-cache nil)
@@ -688,37 +814,44 @@ This function will only ask JIRA for the list of codes once, than
 will cache it."
   (unless jiralib-subtask-types-cache
     (setq jiralib-subtask-types-cache
-          (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes") 'id 'name)))
+          (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes" nil) 'id 'name)))
   jiralib-subtask-types-cache)
 
 
-(defun jiralib-get-comments (issue-key)
-  "Return all comments associated with issue ISSUE-KEY."
-  (jiralib-call "getComments" issue-key))
+(defun jiralib-get-comments (issue-key &optional callback)
+  "Return all comments associated with issue ISSUE-KEY, invoking CALLBACK."
+  (jiralib-call "getComments" callback issue-key))
 
 (defun jiralib-get-worklogs (issue-key)
   "Return all worklogs associated with issue ISSUE-KEY."
-  (jiralib-call "getWorklogs" issue-key))
+  (jiralib-call "getWorklogs" nil issue-key))
 
 (defun jiralib-update-worklog (worklog)
   "Update the WORKLOG, updating the ETA for the related issue."
-  (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" worklog))
+  (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" nil worklog))
+
+(defvar jiralib-components-cache nil "An alist of project components.")
 
 (defun jiralib-get-components (project-key)
   "Return all components available in the project PROJECT-KEY."
-  (jiralib-make-assoc-list (jiralib-call "getComponents" project-key) 'id 'name))
+  (unless (assoc project-key jiralib-components-cache)
+    (push (cons project-key
+                (jiralib-make-assoc-list
+                 (jiralib-call "getComponents" nil project-key) 'id 'name))
+          jiralib-components-cache))
+  (cdr (assoc project-key jiralib-components-cache)))
 
-(defun jiralib-get-issue (issue-key)
-  "Get the issue with key ISSUE-KEY."
-  (jiralib-call "getIssue" issue-key))
+(defun jiralib-get-issue (issue-key &optional callback)
+  "Get the issue with key ISSUE-KEY, running CALLBACK after."
+  (jiralib-call "getIssue" callback issue-key))
 
 (defun jiralib-get-issues-from-filter (filter-id)
   "Get the issues from applying saved filter FILTER-ID."
-  (jiralib-call "getIssuesFromFilter" filter-id))
+  (jiralib-call "getIssuesFromFilter" nil filter-id))
 
 (defun jiralib-get-issues-from-text-search (search-terms)
   "Find issues using free text search SEARCH-TERMS."
-  (jiralib-call "getIssuesFromTextSearch" search-terms))
+  (jiralib-call "getIssuesFromTextSearch" nil search-terms))
 
 (defun jiralib-get-issues-from-text-search-with-project
     (project-keys search-terms max-num-results)
@@ -726,6 +859,7 @@ will cache it."
 
 Return no more than MAX-NUM-RESULTS."
   (jiralib-call "getIssuesFromTextSearchWithProject"
+                nil
                 (apply 'vector project-keys) search-terms max-num-results))
 
 ;; Modified by Brian Zwahr to use getProjectsNoSchemes instead of getProjects
@@ -735,32 +869,37 @@ Return no more than MAX-NUM-RESULTS."
       jiralib-projects-list
     (setq jiralib-projects-list
           (if jiralib-use-restapi
-              (jiralib-call "getProjects")
-              (jiralib-call "getProjectsNoSchemes")))))
+              (jiralib-call "getProjects" nil)
+            (jiralib-call "getProjectsNoSchemes" nil)))))
 
 (defun jiralib-get-saved-filters ()
   "Get all saved filters available for the currently logged in user."
-  (jiralib-make-assoc-list (jiralib-call "getSavedFilters") 'id 'name))
+  (jiralib-make-assoc-list (jiralib-call "getSavedFilters" nil) 'id 'name))
 
 (defun jiralib-get-server-info ()
   "Return the Server information such as baseUrl, version, edition, buildDate, buildNumber."
-  (jiralib-call "getServerInfo"))
+  (jiralib-call "getServerInfo" nil))
 
 (defun jiralib-get-sub-task-issue-types ()
   "Return all visible subtask issue types in the system."
-  (jiralib-call "getSubTaskIssueTypes"))
+  (jiralib-call "getSubTaskIssueTypes" nil))
 
 (defun jiralib-get-user (username)
   "Return a user's information given their USERNAME."
-  (jiralib-call "getUser" username))
+  (jiralib-call "getUser" nil username))
+
+(defvar jiralib-users-cache nil "Cached list of users.")
 
 (defun jiralib-get-users (project-key)
   "Return assignable users information given the PROJECT-KEY."
-  (jiralib-call "getUsers" project-key))
+  (unless jiralib-users-cache
+    (setq jiralib-users-cache
+          (jiralib-call "getUsers" nil project-key)))
+  jiralib-users-cache)
 
 (defun jiralib-get-versions (project-key)
   "Return all versions available in project PROJECT-KEY."
-  (jiralib-call "getVersions" project-key))
+  (jiralib-call "getVersions" nil project-key))
 
 (defun jiralib-strip-cr (string)
   "Remove carriage returns from STRING."
