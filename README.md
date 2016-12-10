@@ -1,6 +1,18 @@
 # org-jira mode
 
-Use [[http://www.atlassian.com/software/jira/overview/][Jira]] in Emacs org-mode.
+Use Jira in Emacs org-mode.
+
+## TOC
+
+- [Setup](#setup)
+  * [Install](#installation)
+  * [Config](#configuration)
+- [Usage](#usage)
+  * [Getting Started](#gettingstarted)
+  * [Keybinds](#keybinds)
+- [About](#about)
+  * [Maintainer](#maintainer)
+  * [License](#license)
 
 # Setup
 
@@ -37,6 +49,8 @@ even if your jiralib-url is https._
 
 # Usage
 
+## Getting Started
+
 org-jira mode is easy to use, to get started (after installing this
 library) try running `M-x org-jira-get-issues`.  You should see that
 it pulls in all issues that are assigned to you.
@@ -44,7 +58,7 @@ it pulls in all issues that are assigned to you.
 Following that, you can try out some of the org-jira mode commands by
 visiting one of the files (they're named after your Jira project code,
 for example, 'EX.org' for a project named 'EX').
-
+## Keybinds
 Some of the important keybindings:
 
 ```lisp
@@ -67,12 +81,13 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
 ```
 
+# About
 
-# Maintainer
+## Maintainer
 
 You can reach me directly: Matthew Carter <m@ahungry.com>, or file an
 issue here on https://github.com/ahungry/org-jira.
 
-# License
+## License
 
 GPLv3
