@@ -14,10 +14,8 @@ Use Jira in Emacs org-mode.
   * [Maintainer](#maintainer)
   * [License](#license)
 
-# Setup
-
-## Installation
-
+## Setup
+### Installation
 To install, just grab it off of MELPA (ensure your ~/.emacs already
 has MELPA set up):
 
@@ -28,9 +26,7 @@ has MELPA set up):
 ```
 
 Then run `M-x package-install RET org-jira RET` and you're done!
-
-## Configuration
-
+### Configuration
 In your ~/.emacs, you should set the variable as such:
 
 ```conf
@@ -47,10 +43,8 @@ machine your-site.atlassian.net login you@example.com password yourPassword port
 _Please note that in the authinfo file, port 80 should be specified
 even if your jiralib-url is https._
 
-# Usage
-
-## Getting Started
-
+## Usage
+### Getting Started
 org-jira mode is easy to use, to get started (after installing this
 library) try running `M-x org-jira-get-issues`.  You should see that
 it pulls in all issues that are assigned to you.
@@ -58,7 +52,7 @@ it pulls in all issues that are assigned to you.
 Following that, you can try out some of the org-jira mode commands by
 visiting one of the files (they're named after your Jira project code,
 for example, 'EX.org' for a project named 'EX').
-## Keybinds
+### Keybinds
 Some of the important keybindings:
 
 ```lisp
@@ -81,13 +75,10 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
 ```
 
-# About
-
-## Maintainer
-
+## About
+### Maintainer
 You can reach me directly: Matthew Carter <m@ahungry.com>, or file an
 issue here on https://github.com/ahungry/org-jira.
 
-## License
-
+### License
 GPLv3
