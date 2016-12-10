@@ -886,7 +886,7 @@ Return no more than MAX-NUM-RESULTS."
 
 (defun jiralib-get-user (username)
   "Return a user's information given their USERNAME."
-  (cond ((string= "unassigned" username) nil)
+  (cond ((eq 0 (length username)) nil) ;; Unassigned
         (t (jiralib-call "getUser" nil username))))
 
 (defvar jiralib-users-cache nil "Cached list of users.")

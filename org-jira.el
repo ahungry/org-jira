@@ -316,7 +316,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 (defun org-jira-get-assignable-users (project-key)
   "Get the list of assignable users for PROJECT-KEY, adding user set jira-users first."
   (append
-   '(("Unassigned" . "unassigned"))
+   '(("Unassigned" . ""))
    org-jira-users
    (mapcar (lambda (user)
              (cons (cdr (assoc 'displayName user))
