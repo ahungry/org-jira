@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.1.0
+;; Version: 2.2.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,10 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.1.0:
+;; - Allow changing to unassigned user
+;; - Add new shortcut for quick assignment
 
 ;;;; Changes since 2.0.0:
 ;; - Change statusCategory to status value
@@ -155,7 +159,7 @@ variables.
   "Ask before killing buffer.")
 (make-variable-buffer-local 'org-jira-buffer-kill-prompt)
 
-(defconst org-jira-version "2.0.0"
+(defconst org-jira-version "2.2.0"
   "Current version of org-jira.el.")
 
 (defvar org-jira-mode-hook nil
@@ -253,6 +257,7 @@ variables.
     (define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
     (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
+    (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
     (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
     (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
@@ -311,7 +316,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 (defun org-jira-get-assignable-users (project-key)
   "Get the list of assignable users for PROJECT-KEY, adding user set jira-users first."
   (append
-   '(("Unassigned" . ""))
+   '(("Unassigned" . "unassigned"))
    org-jira-users
    (mapcar (lambda (user)
              (cons (cdr (assoc 'displayName user))
@@ -585,7 +590,8 @@ See`org-jira-get-issue-list'"
 
                       (mapc (lambda (entry)
                               (let ((val (org-jira-get-issue-val entry issue)))
-                                (when (and val (not (string= val "")))
+                                (when (or (and val (not (string= val "")))
+                                          (eq entry 'assignee)) ;; Always show assignee
                                   (org-entry-put (point) (symbol-name entry) val))))
                             '(assignee reporter type priority resolution status components created updated))
                       (org-entry-put (point) "ID" (org-jira-get-issue-key issue))
@@ -779,6 +785,19 @@ See`org-jira-get-issue-list'"
                                   (org-jira-insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'comment worklog)) ""))))))
           worklogs)))
 
+
+;;;###autoload
+(defun org-jira-assign-issue ()
+  "Update an issue with interactive re-assignment."
+  (interactive)
+  (let ((issue-id (org-jira-parse-issue-id)))
+    (if issue-id
+        (let* ((project (replace-regexp-in-string "-[0-9]+" "" issue-id))
+               (jira-users (org-jira-get-assignable-users project))
+               (user (completing-read "Assignee: " (mapcar 'car jira-users)))
+               (assignee (cdr (assoc user jira-users))))
+          (org-jira-update-issue-details issue-id :assignee assignee))
+      (error "Not on an issue"))))
 
 ;;;###autoload
 (defun org-jira-update-issue ()
@@ -1068,8 +1087,8 @@ See`org-jira-get-issue-list'"
     `((id . ,id)
       (name . ,name))))
 
-(defun org-jira-update-issue-details (issue-id)
-  "Update the details of issue ISSUE-ID."
+(defun org-jira-update-issue-details (issue-id &rest rest)
+  "Update the details of issue ISSUE-ID.  REST will contain optional input."
   (ensure-on-issue-id
    issue-id
    ;; Set up a bunch of values from the org content
@@ -1077,7 +1096,7 @@ See`org-jira-get-issue-list'"
           (org-issue-description (replace-regexp-in-string "^  " "" (org-jira-get-issue-val-from-org 'description)))
           (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
           (org-issue-type (org-jira-get-issue-val-from-org 'type))
-          (org-issue-assignee (org-jira-get-issue-val-from-org 'assignee))
+          (org-issue-assignee (getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
           (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
           (project-components (jiralib-get-components project)))
 
