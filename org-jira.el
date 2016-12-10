@@ -8,8 +8,9 @@
 ;; Bao Haojun <baohaojun@gmail.com>
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
-;; Version: 2.0.0
-;; Homepage: https://github.com/ahungry/org-jira
+;; URL: https://github.com/ahungry/org-jira
+;; Version: 2.1.0
+;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((cl-lib "0.5") (request "0.2.0"))
 
 ;; This file is not part of GNU Emacs.
@@ -36,6 +37,11 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.0.0:
+;; - Change statusCategory to status value
+;; - Clean out some redundant code
+;; - Add ELPA tags in keywords
 
 ;;;; Changes since 1.0.1:
 ;; - Converted many calls to async
@@ -410,7 +416,7 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
            (org-jira-transform-time-format tmp))
           ((eq key 'status)
            (if jiralib-use-restapi
-               (org-jira-find-value issue 'fields 'status 'statusCategory 'name)
+               (org-jira-find-value issue 'fields 'status 'name)
              (org-jira-find-value (jiralib-get-statuses) tmp)))
           ((eq key 'resolution)
            (if jiralib-use-restapi
@@ -1068,11 +1074,9 @@ See`org-jira-get-issue-list'"
    ;; Set up a bunch of values from the org content
    (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
           (org-issue-description (replace-regexp-in-string "^  " "" (org-jira-get-issue-val-from-org 'description)))
-          (org-issue-resolution (org-jira-get-issue-val-from-org 'resolution))
           (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
           (org-issue-type (org-jira-get-issue-val-from-org 'type))
           (org-issue-assignee (org-jira-get-issue-val-from-org 'assignee))
-          (org-issue-status (org-jira-get-issue-val-from-org 'status))
           (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
           (project-components (jiralib-get-components project)))
 
