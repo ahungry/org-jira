@@ -597,7 +597,13 @@ See`org-jira-get-issue-list'"
                                           (eq entry 'assignee)) ;; Always show assignee
                                   (org-entry-put (point) (symbol-name entry) val))))
                             '(assignee reporter type priority resolution status components created updated))
+
                       (org-entry-put (point) "ID" (org-jira-get-issue-key issue))
+
+                      ;; Insert the duedate as a deadline if it exists
+                      (let ((duedate (org-jira-get-issue-val 'duedate issue)))
+                        (when (> (length duedate) 0)
+                          (org-deadline nil duedate)))
 
                       (mapc (lambda (heading-entry)
                               (ensure-on-issue-id
