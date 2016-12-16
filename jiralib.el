@@ -299,6 +299,9 @@ request.el, so if at all possible, it should be avoided."
     (case (intern method)
       ('getStatuses (jiralib--rest-call-it "/rest/api/2/status"))
       ('getIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
+      ('getIssueTypesByProject
+       (let ((response (jiralib--rest-call-it (format "/rest/api/2/project/%s" (first params)))))
+         (coerce (cdr (assoc 'issueTypes response)) 'list)))
       ('getUser (jiralib--rest-call-it "/rest/api/2/user" :params `((username . ,(first params)))))
       ('getVersions (jiralib--rest-call-it (format "/rest/api/2/project/%s/versions" (first params))))
       ('getWorklogs nil) ; fixme
@@ -491,11 +494,37 @@ will cache it."
 NOTE: Issue type codes are stored as strings, not numbers.
 
 This function will only ask JIRA for the list of codes once, than
-will cache it."
+will cache it.
+
+The issue types returned via getIssueTypes are all the ones
+available to the user, but not necessarily available to the given
+project.
+
+This endpoint is essentially deprecated in favor of
+#'jiralib-get-issue-types-by-project.
+
+TODO: There may be a reason to compare the result of
+both endpoints (to ensure project specific issue types intersect
+with the user available issue types), but for now, we will just
+query by project specific issue types."
   (unless jiralib-issue-types-cache
     (setq jiralib-issue-types-cache
           (jiralib-make-assoc-list (jiralib-call "getIssueTypes" nil) 'id 'name)))
   jiralib-issue-types-cache)
+
+(defvar jiralib-issue-types-by-project-cache nil "An alist of available issue types.")
+
+(defun jiralib-get-issue-types-by-project (project)
+  "Return the available issue types for PROJECT.
+
+PROJECT should be the key, such as `EX' or `DEMO'."
+  (unless (assoc project jiralib-issue-types-by-project-cache)
+    (push (cons project
+                (jiralib-make-assoc-list
+                 (jiralib-call "getIssueTypesByProject" nil project)
+                 'id 'name))
+          jiralib-issue-types-by-project-cache))
+  (cdr (assoc project jiralib-issue-types-by-project-cache)))
 
 (defvar jiralib-priority-codes-cache nil)
 
