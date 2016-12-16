@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.2.0
+;; Version: 2.3.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.2.0:
+;; - Selecting issue type based on project key for creating issues
 
 ;;;; Changes since 2.1.0:
 ;; - Allow changing to unassigned user
@@ -159,7 +162,7 @@ variables.
   "Ask before killing buffer.")
 (make-variable-buffer-local 'org-jira-buffer-kill-prompt)
 
-(defconst org-jira-version "2.2.0"
+(defconst org-jira-version "2.3.0"
   "Current version of org-jira.el.")
 
 (defvar org-jira-mode-hook nil
@@ -855,16 +858,22 @@ See`org-jira-get-issue-list'"
    'org-jira-priority-read-history
    (car org-jira-priority-read-history)))
 
-(defun org-jira-read-issue-type ()
-  "Read issue type name."
+(defun org-jira-read-issue-type (&optional project)
+  "Read issue type name.  PROJECT is the optional project key."
+  (let* ((issue-types
+          (mapcar 'cdr (if project
+                           (jiralib-get-issue-types-by-project project)
+                         (jiralib-get-issue-types))))
+         (initial-input (when (member (car org-jira-type-read-history) issue-types)
+                          org-jira-type-read-history)))
   (completing-read
    "Type: "
-   (mapcar 'cdr (jiralib-get-issue-types))
+   issue-types
    nil
    t
    nil
-   'org-jira-type-read-history
-   (car org-jira-type-read-history)))
+   'initial-input
+   (car initial-input))))
 
 (defun org-jira-read-subtask-type ()
   "Read issue type name."
@@ -904,10 +913,12 @@ See`org-jira-get-issue-list'"
 ;;;###autoload
 (defun org-jira-create-issue (project type summary description)
   "Create an issue in PROJECT, of type TYPE, with given SUMMARY and DESCRIPTION."
-  (interactive (list (org-jira-read-project)
-                     (org-jira-read-issue-type)
-                     (read-string "Summary: ")
-                     (read-string "Description: ")))
+  (interactive
+   (let* ((project (org-jira-read-project))
+          (type (org-jira-read-issue-type project))
+          (summary (read-string "Summary: "))
+          (description (read-string "Description: ")))
+     (list project type summary description)))
   (if (or (equal project "")
           (equal type "")
           (equal summary ""))

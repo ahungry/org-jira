@@ -500,13 +500,11 @@ The issue types returned via getIssueTypes are all the ones
 available to the user, but not necessarily available to the given
 project.
 
-This endpoint is essentially deprecated in favor of
-#'jiralib-get-issue-types-by-project.
+This endpoint is essentially a master reference for when issue
+types need a name lookup when given an id.
 
-TODO: There may be a reason to compare the result of
-both endpoints (to ensure project specific issue types intersect
-with the user available issue types), but for now, we will just
-query by project specific issue types."
+For applying issue types to a given project that is being created, see
+the #'jiralib-get-issue-types-by-project call."
   (unless jiralib-issue-types-cache
     (setq jiralib-issue-types-cache
           (jiralib-make-assoc-list (jiralib-call "getIssueTypes" nil) 'id 'name)))
