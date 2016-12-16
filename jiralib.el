@@ -15,7 +15,7 @@
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
 ;; Maintainer: Matthew Carter <m@ahungry.com>
-;; Version: 2.0.0
+;; Version: 2.1.0
 ;; Homepage: https://github.com/ahungry/org-jira
 
 ;; This file is not part of GNU Emacs.
@@ -61,6 +61,9 @@
 ;; http://docs.atlassian.com/software/jira/docs/api/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/JiraSoapService.html
 
 ;;; News:
+
+;;;; Changes since 2.0.0:
+;; - Allow issue type query by project
 
 ;;;; Changes since 0.0.0:
 ;; - Converted many calls to async

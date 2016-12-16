@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.3.0
+;; Version: 2.4.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.3.0:
+;; - Integration with org deadline and Jira due date fields
 
 ;;;; Changes since 2.2.0:
 ;; - Selecting issue type based on project key for creating issues
@@ -162,7 +165,7 @@ variables.
   "Ask before killing buffer.")
 (make-variable-buffer-local 'org-jira-buffer-kill-prompt)
 
-(defconst org-jira-version "2.3.0"
+(defconst org-jira-version "2.4.0"
   "Current version of org-jira.el.")
 
 (defvar org-jira-mode-hook nil
@@ -961,9 +964,20 @@ See`org-jira-get-issue-list'"
           (if (looking-at "description: ")
               (org-jira-strip-string (org-get-entry))
             (error "Can not find description field for this issue")))
+
          ((eq key 'summary)
           (ensure-on-issue
            (org-get-heading t t)))
+
+         ;; org returns a time tuple, we need to convert it
+         ((eq key 'deadline)
+          (let ((encoded-time (org-get-deadline-time (point))))
+            (when encoded-time
+              (reduce (lambda (carry segment)
+                        (format "%s-%s" carry segment))
+                      (reverse (subseq (decode-time encoded-time) 3 6))))))
+
+         ;; default case, just grab the value in the properties block
          (t
           (when (symbolp key)
             (setq key (symbol-name key)))
@@ -1137,7 +1151,9 @@ See`org-jira-get-issue-list'"
             (cons 'assignee (jiralib-get-user org-issue-assignee))
             (cons 'summary (org-jira-get-issue-val-from-org 'summary))
             (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
-                                                         (jiralib-get-issue-types))))
+                                                         (jiralib-get-issue-types)))
+            (cons 'duedate (org-jira-get-issue-val-from-org 'deadline)))
+
       ;; This callback occurs on success
       (lambda (&rest data &allow-other-keys)
         ;; We have to snag issue-id out of the response because the callback can't see it.
