@@ -131,6 +131,14 @@ variables.
   "Use custom coding system on org-jira buffers."
   :group 'org-jira)
 
+(defcustom org-jira-deadline-duedate-sync-p t
+  "Keep org deadline and jira duedate fields synced.
+You may wish to set this to nil if you track org deadlines in
+your buffer that you do not want to send back to your Jira
+instance."
+  :group 'org-jira
+  :type 'boolean)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -604,9 +612,10 @@ See`org-jira-get-issue-list'"
                       (org-entry-put (point) "ID" (org-jira-get-issue-key issue))
 
                       ;; Insert the duedate as a deadline if it exists
-                      (let ((duedate (org-jira-get-issue-val 'duedate issue)))
-                        (when (> (length duedate) 0)
-                          (org-deadline nil duedate)))
+                      (when org-jira-deadline-duedate-sync-p
+                        (let ((duedate (org-jira-get-issue-val 'duedate issue)))
+                          (when (> (length duedate) 0)
+                            (org-deadline nil duedate))))
 
                       (mapc (lambda (heading-entry)
                               (ensure-on-issue-id
@@ -1132,42 +1141,47 @@ See`org-jira-get-issue-list'"
           (project-components (jiralib-get-components project)))
 
      ;; Send the update to jira
-     (jiralib-update-issue
-      issue-id ; (jiralib-update-issue "FB-1" '((components . ["10001" "10000"])))
-      (list (cons
-             'components
-             (apply 'vector
-                    (cl-mapcan
-                     (lambda (item)
-                       (let ((comp-id (car (rassoc item project-components))))
-                         (if comp-id
-                             `((id . comp-id)
-                               (name . item))
-                           nil)))
-                     (split-string org-issue-components ",\\s *"))))
-            (cons 'priority (org-jira-get-id-name-alist org-issue-priority
-                                                        (jiralib-get-priorities)))
-            (cons 'description org-issue-description)
-            (cons 'assignee (jiralib-get-user org-issue-assignee))
-            (cons 'summary (org-jira-get-issue-val-from-org 'summary))
-            (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
-                                                         (jiralib-get-issue-types)))
-            (cons 'duedate (org-jira-get-issue-val-from-org 'deadline)))
+     (let ((update-fields
+            (list (cons
+                   'components
+                   (apply 'vector
+                          (cl-mapcan
+                           (lambda (item)
+                             (let ((comp-id (car (rassoc item project-components))))
+                               (if comp-id
+                                   `((id . comp-id)
+                                     (name . item))
+                                 nil)))
+                           (split-string org-issue-components ",\\s *"))))
+                  (cons 'priority (org-jira-get-id-name-alist org-issue-priority
+                                                              (jiralib-get-priorities)))
+                  (cons 'description org-issue-description)
+                  (cons 'assignee (jiralib-get-user org-issue-assignee))
+                  (cons 'summary (org-jira-get-issue-val-from-org 'summary))
+                  (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
+                                                               (jiralib-get-issue-types))))))
+       (when org-jira-deadline-duedate-sync-p
+         (setq update-fields
+               (append update-fields
+                       (list (cons 'duedate (org-jira-get-issue-val-from-org 'deadline))))))
 
+       (jiralib-update-issue
+        issue-id
+        update-fields
       ;; This callback occurs on success
-      (lambda (&rest data &allow-other-keys)
-        ;; We have to snag issue-id out of the response because the callback can't see it.
-        (let ((issue-id (replace-regexp-in-string
-                         ".*issue\\/\\(.*\\)"
-                         "\\1"
-                         (request-response-url (getf data :response)))))
-          (message (format "Issue '%s' updated!" issue-id))
-          (jiralib-get-issue
-           issue-id
-           (lambda (&rest data &allow-other-keys)
-             (org-jira-get-issues (list (getf data :data)))))
-          ))
-      )
+        (lambda (&rest data &allow-other-keys)
+          ;; We have to snag issue-id out of the response because the callback can't see it.
+          (let ((issue-id (replace-regexp-in-string
+                           ".*issue\\/\\(.*\\)"
+                           "\\1"
+                           (request-response-url (getf data :response)))))
+            (message (format "Issue '%s' updated!" issue-id))
+            (jiralib-get-issue
+             issue-id
+             (lambda (&rest data &allow-other-keys)
+               (org-jira-get-issues (list (getf data :data)))))
+            ))
+      ))
      )))
 
 (defun org-jira-parse-issue-id ()
