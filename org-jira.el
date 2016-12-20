@@ -1027,6 +1027,10 @@ See`org-jira-get-issue-list'"
       field-name)))
 
 
+(defvar org-jira-rest-fields nil
+  "Extra fields are held here for usage between two endpoints.
+Used in org-jira-read-resolution and org-jira-progress-issue calls.")
+
 (defvar org-jira-resolution-history nil)
 (defun org-jira-read-resolution ()
   "Read issue workflow progress resolution."
@@ -1040,7 +1044,7 @@ See`org-jira-get-issue-list'"
                          'org-jira-resolution-history
                          (car org-jira-resolution-history))))
         (car (rassoc resolution (jiralib-get-resolutions))))
-    (let* ((resolutions (org-jira-find-value rest-fields 'resolution 'allowedValues))
+    (let* ((resolutions (org-jira-find-value org-jira-rest-fields 'resolution 'allowedValues))
            (resolution-name (completing-read
                              "Resolution: "
                              (mapcar (lambda (resolution)
@@ -1073,6 +1077,7 @@ See`org-jira-get-issue-list'"
                     (org-jira-get-issue-val-from-org 'status)))
           (action (org-jira-read-action actions))
           (fields (jiralib-get-fields-for-action issue-id action))
+          (org-jira-rest-fields fields)
           (field-key)
           (custom-fields-collector nil)
           (custom-fields
