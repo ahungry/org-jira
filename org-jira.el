@@ -200,7 +200,7 @@ instance."
   `(save-excursion
      (save-restriction
        (widen)
-       (show-all)
+       (outline-show-all)
        (goto-char (point-min))
        (let (p)
          (setq p (org-find-entry-with-id ,issue-id))
@@ -250,16 +250,6 @@ instance."
      (save-restriction
        (org-narrow-to-subtree)
        ,@body)))
-
-(defun org-jira-kill-buffer-hook ()
-  "Prompt before killing buffer."
-  (if (and org-jira-buffer-kill-prompt
-           (not (buffer-file-name)))
-      (if (y-or-n-p "Save Jira? ")
-          (progn
-            (save-buffer)
-            (org-jira-save-details (org-jira-parse-entry) nil
-                                   (y-or-n-p "Published? "))))))
 
 (defvar org-jira-entry-mode-map
   (let ((org-jira-map (make-sparse-keymap)))
@@ -353,7 +343,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
                   (save-restriction
                     (widen)
                     (goto-char (point-min))
-                    (show-all)
+                    (outline-show-all)
                     (setq p (org-find-exact-headline-in-buffer proj-headline))
                     (if (and p (>= p (point-min))
                              (<= p (point-max)))
@@ -381,9 +371,8 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 (defun org-jira-insert (&rest args)
   "Set coding to text provide by `ARGS' when insert in buffer."
   (let ((coding-system (or org-jira-coding-system
-                           (if (boundp 'buffer-file-coding-system)
-                               buffer-file-coding-system 'utf-8
-                               default-buffer-file-coding-system))))
+                           (when (boundp 'buffer-file-coding-system)
+                             buffer-file-coding-system 'utf-8))))
     (insert (decode-coding-string
              (string-make-unibyte (apply #'concat args)) coding-system))))
 
@@ -494,7 +483,6 @@ jql."
   "Get issue summary from point and place next to issue id from jira, and make issue id a link"
   (interactive)
   (let ((jira-id (thing-at-point 'symbol)))
-    (sp-kill-symbol 1)
     (insert (format "[[%s][%s]] - %s"
                     (concatenate 'string jiralib-url "browse/" jira-id) jira-id
                     (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira-id))))))))
@@ -545,7 +533,7 @@ With a prefix argument, allow you to customize the jql.  See
   (cl-function
    (lambda (&rest data &allow-other-keys)
      "Callback for async, DATA is the response from the request call."
-     (let ((issues (append (cdr (assoc 'issues (getf data :data))) nil)))
+     (let ((issues (append (cdr (assoc 'issues (cl-getf data :data))) nil)))
        (org-jira-get-issues issues)))))
 
 (defun org-jira-get-issues (issues)
@@ -571,7 +559,7 @@ See`org-jira-get-issue-list'"
                   (save-excursion
                     (org-jira-mode t)
                     (widen)
-                    (show-all)
+                    (outline-show-all)
                     (goto-char (point-min))
                     (setq p (org-find-entry-with-id issue-id))
                     (save-restriction
@@ -728,11 +716,11 @@ See`org-jira-get-issue-list'"
      issue-id
      (cl-function
       (lambda (&rest data &allow-other-keys)
-        (let ((comments (org-jira-find-value (getf data :data) 'comments))
+        (let ((comments (org-jira-find-value (cl-getf data :data) 'comments))
               (issue-id (replace-regexp-in-string
                          ".*issue\\/\\(.*\\)\\/comment"
                          "\\1"
-                         (request-response-url (getf data :response)))))
+                         (request-response-url (cl-getf data :response)))))
           (mapc
            (lambda (comment)
              (ensure-on-issue-id
@@ -986,9 +974,9 @@ See`org-jira-get-issue-list'"
          ((eq key 'deadline)
           (let ((encoded-time (org-get-deadline-time (point))))
             (when encoded-time
-              (reduce (lambda (carry segment)
-                        (format "%s-%s" carry segment))
-                      (reverse (subseq (decode-time encoded-time) 3 6))))))
+              (cl-reduce (lambda (carry segment)
+                           (format "%s-%s" carry segment))
+                         (reverse (cl-subseq (decode-time encoded-time) 3 6))))))
 
          ;; default case, just grab the value in the properties block
          (t
@@ -1066,7 +1054,7 @@ See`org-jira-get-issue-list'"
            (cl-function
             (lambda (&rest data &allow-other-keys)
               (message "org-jira-refresh-issue cb")
-              (org-jira-get-issues (list (getf data :data)))))))
+              (org-jira-get-issues (list (cl-getf data :data)))))))
      (jiralib-get-issue issue-id callback))))
 
 (defvar org-jira-fields-values-history nil)
@@ -1142,7 +1130,7 @@ See`org-jira-get-issue-list'"
           (org-issue-description (replace-regexp-in-string "^  " "" (org-jira-get-issue-val-from-org 'description)))
           (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
           (org-issue-type (org-jira-get-issue-val-from-org 'type))
-          (org-issue-assignee (getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
+          (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
           (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
           (project-components (jiralib-get-components project)))
 
@@ -1181,13 +1169,13 @@ See`org-jira-get-issue-list'"
            (let ((issue-id (replace-regexp-in-string
                             ".*issue\\/\\(.*\\)"
                             "\\1"
-                            (request-response-url (getf data :response)))))
+                            (request-response-url (cl-getf data :response)))))
              (message (format "Issue '%s' updated!" issue-id))
              (jiralib-get-issue
               issue-id
               (cl-function
                (lambda (&rest data &allow-other-keys)
-                 (org-jira-get-issues (list (getf data :data))))))
+                 (org-jira-get-issues (list (cl-getf data :data))))))
              )))
         ))
      )))
@@ -1292,6 +1280,11 @@ See `org-jira-get-issues-from-filter'."
   (org-jira-get-issues-headonly (jiralib-get-issues-from-filter (car (rassoc filter (jiralib-get-saved-filters))))))
 
 (org-add-link-type "jira" 'org-jira-open)
+
+;; This was only added in org 9.0, not sure all org users will have
+;; that version, so keep the deprecated one from above for now.
+
+;;(org-link-set-parameters "jira" ((:follow . 'org-jira-open)))
 
 (defun org-jira-open (path)
   "Open a Jira Link from PATH."
