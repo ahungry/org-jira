@@ -9,9 +9,9 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.4.0
+;; Version: 2.4.1
 ;; Keywords: ahungry jira org bug tracker
-;; Package-Requires: ((cl-lib "0.5") (request "0.2.0"))
+;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,6 +38,10 @@
 
 ;;; News:
 
+;;;; Changes since 2.4.0:
+;; - Fix many deprecation/warning issues
+;; - Fix error with allow-other-keys not being wrapped in cl-function
+
 ;;;; Changes since 2.3.0:
 ;; - Integration with org deadline and Jira due date fields
 
@@ -62,6 +66,9 @@
 (require 'org)
 (require 'jiralib)
 (require 'cl-lib)
+
+(defconst org-jira-version "2.4.1"
+  "Current version of org-jira.el.")
 
 (defgroup org-jira nil
   "Customisation group for org-jira."
@@ -172,9 +179,6 @@ instance."
 (defvar org-jira-buffer-kill-prompt t
   "Ask before killing buffer.")
 (make-variable-buffer-local 'org-jira-buffer-kill-prompt)
-
-(defconst org-jira-version "2.4.0"
-  "Current version of org-jira.el.")
 
 (defvar org-jira-mode-hook nil
   "Hook to run upon entry into mode.")
