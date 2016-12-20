@@ -542,10 +542,11 @@ With a prefix argument, allow you to customize the jql.  See
   (org-jira-find-value issue 'fields 'summary))
 
 (defvar org-jira-get-issue-list-callback
-  (lambda (&rest data &allow-other-keys)
-    "Callback for async, DATA is the response from the request call."
-    (let ((issues (append (cdr (assoc 'issues (getf data :data))) nil)))
-      (org-jira-get-issues issues))))
+  (cl-function
+   (lambda (&rest data &allow-other-keys)
+     "Callback for async, DATA is the response from the request call."
+     (let ((issues (append (cdr (assoc 'issues (getf data :data))) nil)))
+       (org-jira-get-issues issues)))))
 
 (defun org-jira-get-issues (issues)
   "Get list of ISSUES into an org buffer.
@@ -652,13 +653,15 @@ See`org-jira-get-issue-list'"
          (comment-id (org-jira-get-from-org 'comment 'id))
          (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id)))
          (callback-edit
-          (lambda (&rest data &allow-other-keys)
-            (org-jira-update-comments-for-current-issue)))
+          (cl-function
+           (lambda (&rest data &allow-other-keys)
+             (org-jira-update-comments-for-current-issue))))
          (callback-add
-          (lambda (&rest data &allow-other-keys)
-            ;; @todo Has to be a better way to do this than delete region (like update the unmarked one)
-            (org-jira-delete-current-comment)
-            (org-jira-update-comments-for-current-issue))))
+          (cl-function
+           (lambda (&rest data &allow-other-keys)
+             ;; @todo Has to be a better way to do this than delete region (like update the unmarked one)
+             (org-jira-delete-current-comment)
+             (org-jira-update-comments-for-current-issue)))))
     (if comment-id
         (jiralib-edit-comment issue-id comment-id comment callback-edit)
       (jiralib-add-comment issue-id comment callback-add))))
@@ -723,52 +726,53 @@ See`org-jira-get-issue-list'"
     ;; Run the call
     (jiralib-get-comments
      issue-id
-     (lambda (&rest data &allow-other-keys)
-       (let ((comments (org-jira-find-value (getf data :data) 'comments))
-             (issue-id (replace-regexp-in-string
-                        ".*issue\\/\\(.*\\)\\/comment"
-                        "\\1"
-                        (request-response-url (getf data :response)))))
-         (mapc
-          (lambda (comment)
-            (ensure-on-issue-id
-             issue-id
-             (let* ((comment-id (org-jira-get-comment-id comment))
-                    (comment-author (or (car (rassoc
-                                              (org-jira-get-comment-author comment)
-                                              org-jira-users))
-                                        (org-jira-get-comment-author comment)))
-                    (comment-headline (format "Comment: %s" comment-author)))
-               (setq p (org-find-entry-with-id comment-id))
-               (when (and p (>= p (point-min))
-                          (<= p (point-max)))
-                 (goto-char p)
-                 (org-narrow-to-subtree)
-                 (delete-region (point-min) (point-max)))
-               (goto-char (point-max))
-               (unless (looking-at "^")
-                 (insert "\n"))
-               (insert "** ")
-               (org-jira-insert comment-headline "\n")
-               (org-narrow-to-subtree)
-               (org-entry-put (point) "ID" comment-id)
-               (let ((created (org-jira-get-comment-val 'created comment))
-                     (updated (org-jira-get-comment-val 'updated comment)))
-                 (org-entry-put (point) "created" created)
-                 (unless (string= created updated)
-                   (org-entry-put (point) "updated" updated)))
-               (goto-char (point-max))
-               (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
-          (cl-mapcan
+     (cl-function
+      (lambda (&rest data &allow-other-keys)
+        (let ((comments (org-jira-find-value (getf data :data) 'comments))
+              (issue-id (replace-regexp-in-string
+                         ".*issue\\/\\(.*\\)\\/comment"
+                         "\\1"
+                         (request-response-url (getf data :response)))))
+          (mapc
            (lambda (comment)
-             ;; Allow user to specify a list of excluded usernames for
-             ;; comment displaying.
-             (if (member-ignore-case
-                  (org-jira-get-comment-author comment)
-                  org-jira-ignore-comment-user-list)
-                 nil
-               (list comment)))
-           comments)))))))
+             (ensure-on-issue-id
+              issue-id
+              (let* ((comment-id (org-jira-get-comment-id comment))
+                     (comment-author (or (car (rassoc
+                                               (org-jira-get-comment-author comment)
+                                               org-jira-users))
+                                         (org-jira-get-comment-author comment)))
+                     (comment-headline (format "Comment: %s" comment-author)))
+                (setq p (org-find-entry-with-id comment-id))
+                (when (and p (>= p (point-min))
+                           (<= p (point-max)))
+                  (goto-char p)
+                  (org-narrow-to-subtree)
+                  (delete-region (point-min) (point-max)))
+                (goto-char (point-max))
+                (unless (looking-at "^")
+                  (insert "\n"))
+                (insert "** ")
+                (org-jira-insert comment-headline "\n")
+                (org-narrow-to-subtree)
+                (org-entry-put (point) "ID" comment-id)
+                (let ((created (org-jira-get-comment-val 'created comment))
+                      (updated (org-jira-get-comment-val 'updated comment)))
+                  (org-entry-put (point) "created" created)
+                  (unless (string= created updated)
+                    (org-entry-put (point) "updated" updated)))
+                (goto-char (point-max))
+                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
+           (cl-mapcan
+            (lambda (comment)
+              ;; Allow user to specify a list of excluded usernames for
+              ;; comment displaying.
+              (if (member-ignore-case
+                   (org-jira-get-comment-author comment)
+                   org-jira-ignore-comment-user-list)
+                  nil
+                (list comment)))
+            comments))))))))
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
@@ -884,14 +888,14 @@ See`org-jira-get-issue-list'"
                          (jiralib-get-issue-types))))
          (initial-input (when (member (car org-jira-type-read-history) issue-types)
                           org-jira-type-read-history)))
-  (completing-read
-   "Type: "
-   issue-types
-   nil
-   t
-   nil
-   'initial-input
-   (car initial-input))))
+    (completing-read
+     "Type: "
+     issue-types
+     nil
+     t
+     nil
+     'initial-input
+     (car initial-input))))
 
 (defun org-jira-read-subtask-type ()
   "Read issue type name."
@@ -1059,9 +1063,10 @@ See`org-jira-get-issue-list'"
   (ensure-on-issue
    (let* ((issue-id (org-jira-id))
           (callback
-           (lambda (&rest data &allow-other-keys)
-             (message "org-jira-refresh-issue cb")
-             (org-jira-get-issues (list (getf data :data))))))
+           (cl-function
+            (lambda (&rest data &allow-other-keys)
+              (message "org-jira-refresh-issue cb")
+              (org-jira-get-issues (list (getf data :data)))))))
      (jiralib-get-issue issue-id callback))))
 
 (defvar org-jira-fields-values-history nil)
@@ -1118,8 +1123,9 @@ See`org-jira-get-issue-list'"
       issue-id
       action
       custom-fields
-      (lambda (&rest data &allow-other-keys)
-        (org-jira-refresh-issue))))))
+      (cl-function
+       (lambda (&rest data &allow-other-keys)
+         (org-jira-refresh-issue)))))))
 
 (defun org-jira-get-id-name-alist (name ids-to-names)
   "Finds the id corresponding to NAME in IDS-TO-NAMES and returns an alist with id and name as keys"
@@ -1168,20 +1174,22 @@ See`org-jira-get-issue-list'"
        (jiralib-update-issue
         issue-id
         update-fields
-      ;; This callback occurs on success
-        (lambda (&rest data &allow-other-keys)
-          ;; We have to snag issue-id out of the response because the callback can't see it.
-          (let ((issue-id (replace-regexp-in-string
-                           ".*issue\\/\\(.*\\)"
-                           "\\1"
-                           (request-response-url (getf data :response)))))
-            (message (format "Issue '%s' updated!" issue-id))
-            (jiralib-get-issue
-             issue-id
-             (lambda (&rest data &allow-other-keys)
-               (org-jira-get-issues (list (getf data :data)))))
-            ))
-      ))
+        ;; This callback occurs on success
+        (cl-function
+         (lambda (&rest data &allow-other-keys)
+           ;; We have to snag issue-id out of the response because the callback can't see it.
+           (let ((issue-id (replace-regexp-in-string
+                            ".*issue\\/\\(.*\\)"
+                            "\\1"
+                            (request-response-url (getf data :response)))))
+             (message (format "Issue '%s' updated!" issue-id))
+             (jiralib-get-issue
+              issue-id
+              (cl-function
+               (lambda (&rest data &allow-other-keys)
+                 (org-jira-get-issues (list (getf data :data))))))
+             )))
+        ))
      )))
 
 (defun org-jira-parse-issue-id ()

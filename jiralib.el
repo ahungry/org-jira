@@ -269,8 +269,9 @@ completed data from the request result, which can be accessed with:
 
 as such, the CALLBACK should follow this type of form:
 
-  (lambda (&rest data &allow-other-keys)
-    (print (getf data :data)))
+  (cl-function
+    (lambda (&rest data &allow-other-keys)
+      (print (getf data :data))))
 
 If CALLBACK is set to nil then the request will occur with sync.
 This produces a noticeable slowdown and is not recommended by
@@ -327,9 +328,10 @@ request.el, so if at all possible, it should be avoided."
                      (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params))
                      :data (json-encode `((body . ,(third params))))
                      :type "PUT"))
-      ('getComments (org-jira-find-value (jiralib--rest-call-it
-                                          (format "/rest/api/2/issue/%s/comment" (first params)))
-                                         'comments))
+      ('getComments (org-jira-find-value
+                     (jiralib--rest-call-it
+                      (format "/rest/api/2/issue/%s/comment" (first params)))
+                     'comments))
       ('getComponents (jiralib--rest-call-it
                        (format "/rest/api/2/project/%s/components" (first params))))
       ('getIssue (jiralib--rest-call-it
@@ -570,7 +572,9 @@ where KEY is a project key and NUMBER is the issue number."
   (unless jiralib-issue-regexp
     (let ((projects (mapcar (lambda (e) (downcase (cdr (assoc 'key e))))
                             (jiralib-call "getProjectsNoSchemes" nil))))
-      (setq jiralib-issue-regexp (concat "\\<" (regexp-opt projects) "-[0-9]+\\>"))))
+      (when projects
+        (setq jiralib-issue-regexp
+              (concat "\\<" (regexp-opt projects) "-[0-9]+\\>")))))
   jiralib-issue-regexp)
 
 (defun jiralib-do-jql-search (jql &optional limit callback)
