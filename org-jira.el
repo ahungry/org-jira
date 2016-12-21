@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.4.1
+;; Version: 2.5.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.5.0:
+;; - Allow overriding the org property names with new defcustom
 
 ;;;; Changes since 2.4.0:
 ;; - Fix many deprecation/warning issues
@@ -67,7 +70,7 @@
 (require 'jiralib)
 (require 'cl-lib)
 
-(defconst org-jira-version "2.4.1"
+(defconst org-jira-version "2.5.0"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
@@ -100,6 +103,30 @@
 (defcustom org-jira-users
   '(("Full Name" . "username"))
   "A list of displayName and key pairs."
+  :group 'org-jira
+  :type 'list)
+
+(defcustom org-jira-property-overrides (list)
+  "An assoc list of property tag overrides.
+
+The KEY . VAL pairs should both be strings.
+
+For instance, to change the :assignee: property in the org :PROPERTIES:
+block to :WorkedBy:, you can set this as such:
+
+  (setq org-jira-property-overrides (list (cons \"assignee\" \"WorkedBy\")))
+
+or simply:
+
+  (add-to-list (quote org-jira-property-overrides)
+               (cons (\"assignee\" \"WorkedBy\")))
+
+This will work for most any of the properties, with the
+exception of ones with unique functionality, such as:
+
+  - deadline
+  - summary
+  - description"
   :group 'org-jira
   :type 'list)
 
@@ -331,6 +358,19 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
                    (cdr (assoc 'key user))))
            (jiralib-get-users project-key))))
 
+(defun org-jira-entry-put (pom property value)
+  "Similar to org-jira-entry-put, but with an optional alist of overrides.
+
+At point-or-marker POM, set PROPERTY to VALUE.
+
+Look at customizing org-jira-property-overrides if you want
+to change the property names this sets."
+  (unless (stringp property)
+    (setq property (symbol-name property)))
+  (let ((property (or (assoc-default property org-jira-property-overrides)
+                       property)))
+    (org-entry-put pom property value)))
+
 ;;;###autoload
 (defun org-jira-get-projects ()
   "Get list of projects."
@@ -361,11 +401,11 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
                       (insert "* ")
                       (org-jira-insert proj-headline)
                       (org-narrow-to-subtree))
-                    (org-entry-put (point) "name" (org-jira-get-project-name proj))
-                    (org-entry-put (point) "key" (org-jira-find-value proj 'key))
-                    (org-entry-put (point) "lead" (org-jira-get-project-lead proj))
-                    (org-entry-put (point) "ID" (org-jira-find-value proj 'id))
-                    (org-entry-put (point) "url" (format "%s/browse/%s" (replace-regexp-in-string "/*$" "" jiralib-url) (org-jira-find-value proj 'key))))))
+                    (org-jira-entry-put (point) "name" (org-jira-get-project-name proj))
+                    (org-jira-entry-put (point) "key" (org-jira-find-value proj 'key))
+                    (org-jira-entry-put (point) "lead" (org-jira-get-project-lead proj))
+                    (org-jira-entry-put (point) "ID" (org-jira-find-value proj 'id))
+                    (org-jira-entry-put (point) "url" (format "%s/browse/%s" (replace-regexp-in-string "/*$" "" jiralib-url) (org-jira-find-value proj 'key))))))
               oj-projs)))))
 
 (defun org-jira-get-issue-components (issue)
@@ -599,10 +639,10 @@ See`org-jira-get-issue-list'"
                               (let ((val (org-jira-get-issue-val entry issue)))
                                 (when (or (and val (not (string= val "")))
                                           (eq entry 'assignee)) ;; Always show assignee
-                                  (org-entry-put (point) (symbol-name entry) val))))
+                                  (org-jira-entry-put (point) (symbol-name entry) val))))
                             '(assignee reporter type priority resolution status components created updated))
 
-                      (org-entry-put (point) "ID" (org-jira-get-issue-key issue))
+                      (org-jira-entry-put (point) "ID" (org-jira-get-issue-key issue))
 
                       ;; Insert the duedate as a deadline if it exists
                       (when org-jira-deadline-duedate-sync-p
@@ -747,12 +787,12 @@ See`org-jira-get-issue-list'"
                 (insert "** ")
                 (org-jira-insert comment-headline "\n")
                 (org-narrow-to-subtree)
-                (org-entry-put (point) "ID" comment-id)
+                (org-jira-entry-put (point) "ID" comment-id)
                 (let ((created (org-jira-get-comment-val 'created comment))
                       (updated (org-jira-get-comment-val 'updated comment)))
-                  (org-entry-put (point) "created" created)
+                  (org-jira-entry-put (point) "created" created)
                   (unless (string= created updated)
-                    (org-entry-put (point) "updated" updated)))
+                    (org-jira-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
                 (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
            (cl-mapcan
@@ -790,14 +830,14 @@ See`org-jira-get-issue-list'"
                                   (insert "** ")
                                   (org-jira-insert worklog-headline "\n")
                                   (org-narrow-to-subtree)
-                                  (org-entry-put (point) "ID" worklog-id)
+                                  (org-jira-entry-put (point) "ID" worklog-id)
                                   (let ((created (org-jira-get-worklog-val 'created worklog))
                                         (updated (org-jira-get-worklog-val 'updated worklog)))
-                                    (org-entry-put (point) "created" created)
+                                    (org-jira-entry-put (point) "created" created)
                                     (unless (string= created updated)
-                                      (org-entry-put (point) "updated" updated)))
-                                  (org-entry-put (point) "startDate" (org-jira-get-worklog-val 'startDate worklog))
-                                  (org-entry-put (point) "timeSpent" (org-jira-get-worklog-val 'timeSpent worklog))
+                                      (org-jira-entry-put (point) "updated" updated)))
+                                  (org-jira-entry-put (point) "startDate" (org-jira-get-worklog-val 'startDate worklog))
+                                  (org-jira-entry-put (point) "timeSpent" (org-jira-get-worklog-val 'timeSpent worklog))
                                   (goto-char (point-max))
                                   (org-jira-insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'comment worklog)) ""))))))
           worklogs)))
@@ -986,6 +1026,8 @@ See`org-jira-get-issue-list'"
          (t
           (when (symbolp key)
             (setq key (symbol-name key)))
+          (setq key (or (assoc-default key org-jira-property-overrides)
+                        key))
           (when (string= key "key")
             (setq key "ID"))
           ;; The variable `org-special-properties' will mess this up
@@ -1244,7 +1286,7 @@ it is a symbol, it will be converted to string."
   (ensure-on-comment
    (goto-char (point-min))
    ;; so that search for :END: won't fail
-   (org-entry-put (point) "ID" comment-id)
+   (org-jira-entry-put (point) "ID" comment-id)
    (search-forward ":END:")
    (forward-line)
    (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
@@ -1254,7 +1296,7 @@ it is a symbol, it will be converted to string."
   (ensure-on-worklog
    (goto-char (point-min))
    ;; so that search for :END: won't fail
-   (org-entry-put (point) "ID" worklog-id)
+   (org-jira-entry-put (point) "ID" worklog-id)
    (search-forward ":END:")
    (forward-line)
    (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
