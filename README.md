@@ -60,8 +60,6 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
 (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
 (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
-(define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
-(define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
 (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
 (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
 (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)

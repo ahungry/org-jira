@@ -881,6 +881,7 @@ will cache it."
 
 (defun jiralib-get-issues-from-filter (filter-id)
   "Get the issues from applying saved filter FILTER-ID."
+  (message "jiralib-get-issues-from-filter is NOT IMPLEMENTED!!  Do not use!")
   (jiralib-call "getIssuesFromFilter" nil filter-id))
 
 (defun jiralib-get-issues-from-text-search (search-terms)
