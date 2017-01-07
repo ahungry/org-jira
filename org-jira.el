@@ -580,6 +580,7 @@ With a prefix argument, allow you to customize the jql.  See
      (let ((issues (append (cdr (assoc 'issues (cl-getf data :data))) nil)))
        (org-jira-get-issues issues)))))
 
+;;;###autoload
 (defun org-jira-get-issues (issues)
   "Get list of ISSUES into an org buffer.
 
