@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.5.0
+;; Version: 2.5.2
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.5.1:
+;; - Only set duedate if a DEADLINE is present in the tags and predicate is t
 
 ;;;; Changes since 2.5.0:
 ;; - Allow overriding the org property names with new defcustom
@@ -70,7 +73,7 @@
 (require 'jiralib)
 (require 'cl-lib)
 
-(defconst org-jira-version "2.5.0"
+(defconst org-jira-version "2.5.2"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
@@ -1206,7 +1209,10 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
                   (cons 'summary (org-jira-get-issue-val-from-org 'summary))
                   (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
                                                                (jiralib-get-issue-types))))))
-       (when org-jira-deadline-duedate-sync-p
+
+       ;; If we enable duedate sync and we have a deadline present
+       (when (and org-jira-deadline-duedate-sync-p
+                  (org-jira-get-issue-val-from-org 'deadline))
          (setq update-fields
                (append update-fields
                        (list (cons 'duedate (org-jira-get-issue-val-from-org 'deadline))))))
