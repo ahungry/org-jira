@@ -1193,13 +1193,13 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
      (let ((update-fields
             (list (cons
                    'components
-                   (apply 'vector
+                   (apply 'list
                           (cl-mapcan
                            (lambda (item)
                              (let ((comp-id (car (rassoc item project-components))))
                                (if comp-id
-                                   `((id . comp-id)
-                                     (name . item))
+                                   `(((id . ,comp-id)
+                                     (name . ,item)))
                                  nil)))
                            (split-string org-issue-components ",\\s *"))))
                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
