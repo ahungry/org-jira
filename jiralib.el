@@ -216,34 +216,7 @@ After a succesful login, store the authentication token in
       (jiralib-load-wsdl))
     (setq jiralib-token
           (car (soap-invoke jiralib-wsdl "jirasoapservice-v2" "login" username password)))
-    (setq jiralib-user-login-name username))
-  ;; At this poing, soap-invoke didn't raise an error, so the login
-  ;; credentials are OK.  use them to log into the web interface as
-  ;; well, as this will be used to link issues (an operation which is
-  ;; not exposed to the SOAP interface.
-  ;;
-  ;; Note that we don't validate the response at all -- not sure how we
-  ;; would do it...
-  (let ((url (concat jiralib-url "/secure/Dashboard.jspa?"
-                     (format "&os_username=%s&os_password=%s&os_cookie=true"
-                             username password))))
-    (let ((url-request-method "POST")
-          (url-package-name "Emacs jiralib.el")
-          (url-package-version "1.0")
-          (url-mime-charset-string "utf-8;q=1, iso-8859-1;q=0.5")
-          (url-request-data "abc")
-          (url-request-coding-system 'utf-8)
-          (url-http-attempt-keepalives t))
-      (let ((buffer (url-retrieve-synchronously url)))
-        ;; This is just a basic check that the page was retrieved
-        ;; correctly.  No error does not indicate a succesfull login,
-        ;; we would have to parse the HTML page to find that out...
-        (with-current-buffer buffer
-          (declare (special url-http-response-status))
-          (if (> url-http-response-status 299)
-              (error "Error logging into JIRA Web interface %s"
-                     url-http-response-status)))
-        (kill-buffer buffer)))))
+    (setq jiralib-user-login-name username)))
 
 (defvar jiralib-complete-callback nil)
 
@@ -691,48 +664,6 @@ COMMENT will be added to this worklog."
                 `((startDate . ,start-date)
                   (timeSpent . ,time-spent)
                   (comment   . ,comment))))
-
-(defun jiralib-link-issue (issue-key link-type other-issue-key)
-  "Link ISSUE-KEY with a link of type LINK-TYPE to OTHER-ISSUE-KEY.
-LINK-TYPE is a string representing the type of the link, e.g
-\"requires\", \"depends on\", etc.  I believe each JIRA
-installation can define its own link types."
-
-  ;; IMPLEMENTATION NOTES: The linking jira issues functionality is
-  ;; not exposed through the SOAP api, we must use the web interface
-  ;; to do the linking.  Unfortunately, we cannot parse the result, so
-  ;; we don't know that the linking was succesfull or not.  To reduce
-  ;; the risk, we use the SOAP api to retrieve the issues for
-  ;; ISSUE-KEY and OTHER-ISSUE-KEY.  This will ensure that we are
-  ;; logged in (see also jiralib-login) and that both issues exist. We
-  ;; don't validate the LINK-TYPE, not sure how to do it.
-
-  (let ((issue (jiralib-get-issue issue-key))
-        (other-issue (jiralib-get-issue other-issue-key)))
-    (let ((url (concat jiralib-url
-                       "/secure/LinkExistingIssue.jspa?"
-                       (format "linkDesc=%s&linkKey=%s&id=%s&Link=Link"
-                               link-type other-issue-key (cdr (assq 'id issue))))))
-      (let ((url-request-method "POST")
-            (url-package-name "Emacs scratch.el")
-            (url-package-version "1.0")
-            (url-mime-charset-string "utf-8;q=1, iso-8859-1;q=0.5")
-            (url-request-data "abc")
-            (url-request-coding-system 'utf-8)
-            (url-http-attempt-keepalives t)
-            ;; see http://confluence.atlassian.com/display/JIRA/Form+Token+Handling
-            (url-request-extra-headers '(("X-Atlassian-Token" . "no-check"))))
-
-        (let ((buffer (url-retrieve-synchronously url)))
-          ;; This is just a basic check that the page was retrieved
-          ;; correctly.  No error does not indicate a success as we
-          ;; have to parse the HTML page to find that out...
-          (with-current-buffer buffer
-            (declare (special url-http-response-status))
-            (if (> url-http-response-status 299)
-                (error "Error linking issue through JIRA Web interface %s"
-                       url-http-response-status)))
-          (kill-buffer buffer))))))
 
 
 ;;;; Issue field accessors
