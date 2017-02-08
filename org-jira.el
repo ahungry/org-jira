@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.5.3
+;; Version: 2.5.4
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,11 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.5.3:
+;; - Re-introduce the commit that introduced a break into Emacs 25.1.1 list/array push
+;;     The commit caused updates/comment updates to fail when a blank list of components
+;;     was present - it will now handle both cases (full list, empty list).
 
 ;;;; Changes since 2.5.2:
 ;; - Revert a commit that introduced a break into Emacs 25.1.1 list/array push
@@ -77,7 +82,7 @@
 (require 'jiralib)
 (require 'cl-lib)
 
-(defconst org-jira-version "2.5.3"
+(defconst org-jira-version "2.5.4"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
@@ -375,7 +380,7 @@ to change the property names this sets."
   (unless (stringp property)
     (setq property (symbol-name property)))
   (let ((property (or (assoc-default property org-jira-property-overrides)
-                       property)))
+                      property)))
     (org-entry-put pom property value)))
 
 ;;;###autoload
@@ -1180,6 +1185,33 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
     `((id . ,id)
       (name . ,name))))
 
+(defun org-jira-build-components-list (project-components)
+  "Given PROJECT-COMPONENTS, attempt to build a list.
+
+If the PROJECT-COMPONENTS are nil, this should return:
+
+  (list components []), which will translate into the JSON:
+
+  {\"components\": []}
+
+otherwise it should return:
+
+  (list components (list (cons id comp-id) (cons name item-name))),
+
+  which will translate into the JSON:
+
+{\"components\": [{\"id\": \"comp-id\", \"name\": \"item\"}]}"
+  (if (not project-components) (vector) ;; Return a blank array for JSON
+    (apply 'list
+           (cl-mapcan
+            (lambda (item)
+              (let ((comp-id (car (rassoc item project-components))))
+                (if comp-id
+                    `(((id . ,comp-id)
+                       (name . ,item)))
+                  nil)))
+            (split-string org-issue-components ",\\s *")))))
+
 (defun org-jira-update-issue-details (issue-id &rest rest)
   "Update the details of issue ISSUE-ID.  REST will contain optional input."
   (ensure-on-issue-id
@@ -1197,15 +1229,7 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
      (let ((update-fields
             (list (cons
                    'components
-                   (apply 'vector
-                          (cl-mapcan
-                           (lambda (item)
-                             (let ((comp-id (car (rassoc item project-components))))
-                               (if comp-id
-                                   `((id . comp-id)
-                                     (name . item))
-                                 nil)))
-                           (split-string org-issue-components ",\\s *"))))
+                   (org-jira-build-components-list project-components))
                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                               (jiralib-get-priorities)))
                   (cons 'description org-issue-description)

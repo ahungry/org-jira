@@ -15,7 +15,7 @@
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
 ;; Maintainer: Matthew Carter <m@ahungry.com>
-;; Version: 2.5.3
+;; Version: 2.5.4
 ;; Homepage: https://github.com/ahungry/org-jira
 
 ;; This file is not part of GNU Emacs.
@@ -83,7 +83,7 @@
 (require 'json)
 (require 'url-parse)
 
-(defconst jiralib-version "2.5.3"
+(defconst jiralib-version "2.5.4"
   "Current version of jiralib.el.")
 
 (defgroup jiralib nil
