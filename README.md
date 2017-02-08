@@ -64,6 +64,7 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
 (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
 (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
+(define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
 (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
 (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
 (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
