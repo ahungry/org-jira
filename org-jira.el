@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.5.4
+;; Version: 2.6.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.5.4:
+;; - Added new org-jira-refresh-issues-in-buffer call and binding
 
 ;;;; Changes since 2.5.3:
 ;; - Re-introduce the commit that introduced a break into Emacs 25.1.1 list/array push
@@ -82,7 +85,7 @@
 (require 'jiralib)
 (require 'cl-lib)
 
-(defconst org-jira-version "2.5.4"
+(defconst org-jira-version "2.6.0"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
@@ -306,6 +309,7 @@ instance."
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
+    (define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
     (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
     (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
     (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
@@ -1106,6 +1110,17 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
                                        (org-jira-find-value resolution 'name))
                                      resolutions))))
       (cons 'name resolution-name))))
+
+(defun org-jira-refresh-issues-in-buffer ()
+  "Iterate across all entries in current buffer, refreshing on issue :ID:.
+Where issue-id will be something such as \"EX-22\"."
+  (interactive)
+  (save-excursion
+    (org-overview)
+    (beginning-of-buffer)
+    (while (not (org-next-line-empty-p))
+      (org-jira-refresh-issue)
+      (outline-next-visible-heading 1))))
 
 ;;;###autoload
 (defun org-jira-refresh-issue ()
