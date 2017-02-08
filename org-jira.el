@@ -1,6 +1,6 @@
 ;;; org-jira.el --- Syncing between Jira and Org-mode.
 
-;; Copyright (C) 2016 Matthew Carter <m@ahungry.com>
+;; Copyright (C) 2016,2017 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
 ;;
 ;; Authors:
@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.5.2
+;; Version: 2.5.3
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,10 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.5.2:
+;; - Revert a commit that introduced a break into Emacs 25.1.1 list/array push
+;;     The commit caused updates/comment updates to fail
 
 ;;;; Changes since 2.5.1:
 ;; - Only set duedate if a DEADLINE is present in the tags and predicate is t
@@ -73,7 +77,7 @@
 (require 'jiralib)
 (require 'cl-lib)
 
-(defconst org-jira-version "2.5.2"
+(defconst org-jira-version "2.5.3"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil

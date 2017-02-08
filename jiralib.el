@@ -1,6 +1,6 @@
 ;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services.
 
-;; Copyright (C) 2016 Matthew Carter <m@ahungry.com>
+;; Copyright (C) 2016,2017 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
 ;; original Copyright (C) 2009 Alex Harsanyi
 
@@ -15,7 +15,7 @@
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
 ;; Maintainer: Matthew Carter <m@ahungry.com>
-;; Version: 2.1.0
+;; Version: 2.5.3
 ;; Homepage: https://github.com/ahungry/org-jira
 
 ;; This file is not part of GNU Emacs.
@@ -62,6 +62,12 @@
 
 ;;; News:
 
+;;;; Changes since 2.1.0:
+;; - Remove os_username / os_password manual http request as part of sign in process
+;;     This produces sysadmin level warnings on Jira when these are used under the latest Jira.
+;; - Remove unused function jiralib-link-issue
+;; - Bring version up to match org-jira version so they can share tag
+
 ;;;; Changes since 2.0.0:
 ;; - Allow issue type query by project
 
@@ -77,7 +83,9 @@
 (require 'json)
 (require 'url-parse)
 
-;;; Code:
+(defconst jiralib-version "2.5.3"
+  "Current version of jiralib.el.")
+
 (defgroup jiralib nil
   "Jiralib customization group."
   :group 'applications)
