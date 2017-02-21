@@ -15,7 +15,7 @@
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
 ;; Maintainer: Matthew Carter <m@ahungry.com>
-;; Version: 2.6.0
+;; Version: 2.6.1
 ;; Homepage: https://github.com/ahungry/org-jira
 
 ;; This file is not part of GNU Emacs.
@@ -83,7 +83,7 @@
 (require 'json)
 (require 'url-parse)
 
-(defconst jiralib-version "2.6.0"
+(defconst jiralib-version "2.6.1"
   "Current version of jiralib.el.")
 
 (defgroup jiralib nil
@@ -654,6 +654,9 @@ When CALLBACK is present, this will run async."
     (jiralib-call "progressWorkflowAction"
                   callback issue-key action-id (jiralib-make-remote-field-values params))))
 
+(defvar jiralib-worklog-coming-soon-message
+  "WORKLOG FEATURES ARE NOT IMPLEMENTED YET, COMING SOON!")
+
 (defun jiralib-add-worklog-and-autoadjust-remaining-estimate (issue-key start-date time-spent comment)
   "Log time spent on ISSUE-KEY to its worklog.
 The time worked begins at START-DATE and has a TIME-SPENT
@@ -666,6 +669,7 @@ TIME-SPENT can be in one of the following formats: 10m, 120m
 hours; 10h, 120h days; 10d, 120d weeks.
 
 COMMENT will be added to this worklog."
+  (error jiralib-worklog-coming-soon-message)
   (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
                 nil
                 issue-key
@@ -797,10 +801,12 @@ will cache it."
 
 (defun jiralib-get-worklogs (issue-key)
   "Return all worklogs associated with issue ISSUE-KEY."
+  (error jiralib-worklog-coming-soon-message)
   (jiralib-call "getWorklogs" nil issue-key))
 
 (defun jiralib-update-worklog (worklog)
   "Update the WORKLOG, updating the ETA for the related issue."
+  (error jiralib-worklog-coming-soon-message)
   (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" nil worklog))
 
 (defvar jiralib-components-cache nil "An alist of project components.")

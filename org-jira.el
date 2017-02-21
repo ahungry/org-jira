@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.6.0
+;; Version: 2.6.1
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -85,7 +85,7 @@
 (require 'jiralib)
 (require 'cl-lib)
 
-(defconst org-jira-version "2.6.0"
+(defconst org-jira-version "2.6.1"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
