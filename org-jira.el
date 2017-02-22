@@ -1119,7 +1119,11 @@ Where issue-id will be something such as \"EX-22\"."
     (org-overview)
     (beginning-of-buffer)
     (while (not (org-next-line-empty-p))
-      (org-jira-refresh-issue)
+      (when (outline-on-heading-p t)
+        ;; It's possible we could be on a non-org-jira headline, but
+        ;; that should be an exceptional case and not necessitating a
+        ;; fix atm.
+        (org-jira-refresh-issue))
       (outline-next-visible-heading 1))))
 
 ;;;###autoload
