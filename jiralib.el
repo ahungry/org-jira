@@ -289,7 +289,16 @@ request.el, so if at all possible, it should be avoided."
          (cl-coerce (cdr (assoc 'issueTypes response)) 'list)))
       ('getUser (jiralib--rest-call-it "/rest/api/2/user" :params `((username . ,(first params)))))
       ('getVersions (jiralib--rest-call-it (format "/rest/api/2/project/%s/versions" (first params))))
-      ('getWorklogs nil) ; fixme
+
+      ;; Worklog calls
+      ('getWorklogs ;; @todo Need to parse the worklog response into usable format
+       (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))))
+
+      ('addWorklogAndAutoAdjustRemainingEstimate
+       (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))
+                              :type "POST"
+                              :data (json-encode (second params))))
+
       ('addComment (jiralib--rest-call-it
                     (format "/rest/api/2/issue/%s/comment" (first params))
                     :type "POST"
@@ -669,11 +678,12 @@ TIME-SPENT can be in one of the following formats: 10m, 120m
 hours; 10h, 120h days; 10d, 120d weeks.
 
 COMMENT will be added to this worklog."
-  (error jiralib-worklog-coming-soon-message)
   (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
                 nil
                 issue-key
-                `((startDate . ,start-date)
+                ;; Expects data such as: '{"timeSpent":"1h", "started":"2017-02-21T00:00:00.000+0000", "comment":"woot!"}'
+                ;; and only that format will work (no loose formatting on the started date)
+                `((started   . ,start-date)
                   (timeSpent . ,time-spent)
                   (comment   . ,comment))))
 
@@ -801,7 +811,6 @@ will cache it."
 
 (defun jiralib-get-worklogs (issue-key)
   "Return all worklogs associated with issue ISSUE-KEY."
-  (error jiralib-worklog-coming-soon-message)
   (jiralib-call "getWorklogs" nil issue-key))
 
 (defun jiralib-update-worklog (worklog)
