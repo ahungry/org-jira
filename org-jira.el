@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.6.1
+;; Version: 2.6.2
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.6.1:
+;; - Fix bug with getting all issues when worklog is an error trigger.
 
 ;;;; Changes since 2.5.4:
 ;; - Added new org-jira-refresh-issues-in-buffer call and binding
@@ -689,7 +692,7 @@ See`org-jira-get-issue-list'"
                                  (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
-                      (org-jira-update-worklogs-for-current-issue)
+                      ;;(org-jira-update-worklogs-for-current-issue) ; Re-enable when worklog branch is done
                       ))))))
           issues)
     (switch-to-buffer project-buffer)))
