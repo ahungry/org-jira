@@ -663,6 +663,28 @@ When CALLBACK is present, this will run async."
     (jiralib-call "progressWorkflowAction"
                   callback issue-key action-id (jiralib-make-remote-field-values params))))
 
+
+(defun jiralib-format-datetime (&optional datetime)
+  "Convert a mixed DATETIME format into the Jira required datetime format.
+
+This will produce a datetime string such as:
+
+  2010-02-05T14:30:00.000+0000
+
+for being consumed in the Jira API.
+
+If DATETIME is not passed in, it will default to the current time."
+  (let* ((defaults (format-time-string "%Y-%m-%d %H:%M:%S" (current-time)))
+         (datetime (concat datetime (subseq defaults (length datetime))))
+         (parts (parse-time-string datetime)))
+    (format "%04d-%02d-%02dT%02d:%02d:%02d.000+0000"
+            (nth 5 parts)
+            (nth 4 parts)
+            (nth 3 parts)
+            (nth 2 parts)
+            (nth 1 parts)
+            (nth 0 parts))))
+
 (defvar jiralib-worklog-coming-soon-message
   "WORKLOG FEATURES ARE NOT IMPLEMENTED YET, COMING SOON!")
 
@@ -678,14 +700,15 @@ TIME-SPENT can be in one of the following formats: 10m, 120m
 hours; 10h, 120h days; 10d, 120d weeks.
 
 COMMENT will be added to this worklog."
-  (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
-                nil
-                issue-key
-                ;; Expects data such as: '{"timeSpent":"1h", "started":"2017-02-21T00:00:00.000+0000", "comment":"woot!"}'
-                ;; and only that format will work (no loose formatting on the started date)
-                `((started   . ,start-date)
-                  (timeSpent . ,time-spent)
-                  (comment   . ,comment))))
+  (let ((formatted-start-date (jiralib-format-datetime start-date)))
+    (jiralib-call "addWorklogAndAutoAdjustRemainingEstimate"
+                  nil
+                  issue-key
+                  ;; Expects data such as: '{"timeSpent":"1h", "started":"2017-02-21T00:00:00.000+0000", "comment":"woot!"}'
+                  ;; and only that format will work (no loose formatting on the started date)
+                  `((started   . ,formatted-start-date)
+                    (timeSpent . ,time-spent)
+                    (comment   . ,comment)))))
 
 
 ;;;; Issue field accessors

@@ -731,7 +731,7 @@ See`org-jira-get-issue-list'"
          (startDate (org-jira-get-from-org 'worklog 'startDate))
          (startDate (if startDate
                         startDate
-                      (org-read-date nil nil nil "Inputh when did you start")))
+                      (org-read-date nil nil nil "Input when did you start")))
          (startDate (org-jira-time-format-to-jira startDate))
          (comment (replace-regexp-in-string "^  " "" (org-jira-get-worklog-comment worklog-id)))
          (worklog `((comment . ,comment)
