@@ -471,6 +471,18 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
   "Return the value associated with KEY of COMMENT."
   (org-jira-get-issue-val key comment))
 
+(defun org-jira-time-stamp-to-org-clock (time-stamp)
+  "Convert TIME-STAMP into org-clock format."
+  (format-time-string "%Y-%m-%d %a %H:%M" time-stamp))
+
+(defun org-jira-date-to-org-clock (date)
+  "Convert DATE into a time stamp and then into org-clock format.
+Expects a date in format such as: 2017-02-26T00:08:00.000-0500
+
+@todo Handle the timezone offset properly."
+  (org-jira-time-stamp-to-org-clock
+   (date-to-time date)))
+
 (defun org-jira-get-worklog-val (key WORKLOG)
   "Return the value associated with KEY of WORKLOG."
   (org-jira-get-comment-val key WORKLOG))
