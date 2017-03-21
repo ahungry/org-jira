@@ -445,10 +445,11 @@ to change the property names this sets."
 Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
 16:59:15\", with the current timezone being +0800."
   (condition-case ()
-      (format-time-string "%Y-%m-%d %T"
-                          (apply
-                           'encode-time
-                           (parse-time-string (replace-regexp-in-string "T\\|\\.000" " " jira-time-str))))
+      (format-time-string
+       "%Y-%m-%d %T"
+       (apply
+        'encode-time
+        (parse-time-string (replace-regexp-in-string "T\\|\\.000" " " jira-time-str))))
     (error jira-time-str)))
 
 (defun org-jira--fix-encode-time-args (arg)
@@ -462,9 +463,11 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
 (defun org-jira-time-format-to-jira (org-time-str)
   "Convert ORG-TIME-STR back to jira time format."
   (condition-case ()
-      (format-time-string "%Y-%m-%dT%T.000Z"
-                          (apply 'encode-time
-                                 (org-jira--fix-encode-time-args (parse-time-string org-time-str))) t)
+      (format-time-string
+       "%Y-%m-%dT%T.000Z"
+       (apply 'encode-time
+              (org-jira--fix-encode-time-args (parse-time-string org-time-str)))
+       t)
     (error org-time-str)))
 
 (defun org-jira-get-comment-val (key comment)
