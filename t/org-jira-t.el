@@ -43,12 +43,18 @@
 
 (require 'org-jira)
 
+(ert-deftest org-jira-date-strip-letter-t-test ()
+  (should
+   (string= "2017-01-01 00:00:00.000-0500"
+            (org-jira-date-strip-letter-t "2017-01-01T00:00:00.000-0500")))
+  )
+
 (ert-deftest org-jira-date-to-org-clock-test ()
   (should
-   (string= "2016-12-31 Sat 19:00"
+   (string= "2017-01-01 Sun 00:00"
             (org-jira-date-to-org-clock "2017-01-01T00:00:00.000-0500")))
   (should
-   (string= "2017-02-04 Sat 19:00"
+   (string= "2017-02-05 Sun 00:00"
             (org-jira-date-to-org-clock "2017-02-05T00:00:00.000-0500")))
   )
 
