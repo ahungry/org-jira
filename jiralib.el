@@ -827,7 +827,6 @@ will cache it."
           (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes" nil) 'id 'name)))
   jiralib-subtask-types-cache)
 
-
 (defun jiralib-get-comments (issue-key &optional callback)
   "Return all comments associated with issue ISSUE-KEY, invoking CALLBACK."
   (jiralib-call "getComments" callback issue-key))

@@ -1,4 +1,4 @@
-;;; org-jira-t.el --- ERT tests
+;;; jiralib-t.el --- ERT tests
 
 ;; Copyright (C) 2017 Matthew Carter <m@ahungry.com>
 ;;

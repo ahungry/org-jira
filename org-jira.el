@@ -491,6 +491,20 @@ Expects a date in format such as: 2017-02-26T00:08:00.000-0500."
    (date-to-time
     (org-jira-date-strip-letter-t date))))
 
+(defun org-jira-worklogs-to-org-clocks (worklogs)
+  "Get a list of WORKLOGS and convert to org-clocks."
+  (mapcar
+   (lambda (worklog)
+     (let ((wl-start (cdr (assoc 'started worklog)))
+           (wl-time (cdr (assoc 'timeSpentSeconds worklog)))
+           (wl-end))
+       (setq wl-start (org-jira-date-to-org-clock wl-start))
+       (setq wl-end (org-jira-time-stamp-to-org-clock (time-add (date-to-time wl-start) wl-time)))
+       (list wl-start wl-end)
+       ))
+   worklogs)
+  )
+
 (defun org-jira-get-worklog-val (key WORKLOG)
   "Return the value associated with KEY of WORKLOG."
   (org-jira-get-comment-val key WORKLOG))
