@@ -831,9 +831,9 @@ will cache it."
   "Return all comments associated with issue ISSUE-KEY, invoking CALLBACK."
   (jiralib-call "getComments" callback issue-key))
 
-(defun jiralib-get-worklogs (issue-key)
-  "Return all worklogs associated with issue ISSUE-KEY."
-  (jiralib-call "getWorklogs" nil issue-key))
+(defun jiralib-get-worklogs (issue-key &optional callback)
+  "Return all worklogs associated with issue ISSUE-KEY, invoking CALLBACK."
+  (jiralib-call "getWorklogs" callback issue-key))
 
 (defun jiralib-update-worklog (worklog)
   "Update the WORKLOG, updating the ETA for the related issue."

@@ -520,7 +520,7 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (insert "\n"))
 
 (defun org-jira-logbook-reset (&optional clocks)
-  "Find LOGBOOK (@todo dynamic), delete it, re-create it with CLOCKS contents."
+  "Find LOGBOOK (@todo dynamic drawer name), delete it, re-create it with CLOCKS contents."
   (interactive)
   (save-excursion
     (while (org-up-element))
@@ -529,7 +529,12 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
     (org-beginning-of-line)
     (org-kill-line)
     (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
-    (mapcar #'org-jira-insert-clock clocks)
+    (mapc #'org-jira-insert-clock clocks)
+    ;; Clean up leftover newlines (we left 2 behind)
+    (search-forward-regexp "^$")
+    (org-kill-line)
+    (search-forward-regexp "^$")
+    (org-kill-line)
     ))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
@@ -753,7 +758,7 @@ See`org-jira-get-issue-list'"
                                  (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
-                      ;;(org-jira-update-worklogs-for-current-issue) ; Re-enable when worklog branch is done
+                      (org-jira-update-worklogs-for-current-issue) ; Re-enable when worklog branch is done
                       ))))))
           issues)
     (switch-to-buffer project-buffer)))
@@ -889,40 +894,14 @@ See`org-jira-get-issue-list'"
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
-  (let* ((issue-id (org-jira-get-from-org 'issue 'key))
-         (worklogs (jiralib-get-worklogs issue-id)))
-    (mapc (lambda (worklog)
-            (ensure-on-issue-id issue-id
-                                (let* ((worklog-id (concat "worklog-" (cdr (assoc 'id worklog))))
-                                       (worklog-author (or (car (rassoc
-                                                                 (cdr (assoc 'author worklog))
-                                                                 org-jira-users))
-                                                           (cdr (assoc 'author worklog))))
-                                       (worklog-headline (format "Worklog: %s" worklog-author)))
-                                  (setq p (org-find-entry-with-id worklog-id))
-                                  (when (and p (>= p (point-min))
-                                             (<= p (point-max)))
-                                    (goto-char p)
-                                    (org-narrow-to-subtree)
-                                    (delete-region (point-min) (point-max)))
-                                  (goto-char (point-max))
-                                  (unless (looking-at "^")
-                                    (insert "\n"))
-                                  (insert "** ")
-                                  (org-jira-insert worklog-headline "\n")
-                                  (org-narrow-to-subtree)
-                                  (org-jira-entry-put (point) "ID" worklog-id)
-                                  (let ((created (org-jira-get-worklog-val 'created worklog))
-                                        (updated (org-jira-get-worklog-val 'updated worklog)))
-                                    (org-jira-entry-put (point) "created" created)
-                                    (unless (string= created updated)
-                                      (org-jira-entry-put (point) "updated" updated)))
-                                  (org-jira-entry-put (point) "startDate" (org-jira-get-worklog-val 'startDate worklog))
-                                  (org-jira-entry-put (point) "timeSpent" (org-jira-get-worklog-val 'timeSpent worklog))
-                                  (goto-char (point-max))
-                                  (org-jira-insert (replace-regexp-in-string "^" "  " (or (cdr (assoc 'comment worklog)) ""))))))
-          worklogs)))
-
+  (let* ((issue-id (org-jira-get-from-org 'issue 'key)))
+    ;; Run the call
+    (jiralib-get-worklogs
+     issue-id
+     (cl-function
+      (lambda (&rest data &allow-other-keys)
+        (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
+          (org-jira-logbook-reset (org-jira-worklogs-to-org-clocks worklogs))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
