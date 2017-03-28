@@ -505,6 +505,33 @@ Expects a date in format such as: 2017-02-26T00:08:00.000-0500."
    worklogs)
   )
 
+(defun org-jira-format-clock (clock-entry)
+  "Format a CLOCK-ENTRY given the (list start end).
+This format is typically generated from org-jira-worklogs-to-org-clocks call."
+  (format "CLOCK: [%s]--[%s]" (car clock-entry) (cadr clock-entry)))
+
+(defun org-jira-insert-clock (clock-entry)
+  "Insert a CLOCK-ENTRY given the (list start end).
+This format is typically generated from org-jira-worklogs-to-org-clocks call."
+  (insert (org-jira-format-clock clock-entry))
+  (org-beginning-of-line)
+  (org-ctrl-c-ctrl-c) ;; @todo Maybe not call directly?  does it matter?
+  (org-end-of-line)
+  (insert "\n"))
+
+(defun org-jira-logbook-reset (&optional clocks)
+  "Find LOGBOOK (@todo dynamic), delete it, re-create it with CLOCKS contents."
+  (interactive)
+  (save-excursion
+    (while (org-up-element))
+    (org-cycle-hide-drawers nil)
+    (search-forward ":LOGBOOK:")
+    (org-beginning-of-line)
+    (org-kill-line)
+    (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
+    (mapcar #'org-jira-insert-clock clocks)
+    ))
+
 (defun org-jira-get-worklog-val (key WORKLOG)
   "Return the value associated with KEY of WORKLOG."
   (org-jira-get-comment-val key WORKLOG))

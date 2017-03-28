@@ -162,5 +162,10 @@
               (cadadr result)))
     ))
 
+(ert-deftest org-jira-format-clock-test ()
+    (should
+     (string= "CLOCK: [2017-02-26 Sun 00:08]--[2017-02-26 Sun 01:08]"
+              (org-jira-format-clock '("2017-02-26 Sun 00:08" "2017-02-26 Sun 01:08")))))
+
 (provide 'org-jira-t)
 ;;; org-jira-t.el ends here
