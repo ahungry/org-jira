@@ -520,22 +520,37 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (insert "\n"))
 
 (defun org-jira-logbook-reset (&optional clocks)
-  "Find LOGBOOK (@todo dynamic drawer name), delete it, re-create it with CLOCKS contents."
+  "Find logbook (@todo dynamic drawer), delete it, re-create it with CLOCKS.
+This is used for worklogs."
   (interactive)
-  (save-excursion
-    (while (org-up-element))
-    (org-cycle-hide-drawers nil)
-    (search-forward ":LOGBOOK:")
-    (org-beginning-of-line)
-    (org-kill-line)
-    (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
-    (mapc #'org-jira-insert-clock clocks)
-    ;; Clean up leftover newlines (we left 2 behind)
-    (search-forward-regexp "^$")
-    (org-kill-line)
-    (search-forward-regexp "^$")
-    (org-kill-line)
-    ))
+  ;; @todo Find out why this complains of no surrounding element when run from
+  ;; some parts of the org entry
+  (let ((existing-logbook-p nil))
+    (save-excursion
+      (while (org-up-element))
+      (save-excursion
+        (when (search-forward ":LOGBOOK:" nil 1 1)
+          (setq existing-logbook-p t)))
+      (org-narrow-to-subtree)
+      (org-cycle-hide-drawers nil)
+      (if existing-logbook-p
+          (progn ;; If we had a logbook, drop it and re-create in a bit.
+            (search-forward ":LOGBOOK:")
+            (org-beginning-of-line)
+            (org-kill-line))
+        (progn ;; Otherwise, create a new one at the end of properties list
+          (search-forward ":END:")
+          (org-cycle-hide-drawers nil)
+          (forward-line)))
+      (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
+      (mapc #'org-jira-insert-clock clocks)
+      ;; Clean up leftover newlines (we left 2 behind)
+      (search-forward-regexp "^$")
+      (org-kill-line)
+      (search-forward-regexp "^$")
+      (org-kill-line)
+      (widen)
+      )))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
   "Return the value associated with KEY of WORKLOG."
