@@ -223,6 +223,7 @@ instance."
 
 (defvar org-jira-buffer-kill-prompt t
   "Ask before killing buffer.")
+
 (make-variable-buffer-local 'org-jira-buffer-kill-prompt)
 
 (defvar org-jira-mode-hook nil
@@ -321,7 +322,6 @@ instance."
     (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklog)
     (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
     org-jira-map))
-
 
 ;;;###autoload
 (define-minor-mode org-jira-mode

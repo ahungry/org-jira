@@ -416,6 +416,7 @@ first is normally used."
   "Map all assoc elements in DATA to the value of FIELD in that element."
   (loop for element in data
         collect (cdr (assoc field element))))
+
 (defun jiralib-make-assoc-list (data key-field value-field)
   "Create an association list from a SOAP structure array.
 
