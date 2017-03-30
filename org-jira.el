@@ -537,7 +537,7 @@ This is used for worklogs."
           (progn ;; If we had a logbook, drop it and re-create in a bit.
             (search-forward ":LOGBOOK:")
             (org-beginning-of-line)
-            (org-kill-line))
+            (dotimes (n 2) (org-kill-line)))
         (progn ;; Otherwise, create a new one at the end of properties list
           (search-forward ":END:")
           (org-cycle-hide-drawers nil)
@@ -545,8 +545,6 @@ This is used for worklogs."
       (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
       (mapc #'org-jira-insert-clock clocks)
       ;; Clean up leftover newlines (we left 2 behind)
-      (search-forward-regexp "^$")
-      (org-kill-line)
       (search-forward-regexp "^$")
       (org-kill-line)
       (widen)
