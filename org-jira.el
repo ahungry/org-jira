@@ -523,24 +523,22 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   "Find logbook (@todo dynamic drawer), delete it, re-create it with CLOCKS.
 This is used for worklogs."
   (interactive)
-  ;; @todo Find out why this complains of no surrounding element when run from
-  ;; some parts of the org entry
   (let ((existing-logbook-p nil))
     (save-excursion
-      (while (org-up-element))
+      (ignore-errors (while (org-up-element))) ;; Go to start of entry
+      (org-narrow-to-subtree)
+      (goto-char (point-min))
       (save-excursion
         (when (search-forward ":LOGBOOK:" nil 1 1)
           (setq existing-logbook-p t)))
-      (org-narrow-to-subtree)
-      (org-cycle-hide-drawers nil)
       (if existing-logbook-p
           (progn ;; If we had a logbook, drop it and re-create in a bit.
             (search-forward ":LOGBOOK:")
             (org-beginning-of-line)
+            (org-cycle 0)
             (dotimes (n 2) (org-kill-line)))
         (progn ;; Otherwise, create a new one at the end of properties list
           (search-forward ":END:")
-          (org-cycle-hide-drawers nil)
           (forward-line)))
       (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
       (mapc #'org-jira-insert-clock clocks)
@@ -771,7 +769,7 @@ See`org-jira-get-issue-list'"
                                  (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
-                      (org-jira-update-worklogs-for-current-issue) ; Re-enable when worklog branch is done
+                      (org-jira-update-worklogs-for-current-issue)
                       ))))))
           issues)
     (switch-to-buffer project-buffer)))
@@ -853,17 +851,13 @@ See`org-jira-get-issue-list'"
 
 (defun org-jira-update-comments-for-current-issue ()
   "Update the comments for the current issue."
-  (let ((issue-id (org-jira-get-from-org 'issue 'key)))
+  (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
     ;; Run the call
     (jiralib-get-comments
      issue-id
      (cl-function
       (lambda (&rest data &allow-other-keys)
-        (let ((comments (org-jira-find-value (cl-getf data :data) 'comments))
-              (issue-id (replace-regexp-in-string
-                         ".*issue\\/\\(.*\\)\\/comment"
-                         "\\1"
-                         (request-response-url (cl-getf data :response)))))
+        (let ((comments (org-jira-find-value (cl-getf data :data) 'comments)))
           (mapc
            (lambda (comment)
              (ensure-on-issue-id
@@ -907,14 +901,16 @@ See`org-jira-get-issue-list'"
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
-  (let* ((issue-id (org-jira-get-from-org 'issue 'key)))
+  (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
     ;; Run the call
     (jiralib-get-worklogs
      issue-id
      (cl-function
       (lambda (&rest data &allow-other-keys)
-        (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
-          (org-jira-logbook-reset (org-jira-worklogs-to-org-clocks worklogs))))))))
+        (ensure-on-issue-id
+         issue-id
+         (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
+           (org-jira-logbook-reset (org-jira-worklogs-to-org-clocks worklogs)))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
