@@ -523,8 +523,9 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (org-ctrl-c-ctrl-c) ;; @todo Maybe not call directly?  does it matter?
   (org-end-of-line)
   (insert "\n")
-  (insert (format ":comment: %s\n" (caddr clock-entry)))
-  (insert (format ":id: %s\n" (cadddr clock-entry))))
+  (insert (format "  :id: %s\n" (cadddr clock-entry)))
+  (insert (format "  %s\n" (caddr clock-entry)))
+  )
 
 (defun org-jira-logbook-reset (issue-id &optional clocks)
   "Find logbook for ISSUE-ID (@todo dynamic drawer), delete it.
