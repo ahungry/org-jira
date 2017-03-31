@@ -500,7 +500,7 @@ Expects a date in format such as: 2017-02-26T00:08:00.000-0500."
            (wl-end))
        (setq wl-start (org-jira-date-to-org-clock wl-start))
        (setq wl-end (org-jira-time-stamp-to-org-clock (time-add (date-to-time wl-start) wl-time)))
-       (list wl-start wl-end)
+       (list wl-start wl-end (cdr (assoc 'comment worklog)))
        ))
    worklogs)
   )
@@ -517,7 +517,8 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (org-beginning-of-line)
   (org-ctrl-c-ctrl-c) ;; @todo Maybe not call directly?  does it matter?
   (org-end-of-line)
-  (insert "\n"))
+  (insert "\n")
+  (insert (format ":comment: %s\n" (caddr clock-entry))))
 
 (defun org-jira-logbook-reset (issue-id &optional clocks)
   "Find logbook for ISSUE-ID (@todo dynamic drawer), delete it.
