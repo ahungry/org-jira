@@ -519,34 +519,33 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (org-end-of-line)
   (insert "\n"))
 
-(defun org-jira-logbook-reset (&optional clocks)
-  "Find logbook (@todo dynamic drawer), delete it, re-create it with CLOCKS.
-This is used for worklogs."
+(defun org-jira-logbook-reset (issue-id &optional clocks)
+  "Find logbook for ISSUE-ID (@todo dynamic drawer), delete it.
+Re-create it with CLOCKS.  This is used for worklogs."
   (interactive)
   (let ((existing-logbook-p nil))
-    (save-excursion
-      (ignore-errors (while (org-up-element))) ;; Go to start of entry
-      (org-narrow-to-subtree)
-      (goto-char (point-min))
-      (save-excursion
-        (when (search-forward ":LOGBOOK:" nil 1 1)
-          (setq existing-logbook-p t)))
-      (if existing-logbook-p
-          (progn ;; If we had a logbook, drop it and re-create in a bit.
-            (search-forward ":LOGBOOK:")
-            (org-beginning-of-line)
-            (org-cycle 0)
-            (dotimes (n 2) (org-kill-line)))
-        (progn ;; Otherwise, create a new one at the end of properties list
-          (search-forward ":END:")
-          (forward-line)))
-      (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
-      (mapc #'org-jira-insert-clock clocks)
-      ;; Clean up leftover newlines (we left 2 behind)
-      (search-forward-regexp "^$")
-      (org-kill-line)
-      (widen)
-      )))
+    ;; See if the LOGBOOK already exists or not.
+    (ensure-on-issue-id
+     issue-id
+     (when (search-forward ":LOGBOOK:" nil 1 1)
+       (setq existing-logbook-p t)))
+    (ensure-on-issue-id
+     issue-id
+     (if existing-logbook-p
+         (progn ;; If we had a logbook, drop it and re-create in a bit.
+           (search-forward ":LOGBOOK:")
+           (org-beginning-of-line)
+           (org-cycle 0)
+           (dotimes (n 2) (org-kill-line)))
+       (progn ;; Otherwise, create a new one at the end of properties list
+         (search-forward ":END:")
+         (forward-line)))
+     (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
+     (mapc #'org-jira-insert-clock clocks)
+     ;; Clean up leftover newlines (we left 2 behind)
+     (search-forward-regexp "^$")
+     (org-kill-line)
+     )))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
   "Return the value associated with KEY of WORKLOG."
@@ -910,7 +909,9 @@ See`org-jira-get-issue-list'"
         (ensure-on-issue-id
          issue-id
          (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
-           (org-jira-logbook-reset (org-jira-worklogs-to-org-clocks worklogs)))))))))
+           (org-jira-logbook-reset
+            issue-id
+            (org-jira-worklogs-to-org-clocks worklogs)))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
