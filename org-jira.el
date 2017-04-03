@@ -802,6 +802,29 @@ See`org-jira-get-issue-list'"
         (jiralib-edit-comment issue-id comment-id comment callback-edit)
       (jiralib-add-comment issue-id comment callback-add))))
 
+(defun org-jira-update-worklogs-from-org-clocks ()
+  "Update or add a worklog based on the org clocks."
+  (interactive)
+  (let ((issue-id (org-jira-get-from-org 'issue 'key)))
+    (ensure-on-issue-id
+     issue-id
+     (search-forward ":LOGBOOK:")
+     (org-beginning-of-line)
+     (org-cycle 1)
+     (search-forward "CLOCK: ")
+     (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
+       (forward-line)
+       ;; See where the stuff ends (what point)
+       (let (next-clock-point)
+         (save-excursion
+           (search-forward-regexp "\\(CLOCK\\|:END\\):")
+           (setq next-clock-point (point)))
+         (let ((clock-content
+                (buffer-substring-no-properties (point) next-clock-point)))
+           (message org-time)
+           (message clock-content))))
+     )))
+
 (defun org-jira-update-worklog ()
   "Update a worklog for the current issue."
   (interactive)
