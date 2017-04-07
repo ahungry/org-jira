@@ -802,27 +802,43 @@ See`org-jira-get-issue-list'"
         (jiralib-edit-comment issue-id comment-id comment callback-edit)
       (jiralib-add-comment issue-id comment callback-add))))
 
+(defun org-jira-org-clock-to-jira-worklog (org-time clock-content)
+  "Given ORG-TIME and CLOCK-CONTENT, format a jira worklog entry."
+  (let* ((lines (split-string clock-content "\n"))
+         (worklog-id
+          (replace-regexp-in-string "^.*:id: \\([0-9]*\\)$" "\\1" (first lines))))
+    (when worklog-id ;; pop off the first id line if we found it
+      (setq lines (cdr lines)))
+    (setq lines (reverse (cdr (reverse lines)))) ;; drop last line
+    (let ((comment (s-trim (mapconcat 'identity lines "\n"))))
+      `(,worklog-id ,comment))))
+
+;;;###autoload
 (defun org-jira-update-worklogs-from-org-clocks ()
   "Update or add a worklog based on the org clocks."
   (interactive)
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
     (ensure-on-issue-id
      issue-id
-     (search-forward ":LOGBOOK:")
+     (search-forward ":LOGBOOK:" nil 1 1)
      (org-beginning-of-line)
      (org-cycle 1)
-     (search-forward "CLOCK: " nil 1 1)
-     (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
-       (forward-line)
-       ;; See where the stuff ends (what point)
-       (let (next-clock-point)
-         (save-excursion
-           (search-forward-regexp "\\(CLOCK\\|:END\\):" nil 1 1)
-           (setq next-clock-point (point)))
-         (let ((clock-content
-                (buffer-substring-no-properties (point) next-clock-point)))
-           (message org-time)
-           (message clock-content))))
+     (while (search-forward "CLOCK: " nil 1 1)
+       (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
+         (forward-line)
+         ;; See where the stuff ends (what point)
+         (let (next-clock-point)
+           (save-excursion
+             (search-forward-regexp "\\(CLOCK\\|:END\\):" nil 1 1)
+             (setq next-clock-point (point)))
+           (let ((clock-content
+                  (buffer-substring-no-properties (point) next-clock-point)))
+             ;; Now need to call jiralib to update
+             ;; Expects a call such as this:
+             ;; (jiralib-update-worklog "AHU-28" "10101" "2017-04-05T00:00:00.000-0500" "2800" "Success!")
+             ;;(org-jira-org-clock-to-jira-worklog org-time clock-content)
+             (message org-time)
+             (message clock-content)))))
      )))
 
 (defun org-jira-update-worklog ()

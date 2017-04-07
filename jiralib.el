@@ -291,8 +291,13 @@ request.el, so if at all possible, it should be avoided."
       ('getVersions (jiralib--rest-call-it (format "/rest/api/2/project/%s/versions" (first params))))
 
       ;; Worklog calls
-      ('getWorklogs ;; @todo Need to parse the worklog response into usable format
+      ('getWorklogs
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))))
+
+      ('updateWorklog
+       (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog/%s" (first params) (second params))
+                              :type "PUT"
+                              :data (json-encode (third params))))
 
       ('addWorklogAndAutoAdjustRemainingEstimate
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))
@@ -836,10 +841,15 @@ will cache it."
   "Return all worklogs associated with issue ISSUE-KEY, invoking CALLBACK."
   (jiralib-call "getWorklogs" callback issue-key))
 
-(defun jiralib-update-worklog (worklog)
-  "Update the WORKLOG, updating the ETA for the related issue."
-  (error jiralib-worklog-coming-soon-message)
-  (jiralib-call "updateWorklogAndAutoAdjustRemainingEstimate" nil worklog))
+(defun jiralib-update-worklog (issue-id worklog-id started time-spent-seconds comment &optional callback)
+  "Update the worklog linked to ISSUE-ID and WORKLOG-ID.
+
+Requires STARTED (a jira datetime), TIME-SPENT-SECONDS (integer) and a COMMENT.
+CALLBACK will be invoked if passed in upon endpoint completion."
+  (let ((worklog `((started . ,started)
+                   (timeSpentSeconds . ,time-spent-seconds)
+                   (comment . ,comment))))
+    (jiralib-call "updateWorklog" callback issue-id worklog-id worklog)))
 
 (defvar jiralib-components-cache nil "An alist of project components.")
 

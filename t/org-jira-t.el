@@ -167,5 +167,16 @@
      (string= "CLOCK: [2017-02-26 Sun 00:08]--[2017-02-26 Sun 01:08]"
               (org-jira-format-clock '("2017-02-26 Sun 00:08" "2017-02-26 Sun 01:08")))))
 
+(ert-deftest org-jira-org-clock-to-jira-worklog ()
+  (let ((result
+         (org-jira-org-clock-to-jira-worklog
+          "[2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] =>  0:46"
+          "  :id: 10101
+  Success!
+CLOCK:")))
+    (should (string= "10101" (first result)))
+    (should (string= "Success!" (second result)))
+    ))
+
 (provide 'org-jira-t)
 ;;; org-jira-t.el ends here
