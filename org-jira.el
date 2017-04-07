@@ -810,7 +810,7 @@ See`org-jira-get-issue-list'"
     (when worklog-id ;; pop off the first id line if we found it
       (setq lines (cdr lines)))
     (setq lines (reverse (cdr (reverse lines)))) ;; drop last line
-    (let ((comment (s-trim (mapconcat 'identity lines "\n"))))
+    (let ((comment (org-trim (mapconcat 'identity lines "\n"))))
       `(,worklog-id ,comment))))
 
 ;;;###autoload
