@@ -811,13 +811,13 @@ See`org-jira-get-issue-list'"
      (search-forward ":LOGBOOK:")
      (org-beginning-of-line)
      (org-cycle 1)
-     (search-forward "CLOCK: ")
+     (search-forward "CLOCK: " nil 1 1)
      (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
        (forward-line)
        ;; See where the stuff ends (what point)
        (let (next-clock-point)
          (save-excursion
-           (search-forward-regexp "\\(CLOCK\\|:END\\):")
+           (search-forward-regexp "\\(CLOCK\\|:END\\):" nil 1 1)
            (setq next-clock-point (point)))
          (let ((clock-content
                 (buffer-substring-no-properties (point) next-clock-point)))
