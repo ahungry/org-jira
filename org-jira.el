@@ -814,7 +814,10 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
   (let ((start (replace-regexp-in-string "^\\[\\(.*?\\)\\].*" "\\1" org-time))
         (end (replace-regexp-in-string ".*--\\[\\(.*?\\)\\].*" "\\1" org-time)))
     `((started . ,(org-jira-org-clock-to-date start))
-      (time-spent-seconds . 30))))
+      (time-spent-seconds . ,(time-to-seconds
+                              (time-subtract
+                               (date-to-time end)
+                               (date-to-time start)))))))
 
 (defun org-jira-org-clock-to-jira-worklog (org-time clock-content)
   "Given ORG-TIME and CLOCK-CONTENT, format a jira worklog entry."
@@ -826,8 +829,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
     (setq lines (reverse (cdr (reverse lines)))) ;; drop last line
     (let ((comment (org-trim (mapconcat 'identity lines "\n")))
           (worklog-time (org-jira-worklog-time-from-org-time org-time)))
-      `(
-        (worklog-id . ,worklog-id)
+      `((worklog-id . ,worklog-id)
         (comment . ,comment)
         (started . ,(cdr (assoc 'started worklog-time)))
         (time-spent-seconds . ,(cdr (assoc 'time-spent-seconds worklog-time)))
