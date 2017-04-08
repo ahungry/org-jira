@@ -858,28 +858,37 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
              (setq next-clock-point (point)))
            (let ((clock-content
                   (buffer-substring-no-properties (point) next-clock-point)))
-             ;; Now need to call jiralib to update
-             ;; Expects a call such as this:
-             ;; (jiralib-update-worklog "AHU-28" "10101" "2017-04-05T00:00:00.000-0500" "2800" "Success!")
-             ;;(org-jira-org-clock-to-jira-worklog org-time clock-content)
+
+             ;; @todo This is inefficient, calling the resync on each update/insert event,
+             ;; ideally we would track and only insert/update changed entries, as well
+             ;; only call a resync once (when the entire list is processed, which will
+             ;; basically require a dry run to see how many items we should be updating.
+
+             ;; Update via jiralib call
              (let ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content)))
                (if (cdr (assoc 'worklog-id worklog))
-                 (jiralib-update-worklog
-                  issue-id
-                  (cdr (assoc 'worklog-id worklog))
-                  (cdr (assoc 'started worklog))
-                  (cdr (assoc 'time-spent-seconds worklog))
-                  (cdr (assoc 'comment worklog)))
+                   (jiralib-update-worklog
+                    issue-id
+                    (cdr (assoc 'worklog-id worklog))
+                    (cdr (assoc 'started worklog))
+                    (cdr (assoc 'time-spent-seconds worklog))
+                    (cdr (assoc 'comment worklog))
+                    (cl-function
+                     (lambda (&rest data &allow-other-keys)
+                      (org-jira-update-worklogs-for-current-issue))))
 
                  (jiralib-add-worklog
                   issue-id
                   (cdr (assoc 'started worklog))
                   (cdr (assoc 'time-spent-seconds worklog))
-                  (cdr (assoc 'comment worklog)))))
-               ))))
-       )))
+                  (cdr (assoc 'comment worklog)))
+                    (cl-function
+                     (lambda (&rest data &allow-other-keys)
+                      (org-jira-update-worklogs-for-current-issue)))))
+             ))))
+     )))
 
-  (defun org-jira-update-worklog ()
+(defun org-jira-update-worklog ()
   "Update a worklog for the current issue."
   (interactive)
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
@@ -985,6 +994,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
+  ;; @todo Sort the worklog results by date descending
+  ;; or see if the API response can do it for us...
   (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
     ;; Run the call
     (jiralib-get-worklogs
