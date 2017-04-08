@@ -842,6 +842,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira-update-worklogs-from-org-clocks ()
   "Update or add a worklog based on the org clocks."
   (interactive)
+  ;; @todo Make this a defcustom, and/or check in the project if log
+  ;; is enabled, and only run the sync if both conditions are met.
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
     (ensure-on-issue-id
      issue-id
