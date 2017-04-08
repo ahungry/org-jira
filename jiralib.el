@@ -847,6 +847,9 @@ will cache it."
 Requires STARTED (a jira datetime), TIME-SPENT-SECONDS (integer) and a COMMENT.
 CALLBACK will be invoked if passed in upon endpoint completion."
   (let ((worklog `((started . ,started)
+                   ;; @todo timeSpentSeconds changes into incorrect values
+                   ;; in the Jira API (for instance, 89600 = 1 day, but Jira thinks 3 days...
+                   ;; We should convert to a Xd Xh Xm format from our seconds ourselves.
                    (timeSpentSeconds . ,time-spent-seconds)
                    (comment . ,comment))))
     (jiralib-call "updateWorklog" callback issue-id worklog-id worklog)))

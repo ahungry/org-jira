@@ -859,8 +859,14 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
              ;; Expects a call such as this:
              ;; (jiralib-update-worklog "AHU-28" "10101" "2017-04-05T00:00:00.000-0500" "2800" "Success!")
              ;;(org-jira-org-clock-to-jira-worklog org-time clock-content)
-             (message org-time)
-             (message clock-content)))))
+             (let ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content)))
+               (jiralib-update-worklog
+                issue-id
+                (cdr (assoc 'worklog-id worklog))
+                (cdr (assoc 'started worklog))
+                (cdr (assoc 'time-spent-seconds worklog))
+                (cdr (assoc 'comment worklog))))
+             ))))
      )))
 
 (defun org-jira-update-worklog ()
@@ -1365,6 +1371,14 @@ otherwise it should return:
           (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
           (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
           (project-components (jiralib-get-components project)))
+
+     ;; Lets fire off a worklog update async with the main issue
+     ;; update, why not?  This is better to fire first, because it
+     ;; doesn't auto-refresh any areas, while the end of the main
+     ;; update does a callback that reloads the worklog entries (so,
+     ;; we hope that wont occur until after this successfully syncs
+     ;; up.
+     (org-jira-update-worklogs-from-org-clocks)
 
      ;; Send the update to jira
      (let ((update-fields
