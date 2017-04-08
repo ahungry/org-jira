@@ -802,6 +802,20 @@ See`org-jira-get-issue-list'"
         (jiralib-edit-comment issue-id comment-id comment callback-edit)
       (jiralib-add-comment issue-id comment callback-add))))
 
+(defun org-jira-org-clock-to-date (org-time)
+  "Convert ORG-TIME formatted date into a plain date string."
+  (format-time-string
+   "%Y-%m-%dT%H:%M:%S.000%z"
+   (date-to-time org-time)))
+
+(defun org-jira-worklog-time-from-org-time (org-time)
+  "Take in an ORG-TIME and convert it into the portions of a worklog time.
+Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] =>  0:46"
+  (let ((start (replace-regexp-in-string "^\\[\\(.*?\\)\\].*" "\\1" org-time))
+        (end (replace-regexp-in-string ".*--\\[\\(.*?\\)\\].*" "\\1" org-time)))
+    `((started . ,(org-jira-org-clock-to-date start))
+      (time-spent-seconds . 30))))
+
 (defun org-jira-org-clock-to-jira-worklog (org-time clock-content)
   "Given ORG-TIME and CLOCK-CONTENT, format a jira worklog entry."
   (let* ((lines (split-string clock-content "\n"))
@@ -810,8 +824,14 @@ See`org-jira-get-issue-list'"
     (when worklog-id ;; pop off the first id line if we found it
       (setq lines (cdr lines)))
     (setq lines (reverse (cdr (reverse lines)))) ;; drop last line
-    (let ((comment (org-trim (mapconcat 'identity lines "\n"))))
-      `(,worklog-id ,comment))))
+    (let ((comment (org-trim (mapconcat 'identity lines "\n")))
+          (worklog-time (org-jira-worklog-time-from-org-time org-time)))
+      `(
+        (worklog-id . ,worklog-id)
+        (comment . ,comment)
+        (started . ,(cdr (assoc 'started worklog-time)))
+        (time-spent-seconds . ,(cdr (assoc 'time-spent-seconds worklog-time)))
+        ))))
 
 ;;;###autoload
 (defun org-jira-update-worklogs-from-org-clocks ()

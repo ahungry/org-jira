@@ -58,6 +58,12 @@
             (org-jira-date-to-org-clock "2017-02-05T00:00:00.000-0500")))
   )
 
+(ert-deftest org-jira-org-clock-to-date-test ()
+  (should
+   (string= "2017-01-01T00:00:00.000-0500"
+            (org-jira-org-clock-to-date "2017-01-01 Sun 00:00")))
+  )
+
 (ert-deftest org-jira-time-stamp-to-org-clock-test ()
   (should
    (string= "2016-12-31 Sat 19:05"
@@ -174,8 +180,8 @@
           "  :id: 10101
   Success!
 CLOCK:")))
-    (should (string= "10101" (first result)))
-    (should (string= "Success!" (second result)))
+    (should (string= "10101" (cdr (assoc 'worklog-id result))))
+    (should (string= "Success!" (cdr (assoc 'comment result))))
     ))
 
 (provide 'org-jira-t)
