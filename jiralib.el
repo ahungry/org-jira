@@ -294,6 +294,11 @@ request.el, so if at all possible, it should be avoided."
       ('getWorklogs
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))))
 
+      ('addWorklog
+       (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))
+                              :type "POST"
+                              :data (json-encode (second params))))
+
       ('updateWorklog
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog/%s" (first params) (second params))
                               :type "PUT"
@@ -841,11 +846,30 @@ will cache it."
   "Return all worklogs associated with issue ISSUE-KEY, invoking CALLBACK."
   (jiralib-call "getWorklogs" callback issue-key))
 
+(defun jiralib-add-worklog (issue-id started time-spent-seconds comment &optional callback)
+  "Add the worklog linked to ISSUE-ID.
+
+Requires STARTED (a jira datetime), TIME-SPENT-SECONDS (integer) and a COMMENT.
+CALLBACK will be invoked if passed in upon endpoint completion."
+  ;; Call will fail if 0 seconds are set as the time, so always do at least one min.
+  (setq time-spent-seconds (max 60 time-spent-seconds))
+  ;;(message (format "S: %s TSS: %s C: %s" started time-spent-seconds comment))
+  (let ((worklog `((started . ,started)
+                   ;; @todo timeSpentSeconds changes into incorrect values
+                   ;; in the Jira API (for instance, 89600 = 1 day, but Jira thinks 3 days...
+                   ;; We should convert to a Xd Xh Xm format from our seconds ourselves.
+                   (timeSpentSeconds . ,time-spent-seconds)
+                   (comment . ,comment))))
+    (jiralib-call "addWorklog" callback issue-id worklog)))
+
 (defun jiralib-update-worklog (issue-id worklog-id started time-spent-seconds comment &optional callback)
   "Update the worklog linked to ISSUE-ID and WORKLOG-ID.
 
 Requires STARTED (a jira datetime), TIME-SPENT-SECONDS (integer) and a COMMENT.
 CALLBACK will be invoked if passed in upon endpoint completion."
+  ;; Call will fail if 0 seconds are set as the time, so always do at least one min.
+  (setq time-spent-seconds (max 60 time-spent-seconds))
+  ;;(message (format "S: %s TSS: %s C: %s" started time-spent-seconds comment))
   (let ((worklog `((started . ,started)
                    ;; @todo timeSpentSeconds changes into incorrect values
                    ;; in the Jira API (for instance, 89600 = 1 day, but Jira thinks 3 days...

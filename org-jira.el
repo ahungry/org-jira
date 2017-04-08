@@ -821,11 +821,14 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 
 (defun org-jira-org-clock-to-jira-worklog (org-time clock-content)
   "Given ORG-TIME and CLOCK-CONTENT, format a jira worklog entry."
-  (let* ((lines (split-string clock-content "\n"))
-         (worklog-id
-          (replace-regexp-in-string "^.*:id: \\([0-9]*\\)$" "\\1" (first lines))))
-    (when worklog-id ;; pop off the first id line if we found it
-      (setq lines (cdr lines)))
+  (let ((lines (split-string clock-content "\n"))
+        worklog-id)
+    ;; See if we look like we have an id
+    (when (string-match ":id:" (first lines))
+      (setq worklog-id
+            (replace-regexp-in-string "^.*:id: \\([0-9]*\\)$" "\\1" (first lines)))
+      (when (> (string-to-number worklog-id) 0) ;; pop off the first id line if we found it valid
+        (setq lines (cdr lines))))
     (setq lines (reverse (cdr (reverse lines)))) ;; drop last line
     (let ((comment (org-trim (mapconcat 'identity lines "\n")))
           (worklog-time (org-jira-worklog-time-from-org-time org-time)))
@@ -860,16 +863,23 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
              ;; (jiralib-update-worklog "AHU-28" "10101" "2017-04-05T00:00:00.000-0500" "2800" "Success!")
              ;;(org-jira-org-clock-to-jira-worklog org-time clock-content)
              (let ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content)))
-               (jiralib-update-worklog
-                issue-id
-                (cdr (assoc 'worklog-id worklog))
-                (cdr (assoc 'started worklog))
-                (cdr (assoc 'time-spent-seconds worklog))
-                (cdr (assoc 'comment worklog))))
-             ))))
-     )))
+               (if (cdr (assoc 'worklog-id worklog))
+                 (jiralib-update-worklog
+                  issue-id
+                  (cdr (assoc 'worklog-id worklog))
+                  (cdr (assoc 'started worklog))
+                  (cdr (assoc 'time-spent-seconds worklog))
+                  (cdr (assoc 'comment worklog)))
 
-(defun org-jira-update-worklog ()
+                 (jiralib-add-worklog
+                  issue-id
+                  (cdr (assoc 'started worklog))
+                  (cdr (assoc 'time-spent-seconds worklog))
+                  (cdr (assoc 'comment worklog)))))
+               ))))
+       )))
+
+  (defun org-jira-update-worklog ()
   "Update a worklog for the current issue."
   (interactive)
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
