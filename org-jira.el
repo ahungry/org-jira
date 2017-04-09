@@ -1007,8 +1007,6 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
-  ;; @todo Sort the worklog results by date descending
-  ;; or see if the API response can do it for us...
   (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
     ;; Run the call
     (jiralib-get-worklogs
