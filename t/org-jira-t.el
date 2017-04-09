@@ -198,5 +198,14 @@ CLOCK:")))
     (should (= 2760.0 (cdr (assoc 'time-spent-seconds result))))
     ))
 
+(ert-deftest org-jira-sort-org-clocks-test ()
+  (let* ((clocks '(("2017-02-26 Sun 00:08" "2017-02-26 Sun 01:08" "Some comment here" "10101")
+                     ("2017-03-16 Thu 22:25" "2017-03-16 Thu 22:57" "Add 32 minutes" "10200"))
+                   )
+         (result (org-jira-sort-org-clocks clocks)))
+
+    (should (string= "2017-03-16 Thu 22:25" (car (car result))))
+    ))
+
 (provide 'org-jira-t)
 ;;; org-jira-t.el ends here

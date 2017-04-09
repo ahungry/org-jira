@@ -994,6 +994,17 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                 (list comment)))
             comments))))))))
 
+(defun org-jira-sort-org-clocks (clocks)
+  "Given a CLOCKS list, sort it by start date descending."
+  ;; Expects data such as this:
+
+  ;; ((\"2017-02-26 Sun 00:08\" \"2017-02-26 Sun 01:08\" \"Hi\" \"10101\")
+  ;;  (\"2017-03-16 Thu 22:25\" \"2017-03-16 Thu 22:57\" \"Test\" \"10200\"))
+  (sort clocks
+        (lambda (a b)
+          (> (time-to-seconds (date-to-time (car a)))
+             (time-to-seconds (date-to-time (car b)))))))
+
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
   ;; @todo Sort the worklog results by date descending
@@ -1009,7 +1020,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
          (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
            (org-jira-logbook-reset
             issue-id
-            (org-jira-worklogs-to-org-clocks worklogs)))))))))
+            (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks worklogs))))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
