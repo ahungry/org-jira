@@ -520,7 +520,7 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
 This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (insert (org-jira-format-clock clock-entry))
   (org-beginning-of-line)
-  (org-ctrl-c-ctrl-c) ;; @todo Maybe not call directly?  does it matter?
+  (org-ctrl-c-ctrl-c) ;; @todo Maybe not call directly?  does it matter? - used to resync the clock estimate
   (org-end-of-line)
   (insert "\n")
   (insert (format "  :id: %s\n" (cadddr clock-entry)))
@@ -528,8 +528,11 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   )
 
 (defun org-jira-logbook-reset (issue-id &optional clocks)
-  "Find logbook for ISSUE-ID (@todo dynamic drawer), delete it.
+  "Find logbook for ISSUE-ID, delete it.
 Re-create it with CLOCKS.  This is used for worklogs."
+  ;; @todo Handle dynamic drawer (its possible some people may store
+  ;; their clocks in a non LOGBOOK property drawer, since org does allow
+  ;; customizing the value...
   (interactive)
   (let ((existing-logbook-p nil))
     ;; See if the LOGBOOK already exists or not.

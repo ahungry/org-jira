@@ -853,9 +853,6 @@ Requires STARTED (a jira datetime), TIME-SPENT-SECONDS (integer) and a COMMENT.
 CALLBACK will be invoked if passed in upon endpoint completion."
   ;; Call will fail if 0 seconds are set as the time, so always do at least one min.
   (setq time-spent-seconds (max 60 time-spent-seconds))
-  ;; @todo Add a default comment based on user settings maybe?
-  ;; Although that should probably go in the org-jira portion...
-  ;;(message (format "S: %s TSS: %s C: %s" started time-spent-seconds comment))
   (let ((worklog `((started . ,started)
                    ;; @todo timeSpentSeconds changes into incorrect values
                    ;; in the Jira API (for instance, 89600 = 1 day, but Jira thinks 3 days...
@@ -871,7 +868,6 @@ Requires STARTED (a jira datetime), TIME-SPENT-SECONDS (integer) and a COMMENT.
 CALLBACK will be invoked if passed in upon endpoint completion."
   ;; Call will fail if 0 seconds are set as the time, so always do at least one min.
   (setq time-spent-seconds (max 60 time-spent-seconds))
-  ;;(message (format "S: %s TSS: %s C: %s" started time-spent-seconds comment))
   (let ((worklog `((started . ,started)
                    ;; @todo timeSpentSeconds changes into incorrect values
                    ;; in the Jira API (for instance, 89600 = 1 day, but Jira thinks 3 days...
