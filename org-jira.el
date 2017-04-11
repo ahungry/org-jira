@@ -538,33 +538,32 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
 (defun org-jira-logbook-reset (issue-id &optional clocks)
   "Find logbook for ISSUE-ID, delete it.
 Re-create it with CLOCKS.  This is used for worklogs."
-  ;; @todo :worklog: Handle dynamic drawer (its possible some people may store
-  ;; their clocks in a non LOGBOOK property drawer, since org does allow
-  ;; customizing the value...
   (interactive)
   (let ((existing-logbook-p nil))
     ;; See if the LOGBOOK already exists or not.
     (ensure-on-issue-id
      issue-id
-     (when (search-forward ":LOGBOOK:" nil 1 1)
-       (setq existing-logbook-p t)))
+     (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
+       (when (search-forward (format ":%s:" drawer-name) nil 1 1)
+         (setq existing-logbook-p t))))
     (ensure-on-issue-id
      issue-id
-     (if existing-logbook-p
-         (progn ;; If we had a logbook, drop it and re-create in a bit.
-           (search-forward ":LOGBOOK:")
-           (org-beginning-of-line)
-           (org-cycle 0)
-           (dotimes (n 2) (org-kill-line)))
-       (progn ;; Otherwise, create a new one at the end of properties list
-         (search-forward ":END:")
-         (forward-line)))
-     (org-insert-drawer nil "LOGBOOK") ;; Doc says non-nil, but this requires nil
-     (mapc #'org-jira-insert-clock clocks)
-     ;; Clean up leftover newlines (we left 2 behind)
-     (search-forward-regexp "^$")
-     (org-kill-line)
-     )))
+     (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
+       (if existing-logbook-p
+           (progn ;; If we had a logbook, drop it and re-create in a bit.
+             (search-forward (format ":%s:" drawer-name))
+             (org-beginning-of-line)
+             (org-cycle 0)
+             (dotimes (n 2) (org-kill-line)))
+         (progn ;; Otherwise, create a new one at the end of properties list
+           (search-forward ":END:")
+           (forward-line)))
+       (org-insert-drawer nil (format "%s" drawer-name)) ;; Doc says non-nil, but this requires nil
+       (mapc #'org-jira-insert-clock clocks)
+       ;; Clean up leftover newlines (we left 2 behind)
+       (search-forward-regexp "^$")
+       (org-kill-line)
+       ))))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
   "Return the value associated with KEY of WORKLOG."
@@ -862,7 +861,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
     (ensure-on-issue-id
      issue-id
-     (search-forward ":LOGBOOK:" nil 1 1)
+     (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
      (org-beginning-of-line)
      (org-cycle 1)
      (while (search-forward "CLOCK: " nil 1 1)
