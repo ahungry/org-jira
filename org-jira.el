@@ -881,31 +881,31 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
              ;; only call a resync once (when the entire list is processed, which will
              ;; basically require a dry run to see how many items we should be updating.
 
-             ;; @todo :worklog: Probably prune off empty / whitespace when we resync (so the
-             ;; remote continues to see it as null/nil, and we don't coerce it to empty string).
-
              ;; Update via jiralib call
-             (let ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content)))
+             (let* ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content))
+                    (comment-text (cdr (assoc 'comment worklog)))
+                    (comment-text (if (string= (org-trim comment-text) "") nil comment-text)))
                (if (cdr (assoc 'worklog-id worklog))
                    (jiralib-update-worklog
                     issue-id
                     (cdr (assoc 'worklog-id worklog))
                     (cdr (assoc 'started worklog))
                     (cdr (assoc 'time-spent-seconds worklog))
-                    (cdr (assoc 'comment worklog))
+                    comment-text
                     (cl-function
                      (lambda (&rest data &allow-other-keys)
-                      (org-jira-update-worklogs-for-current-issue))))
-
+                       (org-jira-update-worklogs-for-current-issue))))
+                 ;; else
                  (jiralib-add-worklog
                   issue-id
                   (cdr (assoc 'started worklog))
                   (cdr (assoc 'time-spent-seconds worklog))
-                  (cdr (assoc 'comment worklog)))
-                    (cl-function
-                     (lambda (&rest data &allow-other-keys)
-                      (org-jira-update-worklogs-for-current-issue)))))
-             ))))
+                  comment-text
+                  (cl-function
+                   (lambda (&rest data &allow-other-keys)
+                     (org-jira-update-worklogs-for-current-issue))))
+                 )
+               )))))
      )))
 
 (defun org-jira-update-worklog ()
