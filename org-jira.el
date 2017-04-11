@@ -191,6 +191,14 @@ instance."
   :group 'org-jira
   :type 'boolean)
 
+(defcustom org-jira-worklog-sync-p t
+  "Keep org clocks and jira worklog fields synced.
+You may wish to set this to nil if you track org clocks in
+your buffer that you do not want to send back to your Jira
+instance."
+  :group 'org-jira
+  :type 'boolean)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -779,7 +787,11 @@ See`org-jira-get-issue-list'"
                                  (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
-                      (org-jira-update-worklogs-for-current-issue)
+
+                      ;; only sync worklog clocks when the user sets it to be so.
+                      (when org-jira-worklog-sync-p
+                        (org-jira-update-worklogs-for-current-issue))
+
                       ))))))
           issues)
     (switch-to-buffer project-buffer)))
@@ -1415,8 +1427,9 @@ otherwise it should return:
      ;; doesn't auto-refresh any areas, while the end of the main
      ;; update does a callback that reloads the worklog entries (so,
      ;; we hope that wont occur until after this successfully syncs
-     ;; up.
-     (org-jira-update-worklogs-from-org-clocks)
+     ;; up).  Only do this sync if the user defcustom defines it as such.
+     (when org-jira-worklog-sync-p
+       (org-jira-update-worklogs-from-org-clocks))
 
      ;; Send the update to jira
      (let ((update-fields
