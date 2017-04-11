@@ -538,7 +538,7 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
 (defun org-jira-logbook-reset (issue-id &optional clocks)
   "Find logbook for ISSUE-ID, delete it.
 Re-create it with CLOCKS.  This is used for worklogs."
-  ;; @todo Handle dynamic drawer (its possible some people may store
+  ;; @todo :worklog: Handle dynamic drawer (its possible some people may store
   ;; their clocks in a non LOGBOOK property drawer, since org does allow
   ;; customizing the value...
   (interactive)
@@ -810,7 +810,7 @@ See`org-jira-get-issue-list'"
          (callback-add
           (cl-function
            (lambda (&rest data &allow-other-keys)
-             ;; @todo Has to be a better way to do this than delete region (like update the unmarked one)
+             ;; @todo :optim: Has to be a better way to do this than delete region (like update the unmarked one)
              (org-jira-delete-current-comment)
              (org-jira-update-comments-for-current-issue)))))
     (if comment-id
@@ -857,7 +857,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira-update-worklogs-from-org-clocks ()
   "Update or add a worklog based on the org clocks."
   (interactive)
-  ;; @todo Make this a defcustom, and/or check in the project if log
+  ;; @todo :worklog: Make this a defcustom, and/or check in the project if log
   ;; is enabled, and only run the sync if both conditions are met.
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
     (ensure-on-issue-id
@@ -876,12 +876,12 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
            (let ((clock-content
                   (buffer-substring-no-properties (point) next-clock-point)))
 
-             ;; @todo This is inefficient, calling the resync on each update/insert event,
+             ;; @todo :optim: This is inefficient, calling the resync on each update/insert event,
              ;; ideally we would track and only insert/update changed entries, as well
              ;; only call a resync once (when the entire list is processed, which will
              ;; basically require a dry run to see how many items we should be updating.
 
-             ;; @todo Probably prune off empty / whitespace when we resync (so the
+             ;; @todo :worklog: Probably prune off empty / whitespace when we resync (so the
              ;; remote continues to see it as null/nil, and we don't coerce it to empty string).
 
              ;; Update via jiralib call

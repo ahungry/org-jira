@@ -257,7 +257,7 @@ as such, the CALLBACK should follow this type of form:
 If CALLBACK is set to nil then the request will occur with sync.
 This produces a noticeable slowdown and is not recommended by
 request.el, so if at all possible, it should be avoided."
-  ;; @todo Probably pass this all the way down, but I think
+  ;; @todo :auth: Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
   (setq jiralib-complete-callback
         ;; Don't run with async if we don't have a login token yet.
@@ -854,7 +854,7 @@ CALLBACK will be invoked if passed in upon endpoint completion."
   ;; Call will fail if 0 seconds are set as the time, so always do at least one min.
   (setq time-spent-seconds (max 60 time-spent-seconds))
   (let ((worklog `((started . ,started)
-                   ;; @todo timeSpentSeconds changes into incorrect values
+                   ;; @todo :worklog: timeSpentSeconds changes into incorrect values
                    ;; in the Jira API (for instance, 89600 = 1 day, but Jira thinks 3 days...
                    ;; We should convert to a Xd Xh Xm format from our seconds ourselves.
                    (timeSpentSeconds . ,time-spent-seconds)
@@ -869,7 +869,7 @@ CALLBACK will be invoked if passed in upon endpoint completion."
   ;; Call will fail if 0 seconds are set as the time, so always do at least one min.
   (setq time-spent-seconds (max 60 time-spent-seconds))
   (let ((worklog `((started . ,started)
-                   ;; @todo timeSpentSeconds changes into incorrect values
+                   ;; @todo :worklog: timeSpentSeconds changes into incorrect values
                    ;; in the Jira API (for instance, 89600 = 1 day, but Jira thinks 3 days...
                    ;; We should convert to a Xd Xh Xm format from our seconds ourselves.
                    (timeSpentSeconds . ,time-spent-seconds)
