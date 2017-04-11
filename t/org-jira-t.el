@@ -182,7 +182,7 @@
 CLOCK:")))
     (should (string= "10101" (cdr (assoc 'worklog-id result))))
     (should (string= "Success!" (cdr (assoc 'comment result))))
-    (should (string= "2017-04-05T01:00:00.000-0400" (cdr (assoc 'started result))))
+    (should (string= "2017-04-05T01:00:00.000-0000" (cdr (assoc 'started result))))
     (should (= 2760.0 (cdr (assoc 'time-spent-seconds result))))
     ))
 
@@ -194,7 +194,7 @@ CLOCK:")))
 CLOCK:")))
     (should (equal nil (cdr (assoc 'worklog-id result))))
     (should (string= "My sweet comment!" (cdr (assoc 'comment result))))
-    (should (string= "2017-04-05T01:00:00.000-0400" (cdr (assoc 'started result))))
+    (should (string= "2017-04-05T01:00:00.000-0000" (cdr (assoc 'started result))))
     (should (= 2760.0 (cdr (assoc 'time-spent-seconds result))))
     ))
 

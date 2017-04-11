@@ -819,7 +819,10 @@ See`org-jira-get-issue-list'"
 (defun org-jira-org-clock-to-date (org-time)
   "Convert ORG-TIME formatted date into a plain date string."
   (format-time-string
-   "%Y-%m-%dT%H:%M:%S.000%z"
+   ;;"%Y-%m-%dT%H:%M:%S.000%z"
+   ;; Including the TZ seems to set it off that amount each request.
+   ;; Despite the fact that it starts from the API as 0400 if in EST
+   "%Y-%m-%dT%H:%M:%S.000-0000"
    (date-to-time org-time)))
 
 (defun org-jira-worklog-time-from-org-time (org-time)
