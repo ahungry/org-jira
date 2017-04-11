@@ -60,7 +60,7 @@
 
 (ert-deftest org-jira-org-clock-to-date-test ()
   (should
-   (string= "2017-01-01T00:00:00.000-0500"
+   (string= "2017-01-01T00:00:00.000-0000"
             (org-jira-org-clock-to-date "2017-01-01 Sun 00:00")))
   )
 
