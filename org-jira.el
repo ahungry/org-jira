@@ -524,7 +524,7 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (org-end-of-line)
   (insert "\n")
   (insert (format "  :id: %s\n" (cadddr clock-entry)))
-  (insert (format "  %s\n" (caddr clock-entry)))
+  (when (caddr clock-entry) (insert (format "  %s\n" (caddr clock-entry)))) ;; No comment is nil, so don't print it
   )
 
 (defun org-jira-logbook-reset (issue-id &optional clocks)
@@ -868,6 +868,9 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
              ;; ideally we would track and only insert/update changed entries, as well
              ;; only call a resync once (when the entire list is processed, which will
              ;; basically require a dry run to see how many items we should be updating.
+
+             ;; @todo Probably prune off empty / whitespace when we resync (so the
+             ;; remote continues to see it as null/nil, and we don't coerce it to empty string).
 
              ;; Update via jiralib call
              (let ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content)))
