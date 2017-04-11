@@ -489,8 +489,10 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
 (defun org-jira-date-strip-letter-t (date)
   "Convert DATE into a time stamp and then into org-clock format.
 Expects a date in format such as: 2017-02-26T00:08:00.000-0500 and
-returns in format 2017-02-26 00:08:00.000-0500."
-  (replace-regexp-in-string "^\\(.*?\\)T" "\\1 " date))
+returns in format 2017-02-26 00:08:00-0500."
+  (replace-regexp-in-string
+   "\\.000\\([-+]\\)" "\\1"
+   (replace-regexp-in-string "^\\(.*?\\)T" "\\1 " date)))
 
 (defun org-jira-date-to-org-clock (date)
   "Convert DATE into a time stamp and then into org-clock format.
@@ -819,10 +821,7 @@ See`org-jira-get-issue-list'"
 (defun org-jira-org-clock-to-date (org-time)
   "Convert ORG-TIME formatted date into a plain date string."
   (format-time-string
-   ;;"%Y-%m-%dT%H:%M:%S.000%z"
-   ;; Including the TZ seems to set it off that amount each request.
-   ;; Despite the fact that it starts from the API as 0400 if in EST
-   "%Y-%m-%dT%H:%M:%S.000-0000"
+   "%Y-%m-%dT%H:%M:%S.000%z"
    (date-to-time org-time)))
 
 (defun org-jira-worklog-time-from-org-time (org-time)

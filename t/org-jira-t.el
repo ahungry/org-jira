@@ -45,7 +45,7 @@
 
 (ert-deftest org-jira-date-strip-letter-t-test ()
   (should
-   (string= "2017-01-01 00:00:00.000-0500"
+   (string= "2017-01-01 00:00:00-0500"
             (org-jira-date-strip-letter-t "2017-01-01T00:00:00.000-0500")))
   )
 
@@ -60,7 +60,7 @@
 
 (ert-deftest org-jira-org-clock-to-date-test ()
   (should
-   (string= "2017-01-01T00:00:00.000-0000"
+   (string= "2017-01-01T00:00:00.000-0500"
             (org-jira-org-clock-to-date "2017-01-01 Sun 00:00")))
   )
 
@@ -182,7 +182,7 @@
 CLOCK:")))
     (should (string= "10101" (cdr (assoc 'worklog-id result))))
     (should (string= "Success!" (cdr (assoc 'comment result))))
-    (should (string= "2017-04-05T01:00:00.000-0000" (cdr (assoc 'started result))))
+    (should (string= "2017-04-05T01:00:00.000-0400" (cdr (assoc 'started result))))
     (should (= 2760.0 (cdr (assoc 'time-spent-seconds result))))
     ))
 
@@ -194,7 +194,7 @@ CLOCK:")))
 CLOCK:")))
     (should (equal nil (cdr (assoc 'worklog-id result))))
     (should (string= "My sweet comment!" (cdr (assoc 'comment result))))
-    (should (string= "2017-04-05T01:00:00.000-0000" (cdr (assoc 'started result))))
+    (should (string= "2017-04-05T01:00:00.000-0400" (cdr (assoc 'started result))))
     (should (= 2760.0 (cdr (assoc 'time-spent-seconds result))))
     ))
 
