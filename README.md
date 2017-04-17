@@ -70,7 +70,7 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
 (define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
 (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
-(define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklog)
+(define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
 (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
 ```
 

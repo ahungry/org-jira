@@ -15,7 +15,7 @@
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
 ;; Maintainer: Matthew Carter <m@ahungry.com>
-;; Version: 2.6.1
+;; Version: 2.7.0
 ;; Homepage: https://github.com/ahungry/org-jira
 
 ;; This file is not part of GNU Emacs.
@@ -62,6 +62,9 @@
 
 ;;; News:
 
+;;;; Changes since 2.6.3:
+;; - Add the worklog related endpoint/calls.
+
 ;;;; Changes since 2.1.0:
 ;; - Remove os_username / os_password manual http request as part of sign in process
 ;;     This produces sysadmin level warnings on Jira when these are used under the latest Jira.
@@ -83,7 +86,7 @@
 (require 'json)
 (require 'url-parse)
 
-(defconst jiralib-version "2.6.1"
+(defconst jiralib-version "2.7.0"
   "Current version of jiralib.el.")
 
 (defgroup jiralib nil

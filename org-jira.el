@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.6.2
+;; Version: 2.7.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.6.3:
+;; - Sync up org-clocks and worklogs!  Set org-jira-worklog-sync-p to nil to avoid.
 
 ;;;; Changes since 2.6.1:
 ;; - Fix bug with getting all issues when worklog is an error trigger.
@@ -85,10 +88,11 @@
 ;;; Code:
 
 (require 'org)
+(require 'org-clock)
 (require 'jiralib)
 (require 'cl-lib)
 
-(defconst org-jira-version "2.6.1"
+(defconst org-jira-version "2.7.0"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
@@ -327,7 +331,7 @@ instance."
     (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
     (define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
     (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
-    (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklog)
+    (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
     (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
     org-jira-map))
 
@@ -858,8 +862,6 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira-update-worklogs-from-org-clocks ()
   "Update or add a worklog based on the org clocks."
   (interactive)
-  ;; @todo :worklog: Make this a defcustom, and/or check in the project if log
-  ;; is enabled, and only run the sync if both conditions are met.
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
     (ensure-on-issue-id
      issue-id
@@ -912,6 +914,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira-update-worklog ()
   "Update a worklog for the current issue."
   (interactive)
+  (error "Deprecated, use org-jira-update-worklogs-from-org-clocks instead!")
   (let* ((issue-id (org-jira-get-from-org 'issue 'key))
          (worklog-id (org-jira-get-from-org 'worklog 'id))
          (timeSpent (org-jira-get-from-org 'worklog 'timeSpent))
@@ -1378,7 +1381,7 @@ Where issue-id will be something such as \"EX-22\"."
          (org-jira-refresh-issue)))))))
 
 (defun org-jira-get-id-name-alist (name ids-to-names)
-  "Finds the id corresponding to NAME in IDS-TO-NAMES and returns an alist with id and name as keys"
+  "Find the id corresponding to NAME in IDS-TO-NAMES and return an alist with id and name as keys."
   (let ((id (car (rassoc name ids-to-names))))
     `((id . ,id)
       (name . ,name))))
