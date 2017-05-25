@@ -244,6 +244,9 @@ instance."
 (defvar org-jira-issue-id-history '()
   "Prompt history for issue id.")
 
+(defvar org-jira-fixversion-id-history '()
+  "Prompt history for fixversion id.")
+
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
   (declare (debug (body)))
@@ -632,6 +635,12 @@ jql."
   (let ((jql (format "id = %s" id)))
     (jiralib-do-jql-search jql)))
 
+(defun org-jira-get-issue-by-fixversion (fixversion-id)
+  "Get an issue by its FIXVERSION-ID."
+  (push fixversion-id org-jira-fixversion-id-history)
+  (let ((jql (format "fixVersion = \"%s\""  fixversion-id)))
+    (jiralib-do-jql-search jql)))
+
 ;;;###autoload
 (defun org-jira-get-summary ()
   "Get issue summary from point and place next to issue id from jira"
@@ -681,6 +690,13 @@ With a prefix argument, allow you to customize the jql.  See
   "Get a JIRA issue, allowing you to enter the issue-id first."
   (interactive (list (read-string "Issue ID: " "" 'org-jira-issue-id-history)))
   (org-jira-get-issues (org-jira-get-issue-by-id id)))
+
+;;;###autoload
+(defun org-jira-get-issues-by-fixversion (fixversion)
+  "Get list of issues by FIXVERSION."
+  (interactive (list (read-string "Fixversion ID: " ""
+                                  'org-jira-fixversion-id-history)))
+  (org-jira-get-issues (org-jira-get-issue-by-fixversion fixversion)))
 
 ;;;###autoload
 (defun org-jira-get-issue-project (issue)
