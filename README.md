@@ -1,5 +1,7 @@
 # org-jira mode
 
+[![Join the chat at https://gitter.im/org-jira/Lobby](https://badges.gitter.im/org-jira/Lobby.svg)](https://gitter.im/org-jira/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Use Jira in Emacs org-mode.
 
 ## TOC
