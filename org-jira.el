@@ -203,6 +203,61 @@ instance."
   :group 'org-jira
   :type 'boolean)
 
+(defcustom org-jira-get-issues-issue-functions 'org-jira-get-issue-extras-function
+  "List of functions to be run after 
+each issue is prepared in `org-jira-get-issues'.
+Current issue-id and project-buffer are passed as arguments.
+By default `org-jira-get-issue-extras-function' is added
+which triggers `org-jira-update-comments-for-current-issue' 
+and `org-jira-update-worklogs-for-current-issue'. 
+Hence, one should not expect comments and worklogs to be present when 
+the functions from this list are called.
+"
+  :group 'org-jira
+  :type 'hook)
+
+(defcustom org-jira-get-issues-functions 'switch-to-buffer
+  "List of functions to be run as a last step
+after all project buffers are prepared in `org-jira-get-issues'.
+Last project buffer is passed as an argument to each function.
+By default there is one function provided that switches to the last project buffer.
+
+NOTE: Comments and worklogs are added asynchronously to each project buffer. 
+This hook can ensure only that main issue details are in place when the functions are triggered."
+  :group 'org-jira
+  :type 'hook)
+
+(defun org-jira-get-issue-extras-function (issue-id project-buffer)
+  (org-jira-update-comments-for-current-issue)
+  (org-jira-update-worklogs-for-current-issue))
+
+(defun org-jira-auto-add-agenda-files-function (issue-id project-buffer)
+  "Hook function for auto- saving and adding project files to `org-agenda'."
+  (with-current-buffer project-buffer
+    (save-buffer)
+    (add-to-list 'org-agenda-files (buffer-file-name project-buffer))))
+
+(defun org-jira-auto-add-to-agenda (add-files)
+  "When called with non-nil argument, 
+will set the `org-jira-auto-add-agenda-files-function' function 
+to `org-jira-get-issues-issue-functions' hook. 
+This will cause project files to be automatically saved and added 
+to `org-agenda-files' when `org-jira-get-issues' is called.
+When called interactively use C-u to pass a non-nil value.
+
+NOTE: Due to the async retrieval of comments and worklogs, the buffers can get 
+modified after they have been initially saved for inclusion in the agenda.
+One should not relay on this functionality as an auto-save feature.
+
+The hook can be removed by calling this method with a nil argument.
+By default the functionality is disabled."
+  (interactive "P")
+  (if add-files
+      (add-hook 'org-jira-get-issues-issue-functions
+		'org-jira-auto-add-agenda-files-function)
+    (remove-hook 'org-jira-get-issues-issue-functions
+		 'org-jira-auto-add-agenda-files-function)))
+    
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -807,15 +862,9 @@ See`org-jira-get-issue-list'"
 
                                  (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
-                      (org-jira-update-comments-for-current-issue)
-
-                      ;; only sync worklog clocks when the user sets it to be so.
-                      (when org-jira-worklog-sync-p
-                        (org-jira-update-worklogs-for-current-issue))
-
-                      ))))))
-          issues)
-    (switch-to-buffer project-buffer)))
+		      (run-hook-with-args 'org-jira-get-issues-issue-functions issue-id project-buffer)))))))
+	  issues)
+    (run-hook-with-args 'org-jira-get-issues-functions project-buffer)))
 
 ;;;###autoload
 (defun org-jira-update-comment ()
@@ -875,57 +924,60 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
         ))))
 
 ;;;###autoload
-(defun org-jira-update-worklogs-from-org-clocks ()
-  "Update or add a worklog based on the org clocks."
-  (interactive)
-  (let ((issue-id (org-jira-get-from-org 'issue 'key)))
-    (ensure-on-issue-id
-     issue-id
-     (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
-     (org-beginning-of-line)
-     (org-cycle 1)
-     (while (search-forward "CLOCK: " nil 1 1)
-       (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
-         (forward-line)
-         ;; See where the stuff ends (what point)
-         (let (next-clock-point)
-           (save-excursion
-             (search-forward-regexp "\\(CLOCK\\|:END\\):" nil 1 1)
-             (setq next-clock-point (point)))
-           (let ((clock-content
-                  (buffer-substring-no-properties (point) next-clock-point)))
+(defun org-jira-update-worklogs-from-org-clocks (&optional force)
+  "Update or add a worklog based on the org clocks when `org-jira-worklog-sync-p' is not nil.
+If you have dosabled the worklog sync globally, but you would still like to triger it 
+for the current issue, you can pass a non-nil prefix argument to `force' the behaviour."
+  (interactive "P")
+  (when (or force org-jira-worklog-sync-p)
+    (let ((issue-id (org-jira-get-from-org 'issue 'key)))
+      (ensure-on-issue-id
+       issue-id
+       (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
+       (org-beginning-of-line)
+       (org-cycle 1)
+       (while (search-forward "CLOCK: " nil 1 1)
+	 (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
+	   (forward-line)
+	   ;; See where the stuff ends (what point)
+	   (let (next-clock-point)
+	     (save-excursion
+	       (search-forward-regexp "\\(CLOCK\\|:END\\):" nil 1 1)
+	       (setq next-clock-point (point)))
+	     (let ((clock-content
+		    (buffer-substring-no-properties (point) next-clock-point)))
 
-             ;; @todo :optim: This is inefficient, calling the resync on each update/insert event,
-             ;; ideally we would track and only insert/update changed entries, as well
-             ;; only call a resync once (when the entire list is processed, which will
-             ;; basically require a dry run to see how many items we should be updating.
+	       ;; @todo :optim: This is inefficient, calling the resync on each update/insert event,
+	       ;; ideally we would track and only insert/update changed entries, as well
+	       ;; only call a resync once (when the entire list is processed, which will
+	       ;; basically require a dry run to see how many items we should be updating.
 
-             ;; Update via jiralib call
-             (let* ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content))
-                    (comment-text (cdr (assoc 'comment worklog)))
-                    (comment-text (if (string= (org-trim comment-text) "") nil comment-text)))
-               (if (cdr (assoc 'worklog-id worklog))
-                   (jiralib-update-worklog
-                    issue-id
-                    (cdr (assoc 'worklog-id worklog))
-                    (cdr (assoc 'started worklog))
-                    (cdr (assoc 'time-spent-seconds worklog))
-                    comment-text
-                    (cl-function
-                     (lambda (&rest data &allow-other-keys)
-                       (org-jira-update-worklogs-for-current-issue))))
-                 ;; else
-                 (jiralib-add-worklog
-                  issue-id
-                  (cdr (assoc 'started worklog))
-                  (cdr (assoc 'time-spent-seconds worklog))
-                  comment-text
-                  (cl-function
-                   (lambda (&rest data &allow-other-keys)
-                     (org-jira-update-worklogs-for-current-issue))))
-                 )
-               )))))
-     )))
+	       ;; Update via jiralib call
+	       (let* ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content))
+		      (comment-text (cdr (assoc 'comment worklog)))
+		      (comment-text (if (string= (org-trim comment-text) "") nil comment-text)))
+		 (if (cdr (assoc 'worklog-id worklog))
+		     (jiralib-update-worklog
+		      issue-id
+		      (cdr (assoc 'worklog-id worklog))
+		      (cdr (assoc 'started worklog))
+		      (cdr (assoc 'time-spent-seconds worklog))
+		      comment-text
+		      (cl-function
+		       (lambda (&rest data &allow-other-keys)
+			 (org-jira-update-worklogs-for-current-issue force))))
+		   ;; else
+		   (jiralib-add-worklog
+		    issue-id
+		    (cdr (assoc 'started worklog))
+		    (cdr (assoc 'time-spent-seconds worklog))
+		    comment-text
+		    (cl-function
+		     (lambda (&rest data &allow-other-keys)
+		       (org-jira-update-worklogs-for-current-issue force))))
+		   )
+		 )))))
+       ))))
 
 (defun org-jira-update-worklog ()
   "Update a worklog for the current issue."
@@ -955,7 +1007,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
         (jiralib-update-worklog worklog)
       (jiralib-add-worklog-and-autoadjust-remaining-estimate issue-id startDate timeSpent comment))
     (org-jira-delete-current-worklog)
-    (org-jira-update-worklogs-for-current-issue)))
+    (org-jira-update-worklogs-for-current-issue t)))
 
 (defun org-jira-delete-current-comment ()
   "Delete the current comment."
@@ -1043,20 +1095,22 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
           (> (time-to-seconds (date-to-time (car a)))
              (time-to-seconds (date-to-time (car b)))))))
 
-(defun org-jira-update-worklogs-for-current-issue ()
-  "Update the worklogs for the current issue."
-  (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
-    ;; Run the call
-    (jiralib-get-worklogs
-     issue-id
-     (cl-function
-      (lambda (&rest data &allow-other-keys)
-        (ensure-on-issue-id
-         issue-id
-         (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
-           (org-jira-logbook-reset
-            issue-id
-            (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks worklogs))))))))))
+(defun org-jira-update-worklogs-for-current-issue (&optional force)
+  "Update the worklogs for the current issue when `org-jira-worklog-sync-p' is not nil. 
+You can `force' the update by passing a non-nil argument."
+  (when (or force org-jira-worklog-sync-p)
+    (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
+      ;; Run the call
+      (jiralib-get-worklogs
+       issue-id
+       (cl-function
+        (lambda (&rest data &allow-other-keys)
+          (ensure-on-issue-id
+           issue-id
+           (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
+             (org-jira-logbook-reset
+              issue-id
+              (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks worklogs)))))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
@@ -1448,8 +1502,7 @@ otherwise it should return:
      ;; update does a callback that reloads the worklog entries (so,
      ;; we hope that wont occur until after this successfully syncs
      ;; up).  Only do this sync if the user defcustom defines it as such.
-     (when org-jira-worklog-sync-p
-       (org-jira-update-worklogs-from-org-clocks))
+     (org-jira-update-worklogs-from-org-clocks)
 
      ;; Send the update to jira
      (let ((update-fields
