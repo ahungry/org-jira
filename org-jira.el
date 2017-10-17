@@ -39,6 +39,7 @@
 ;;; News:
 
 ;;;; Changes since 2.6.3:
+;; - Insert worklog import filter in the existing org-jira-update-worklogs-for-current-issue function
 ;; - Sync up org-clocks and worklogs!  Set org-jira-worklog-sync-p to nil to avoid.
 
 ;;;; Changes since 2.6.1:
@@ -1056,7 +1057,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
          (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
            (org-jira-logbook-reset
             issue-id
-            (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks worklogs))))))))))
+            (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
+				       (jiralib-worklog-import--filter-apply worklogs)))))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
