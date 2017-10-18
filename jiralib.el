@@ -63,6 +63,7 @@
 ;;; News:
 
 ;;;; Changes since 2.6.3:
+;; - Add worklog import filter and control variable for external worklogs.
 ;; - Add the worklog related endpoint/calls.
 
 ;;;; Changes since 2.1.0:
@@ -186,6 +187,19 @@ The default value works if JIRA is located at a hostname named
 This is maintained by `jiralib-login'.")
 
 (defvar jiralib-wsdl nil)
+
+(defcustom jiralib-worklog-import--filters-alist
+  (list
+   '(nil "WorklogUpdatedByCurrentUser" (lambda (wl) (let-alist wl (when (and wl (string-equal (downcase (or jiralib-user-login-name user-login-name)) (downcase .updateAuthor.name))) wl))))
+   '(nil "WorklogAuthoredByCurrentUser" (lambda (wl) (let-alist wl (when (and wl (string-equal (downcase (or jiralib-user-login-name user-login-name)) (downcase .author.name))) wl)))))
+  "A list of triplets: ('Global-Enable 'Descriptive-Label 'Function-Definition)
+that apply worklog predicate filters during import.
+
+Example: (list '('t \"descriptive-predicate-label\" (lambda (x) x)))"
+  :type '(repeat (list boolean string function))
+  :group 'org-jira)
+
+
 
 (defun jiralib-load-wsdl ()
   "Load the JIRA WSDL descriptor."
@@ -955,6 +969,66 @@ Return no more than MAX-NUM-RESULTS."
 (defun jiralib-strip-cr (string)
   "Remove carriage returns from STRING."
   (when string (replace-regexp-in-string "\r" "" string)))
+
+(defun jiralib-worklog-import--filter-apply
+    (worklog-obj &optional predicate-fn-lst unwrap-worklog-records-fn rewrap-worklog-records-fn)
+  "Remove non-matching org-jira issue worklogs.
+
+Variables:
+  WORKLOG-OBJ is the passed in object
+  PREDICATE-FN-LST is the list of lambdas used as match predicates.
+  UNWRAP-WORKLOG-RECORDS-FN is the function used to produce the list of worklog records from within the worklog-obj
+  REWRAP-WORKLOG-RECORDS-FN is the function used to reshape the worklog records back into the form they were received in.
+
+Auxilliary Notes:
+  Only the WORKLOG-OBJ variable is required.
+  The value of PPREDICATE-FN-LST is filled from the jiralib-worklog-import--filters-alist variable by default.
+  If PREDICATE-FN-LST is empty the unmodified value of WORKLOG-OBJ is returned.
+  If PREDICATE-FN-LST contains multiple predicate functions, each predicate filters operates as a clause in an AND match.  In effect, a worklog must match all predicates to be returned.
+  The variable 'jiralib-user-login-name is used by many lambda filters."
+
+  (let
+      ((unwrap-worklog-records-fn)
+       (rewrap-worklog-records-fn)
+       (predicate-fn-lst)
+       (worklogs worklog-obj)
+       (predicate-fn))
+    ;; let-body
+    (progn
+      (setq unwrap-worklog-records-fn
+	    (if (and
+		 (boundp 'unwrap-worklog-records-fn)
+		 (functionp unwrap-worklog-records-fn))
+		unwrap-worklog-records-fn
+	      (lambda (x) (coerce x 'list))))
+      (setq rewrap-worklog-records-fn
+	    (if (and
+		 (boundp 'rewrap-worklog-records-fn)
+		 (functionp rewrap-worklog-records-fn))
+		rewrap-worklog-records-fn
+	      (lambda (x) (remove 'nil (coerce x 'vector)))))
+      (setq predicate-fn-lst
+	    (if (and (boundp 'predicate-fn-lst)
+		     (not (null predicate-fn-lst))
+		     (listp predicate-fn-lst))
+		predicate-fn-lst
+	      (mapcar 'caddr
+		      (remove 'nil
+			      (mapcar (lambda (x) (unless (null (car x)) x))
+				      jiralib-worklog-import--filters-alist)))))
+      ;; final condition/sanity checks before processing
+      (cond
+       ;; pass cases, dont apply filters, return unaltered worklog-obj
+       ((or (not (boundp 'predicate-fn-lst)) (not (listp predicate-fn-lst)) (null predicate-fn-lst))
+	worklog-obj)
+       ;; default-case, apply worklog filters and return only matching worklogs
+       (t
+	(setq worklogs (funcall unwrap-worklog-records-fn worklogs))
+	(while (setq predicate-fn (pop predicate-fn-lst))
+	  (setq worklogs (mapcar predicate-fn worklogs)))
+	(funcall rewrap-worklog-records-fn worklogs))))))
+
+
 
 (provide 'jiralib)
 ;;; jiralib.el ends here
