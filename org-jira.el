@@ -92,6 +92,8 @@
 (require 'org-clock)
 (require 'jiralib)
 (require 'cl-lib)
+(require 'url)
+(require 'ls-lisp)
 
 (defconst org-jira-version "2.7.0"
   "Current version of org-jira.el.")
@@ -201,6 +203,16 @@ instance."
 You may wish to set this to nil if you track org clocks in
 your buffer that you do not want to send back to your Jira
 instance."
+  :group 'org-jira
+  :type 'boolean)
+
+(defcustom org-jira-download-dir "~/Downloads"
+  "Name of the default jira download library."
+  :group 'org-jira
+  :type 'string)
+
+(defcustom org-jira-download-ask-override t
+  "Ask before overriding tile."
   :group 'org-jira
   :type 'boolean)
 
@@ -809,6 +821,7 @@ See`org-jira-get-issue-list'"
                                  (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
+                      (org-jira-update-attachments-for-current-issue)
 
                       ;; only sync worklog clocks when the user sets it to be so.
                       (when org-jira-worklog-sync-p
@@ -1032,6 +1045,57 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                   nil
                 (list comment)))
             comments))))))))
+
+(defun org-jira-update-attachments-for-current-issue ()
+  "Update the attachments for the current issue."
+  (when jiralib-use-restapi
+    (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
+      ;; Run the call
+      (jiralib-get-attachments
+       issue-id
+       (save-excursion
+         (cl-function
+          (lambda (&rest data &allow-other-keys)
+            ;; delete old attachment node
+            (ensure-on-issue
+             (if (org-goto-first-child)
+                 (while (org-goto-sibling)
+                   (forward-thing 'whitespace)
+                   (when (looking-at "Attachments:")
+                     (org-cut-subtree)))))
+            (let ((attachments (org-jira-find-value (cl-getf data :data) 'fields 'attachment)))
+              (when (not (zerop (length attachments)))
+                (ensure-on-issue
+                 (if (org-goto-first-child)
+                     (progn
+                       (while (org-goto-sibling))
+                       (org-insert-heading-after-current))
+                   (org-insert-subheading nil))
+
+                 (insert "Attachments:")
+                 (mapc
+                  (lambda (attachment)
+                    (let ((attachment-id (org-jira-get-comment-id attachment))
+                          (author (org-jira-get-comment-author attachment))
+                          (created (org-jira-transform-time-format
+                                    (org-jira-find-value attachment 'created)))
+                          (size (org-jira-find-value attachment 'size))
+                          (mimeType (org-jira-find-value attachment 'mimeType))
+                          (content (org-jira-find-value attachment 'content))
+                          (filename (org-jira-find-value attachment 'filename)))
+                      (if (looking-back "Attachments:")
+                          (org-insert-subheading nil)
+                        (org-insert-heading-respect-content))
+                      (insert "[[" content "][" filename "]]")
+                      (org-narrow-to-subtree)
+                      (org-jira-entry-put (point) "ID" attachment-id)
+                      (org-jira-entry-put (point) "Author" author)
+                      (org-jira-entry-put (point) "Name" filename)
+                      (org-jira-entry-put (point) "Created" created)
+                      (org-jira-entry-put (point) "Size" (ls-lisp-format-file-size size t))
+                      (org-jira-entry-put (point) "Content" content)
+                      (widen)))
+                  attachments)))))))))))
 
 (defun org-jira-sort-org-clocks (clocks)
   "Given a CLOCKS list, sort it by start date descending."
@@ -1574,6 +1638,44 @@ it is a symbol, it will be converted to string."
   (interactive)
   (ensure-on-issue
    (browse-url (concat (replace-regexp-in-string "/*$" "" jiralib-url) "/browse/" (org-jira-id)))))
+
+(defun org-jira-url-copy-file (url newname)
+  "Similar to url-copy-file but async."
+  (lexical-let ((newname newname))
+    (url-retrieve
+     url
+     (lambda (status)
+       (let ((buffer (current-buffer))
+             (handle nil)
+             (filename (if (and (file-exists-p newname)
+                                org-jira-download-ask-override)
+                           (read-string "File already exists, select new name or press ENTER to override: " newname)
+                         newname)))
+         (if (not buffer)
+             (error "Opening input file: No such file or directory, %s" url))
+         (with-current-buffer buffer
+           (setq handle (mm-dissect-buffer t)))
+         (mm-save-part-to-file handle filename)
+         (kill-buffer buffer)
+         (mm-destroy-parts handle))))))
+
+;;;###autoload
+(defun org-jira-download-attachment ()
+  "Download the attachment under cursor."
+  (interactive)
+  (when jiralib-use-restapi
+    (save-excursion
+      (org-up-heading-safe)
+      (org-back-to-heading)
+      (forward-thing 'whitespace)
+      (unless (looking-at "Attachments:")
+        (error "Not on a attachment region!")))
+    (let ((filename (org-entry-get (point) "Name"))
+          (url (org-entry-get (point) "Content"))
+          (url-request-extra-headers `(,jiralib-token)))
+      (org-jira-url-copy-file
+       url
+       (concat (file-name-as-directory org-jira-download-dir) filename)))))
 
 ;;;###autoload
 (defun org-jira-get-issues-from-filter (filter)

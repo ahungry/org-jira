@@ -349,6 +349,10 @@ request.el, so if at all possible, it should be avoided."
                      (jiralib--rest-call-it
                       (format "/rest/api/2/issue/%s/comment" (first params)))
                      'comments))
+      ('getAttachmentsFromIssue (org-jira-find-value
+                     (jiralib--rest-call-it
+                      (format "/rest/api/2/issue/%s?fields=attachment" (first params)))
+                     'comments))
       ('getComponents (jiralib--rest-call-it
                        (format "/rest/api/2/project/%s/components" (first params))))
       ('getIssue (jiralib--rest-call-it
@@ -858,6 +862,10 @@ will cache it."
 (defun jiralib-get-comments (issue-key &optional callback)
   "Return all comments associated with issue ISSUE-KEY, invoking CALLBACK."
   (jiralib-call "getComments" callback issue-key))
+
+(defun jiralib-get-attachments (issue-key &optional callback)
+  "Return all attachments associated with issue ISSUE-KEY, invoking CALLBACK."
+  (jiralib-call "getAttachmentsFromIssue" callback issue-key))
 
 (defun jiralib-get-worklogs (issue-key &optional callback)
   "Return all worklogs associated with issue ISSUE-KEY, invoking CALLBACK."
