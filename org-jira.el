@@ -792,6 +792,7 @@ See`org-jira-get-issue-list'"
                             '(assignee reporter type priority resolution status components created updated))
 
                       (org-jira-entry-put (point) "ID" (org-jira-get-issue-key issue))
+                      (org-jira-entry-put (point) "CUSTOM_ID" (org-jira-get-issue-key issue))
 
                       ;; Insert the duedate as a deadline if it exists
                       (when org-jira-deadline-duedate-sync-p
