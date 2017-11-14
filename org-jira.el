@@ -1054,6 +1054,31 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                 (list comment)))
             comments))))))))
 
+(defun org-jira-delete-subtree ()
+  "Derived from org-cut-subtree.
+
+Like that function, without mangling the user's clipboard for the
+purpose of wiping an old subtree."
+  (let (beg end folded (beg0 (point)))
+    (org-back-to-heading t) ; take what is really there
+    (setq beg (point))
+    (skip-chars-forward " \t\r\n")
+    (save-match-data
+      (save-excursion (outline-end-of-heading)
+                      (setq folded (org-invisible-p))
+                      (org-end-of-subtree t t)))
+    ;; Include the end of an inlinetask
+    (when (and (featurep 'org-inlinetask)
+               (looking-at-p (concat (org-inlinetask-outline-regexp)
+                                     "END[ \t]*$")))
+      (end-of-line))
+    (setq end (point))
+    (goto-char beg0)
+    (when (> end beg)
+      (setq org-subtree-clip-folded folded)
+      (org-save-markers-in-region beg end)
+      (delete-region beg end))))
+
 (defun org-jira-update-attachments-for-current-issue ()
   "Update the attachments for the current issue."
   (when jiralib-use-restapi
@@ -1076,7 +1101,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                  (while (org-goto-sibling)
                    (forward-thing 'whitespace)
                    (when (looking-at "Attachments:")
-                     (org-cut-subtree)))))
+                     (org-jira-delete-subtree)))))
             (let ((attachments (org-jira-find-value (cl-getf data :data) 'fields 'attachment)))
               (when (not (zerop (length attachments)))
                 (ensure-on-issue
