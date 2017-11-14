@@ -822,7 +822,8 @@ See`org-jira-get-issue-list'"
                                  (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
-                      (org-jira-update-attachments-for-current-issue)
+                      ;; FIXME: Re-enable when attachments are not erroring.
+                      ;;(org-jira-update-attachments-for-current-issue)
 
                       ;; only sync worklog clocks when the user sets it to be so.
                       (when org-jira-worklog-sync-p
@@ -1008,6 +1009,12 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
         (let ((comments (org-jira-find-value (cl-getf data :data) 'comments)))
           (mapc
            (lambda (comment)
+        ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
+        (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
+               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+               (project-buffer (or (find-buffer-visiting project-file)
+                                  (find-file project-file))))
+          (with-current-buffer project-buffer
              (ensure-on-issue-id
               issue-id
               (let* ((comment-id (org-jira-get-comment-id comment))
@@ -1035,7 +1042,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                   (unless (string= created updated)
                     (org-jira-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
-                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))
+                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
            (cl-mapcan
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
@@ -1057,6 +1064,12 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
        (save-excursion
          (cl-function
           (lambda (&rest data &allow-other-keys)
+        ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
+        (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
+               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+               (project-buffer (or (find-buffer-visiting project-file)
+                                  (find-file project-file))))
+          (with-current-buffer project-buffer
             ;; delete old attachment node
             (ensure-on-issue
              (if (org-goto-first-child)
@@ -1096,7 +1109,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                       (org-jira-entry-put (point) "Size" (ls-lisp-format-file-size size t))
                       (org-jira-entry-put (point) "Content" content)
                       (widen)))
-                  attachments)))))))))))
+                  attachments)))))))))))))
 
 (defun org-jira-sort-org-clocks (clocks)
   "Given a CLOCKS list, sort it by start date descending."
@@ -1117,13 +1130,19 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
      issue-id
      (cl-function
       (lambda (&rest data &allow-other-keys)
-        (ensure-on-issue-id
-         issue-id
-         (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
-           (org-jira-logbook-reset
-            issue-id
-            (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
-				       (jiralib-worklog-import--filter-apply worklogs)))))))))))
+        ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
+        (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
+               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+               (project-buffer (or (find-buffer-visiting project-file)
+                                  (find-file project-file))))
+          (with-current-buffer project-buffer
+            (ensure-on-issue-id
+             issue-id
+             (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
+               (org-jira-logbook-reset
+                issue-id
+                (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
+                                           (jiralib-worklog-import--filter-apply worklogs)))))))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
