@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.7.0
+;; Version: 2.8.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
 
@@ -37,6 +37,10 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.7.0:
+;; - Clean up multi-buffer handling, disable attachments call until
+;; - refresh is compatible with it.
 
 ;;;; Changes since 2.6.3:
 ;; - Insert worklog import filter in the existing org-jira-update-worklogs-for-current-issue function
@@ -95,7 +99,7 @@
 (require 'url)
 (require 'ls-lisp)
 
-(defconst org-jira-version "2.7.0"
+(defconst org-jira-version "2.8.0"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
