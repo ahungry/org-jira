@@ -6,15 +6,27 @@ Use Jira in Emacs org-mode.
 
 ## TOC
 
-- [Setup](#setup)
-  * [Install](#installation)
-  * [Config](#configuration)
-- [Usage](#usage)
-  * [Getting Started](#gettingstarted)
-  * [Keybinds](#keybinds)
-- [About](#about)
-  * [Maintainer](#maintainer)
-  * [License](#license)
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [org-jira mode](#org-jira-mode)
+    - [TOC](#toc)
+    - [Setup](#setup)
+        - [Installation](#installation)
+        - [Configuration](#configuration)
+    - [Usage](#usage)
+        - [Getting Started](#getting-started)
+        - [Keybinds](#keybinds)
+        - [Customization](#customization)
+            - [Authorization workaround (NOT secure)](#authorization-workaround-not-secure)
+        - [Optimizations](#optimizations)
+            - [Optimizing available actions for status changes](#optimizing-available-actions-for-status-changes)
+    - [About](#about)
+        - [Maintainer](#maintainer)
+        - [License](#license)
+
+<!-- markdown-toc end -->
+
 
 ## Setup
 ### Installation
@@ -64,6 +76,7 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
 (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
 (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
+(define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
 (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
 (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
 (define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
@@ -75,6 +88,81 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
 (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
 (define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-by-fixversion)
+```
+
+### Customization
+You can define your own streamlined issue progress flow as such:
+
+```lisp
+(defconst org-jira-progress-issue-flow
+  '(("To Do" . "In Progress"
+    ("In Progress" . "Done"))))
+```
+or using typical Emacs customize options, as its a defcustom.
+
+This will allow you to quickly progress an issue based on its current
+status, and what the next status should be.
+
+If your Jira is set up to display a status in the issue differently
+than what is shown in the button on Jira, your alist may look like
+this (use the labels shown in the org-jira Status when setting it up,
+or manually work out the workflows being used through
+standard `C-c iw` options/usage):
+
+```lisp
+(defconst org-jira-progress-issue-flow
+  '(("To Do" . "Start Progress")
+    ("In Development" . "Ready For Review")
+    ("Code Review" . "Done")
+    ("Done" . "Reopen")))
+```
+
+#### Authorization workaround (NOT secure)
+If your Jira instance has disabled basic auth, you can still get in
+by copying your web browser's cookie (open up developer console, and
+right click and 'Copy request as cURL', then copy/paste the cookie
+into the jiralib-token variable):
+
+```lisp
+(defconst jiralib-token
+  `("Cookie" . ,(format "__atl_path=...; studio.crowd.tokenkey=...")))
+```
+
+### Optimizations
+It's possible some things in your Jira instance rarely if ever change - while org-jira
+will dynamically query everything as needed, it makes use of some
+variables/caching per-run of Emacs.  If you ever notice something was
+changed on the Jira setup level, you may have to restart your Emacs
+(or manually unset these variables).  By the same token, that makes it
+possible to hardcode some of these values yourself, so org-jira never
+needs to look them up.
+
+Some samples may be:
+
+#### Optimizing available actions for status changes
+Take time inspecting jiralib-available-actions-cache variable as you
+use org-jira, when you see the type of data it stores, you can then
+just define it yourself, as such, so repeated usage will not need to
+re-query the endpoints to get these lists:
+
+```lisp
+(defconst jiralib-available-actions-cache
+  '(("To Do"
+     ("71" . "Business Question")
+     ("11" . "Start Progress"))
+    ("Code Review"
+     ("71" . "Business Question")
+     ("91" . "Reject")
+     ("171" . "Failed Peer Review")
+     ("221" . "Done"))
+    ("In Development"
+     ("71" . "Business Question")
+     ("21" . "Ready For Review")
+     ("81" . "Reject")
+     ("161" . "Stop Progress"))
+    ("Done"
+     ("71" . "Business Question")
+     ("141" . "Re-open"))))
 ```
 
 ## About

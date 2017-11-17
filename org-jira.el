@@ -361,6 +361,7 @@ instance."
     (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
     (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
     (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
+    (define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-by-fixversion)
     org-jira-map))
 
 ;;;###autoload
