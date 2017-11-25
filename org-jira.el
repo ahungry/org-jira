@@ -429,7 +429,7 @@ to change the property names this sets."
     (setq property (symbol-name property)))
   (let ((property (or (assoc-default property org-jira-property-overrides)
                       property)))
-    (org-entry-put pom property value)))
+    (org-entry-put pom property (org-jira-decode value))))
 
 ;;;###autoload
 (defun org-jira-get-projects ()
@@ -472,13 +472,16 @@ to change the property names this sets."
   "Return the components the ISSUE belongs to."
   (mapconcat (lambda (comp) (org-jira-find-value comp 'name)) (org-jira-find-value issue 'fields 'components) ", "))
 
-(defun org-jira-insert (&rest args)
-  "Set coding to text provide by `ARGS' when insert in buffer."
+(defun org-jira-decode (data)
+  "Decode text data."
   (let ((coding-system (or org-jira-coding-system
                            (when (boundp 'buffer-file-coding-system)
                              buffer-file-coding-system 'utf-8))))
-    (insert (decode-coding-string
-             (string-make-unibyte (apply #'concat args)) coding-system))))
+    (decode-coding-string (string-make-unibyte data) coding-system)))
+
+(defun org-jira-insert (&rest args)
+  "Set coding to text provide by `ARGS' when insert in buffer."
+  (insert (org-jira-decode (apply #'concat args))))
 
 (defun org-jira-transform-time-format (jira-time-str)
   "Convert JIRA-TIME-STR to format \"%Y-%m-%d %T\".
@@ -608,7 +611,9 @@ Re-create it with CLOCKS.  This is used for worklogs."
   "Return the value associated with key KEY of issue ISSUE."
   (let ((tmp  (or (org-jira-find-value issue 'fields key 'key) ""))) ;; For project, we need a key, not the name...
     (unless (stringp tmp)
-      (setq tmp (or (org-jira-find-value issue key) "")))
+      (setq tmp (org-jira-find-value issue key)))
+    (unless (stringp tmp)
+      (setq tmp (org-jira-find-value issue 'fields key 'displayName)))
     (unless (stringp tmp)
       (setq tmp ""))
     (cond ((eq key 'components)
@@ -1009,7 +1014,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
   (org-jira-find-value comment 'id))
 
 (defun org-jira-get-comment-author (comment)
-  (org-jira-find-value comment 'author 'name))
+  (org-jira-find-value comment 'author 'displayName))
 
 (defun org-jira-update-comments-for-current-issue ()
   "Update the comments for the current issue."
