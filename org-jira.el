@@ -720,7 +720,11 @@ With a prefix argument, allow you to customize the jql.  See
 (defun org-jira-get-issue (id)
   "Get a JIRA issue, allowing you to enter the issue-id first."
   (interactive (list (read-string "Issue ID: " "" 'org-jira-issue-id-history)))
-  (org-jira-get-issues (org-jira-get-issue-by-id id)))
+  (org-jira-get-issues (org-jira-get-issue-by-id id))
+  (let ((issue-pos (org-find-entry-with-id id)))
+    (when issue-pos
+      (goto-char issue-pos)
+      (recenter 0))))
 
 ;;;###autoload
 (defun org-jira-get-issues-by-fixversion (fixversion)
@@ -1835,7 +1839,7 @@ See `org-jira-get-issues-from-filter'."
 
 (defun org-jira-open (path)
   "Open a Jira Link from PATH."
-  (org-jira-get-issues (list (jiralib-get-issue path))))
+  (org-jira-get-issue path))
 
 (provide 'org-jira)
 ;;; org-jira.el ends here
