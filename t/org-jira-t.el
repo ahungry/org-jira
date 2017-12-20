@@ -207,5 +207,8 @@ CLOCK:")))
     (should (string= "2017-03-16 Thu 22:25" (car (car result))))
     ))
 
+(ert-deftest org-jira-strip-string-test ()
+  (should (string= "dog" (org-jira-strip-string "     dog    "))))
+
 (provide 'org-jira-t)
 ;;; org-jira-t.el ends here
