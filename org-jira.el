@@ -11,7 +11,7 @@
 ;; URL: https://github.com/ahungry/org-jira
 ;; Version: 2.8.0
 ;; Keywords: ahungry jira org bug tracker
-;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0"))
+;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (s "0.0.0"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -98,6 +98,7 @@
 (require 'cl-lib)
 (require 'url)
 (require 'ls-lisp)
+(require 's)
 
 (defconst org-jira-version "2.8.0"
   "Current version of org-jira.el.")
@@ -276,10 +277,11 @@ instance."
   (declare (debug (body)))
 
   `(save-excursion
-     (while (org-up-heading-safe)) ; go to the top heading
+     (unless (looking-at "^\\*\\* ")
+       (search-backward-regexp "^\\*\\* ")) ; go to top heading
      (let ((org-jira-id (org-jira-id)))
        (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) (downcase org-jira-id)))
-         (error "Not on a issue region!")))
+         (error "Not on an issue region!")))
      ,@body))
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
@@ -473,11 +475,15 @@ to change the property names this sets."
   (mapconcat (lambda (comp) (org-jira-find-value comp 'name)) (org-jira-find-value issue 'fields 'components) ", "))
 
 (defun org-jira-decode (data)
-  "Decode text data."
+  "Decode text DATA.
+
+It must receive a coercion to string, as not every time will it
+be populated."
   (let ((coding-system (or org-jira-coding-system
                            (when (boundp 'buffer-file-coding-system)
                              buffer-file-coding-system 'utf-8))))
-    (decode-coding-string (string-make-unibyte data) coding-system)))
+    (decode-coding-string
+     (string-make-unibyte (cl-coerce data 'string)) coding-system)))
 
 (defun org-jira-insert (&rest args)
   "Set coding to text provide by `ARGS' when insert in buffer."
@@ -776,6 +782,8 @@ See`org-jira-get-issue-list'"
                     (widen)
                     (outline-show-all)
                     (goto-char (point-min))
+                    (unless (looking-at (format "^* %s-Tickets" proj-key))
+                      (insert (format "* %s-Tickets\n" proj-key)))
                     (setq p (org-find-entry-with-id issue-id))
                     (save-restriction
                       (if (and p (>= p (point-min))
@@ -787,7 +795,7 @@ See`org-jira-get-issue-list'"
                         (goto-char (point-max))
                         (unless (looking-at "^")
                           (insert "\n"))
-                        (insert "* "))
+                        (insert "** "))
                       (let ((status (org-jira-get-issue-val 'status issue)))
                         (org-jira-insert (concat (cond (org-jira-use-status-as-todo
                                                         (upcase (replace-regexp-in-string " " "-" status)))
@@ -841,7 +849,9 @@ See`org-jira-get-issue-list'"
                                      (org-insert-subheading t))
                                    (org-jira-insert entry-heading "\n"))
 
-                                 (org-jira-insert (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
+                                 ;; Why did this ever insert 2 spaces?  The world may never know...
+                                 (org-jira-insert
+                                  (replace-regexp-in-string "^" "" (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
                       ;; FIXME: Re-enable when attachments are not erroring.
@@ -1054,7 +1064,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                 (goto-char (point-max))
                 (unless (looking-at "^")
                   (insert "\n"))
-                (insert "** ")
+                (insert "*** ")
                 (org-jira-insert comment-headline "\n")
                 (org-narrow-to-subtree)
                 (org-jira-entry-put (point) "ID" comment-id)
@@ -1064,7 +1074,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                   (unless (string= created updated)
                     (org-jira-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
-                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
+                ;; Why did this ever insert 2 extra spaces?  Who knows...
+                (org-jira-insert (replace-regexp-in-string "^" "" (or (org-jira-find-value comment 'body) ""))))))))
            (cl-mapcan
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
@@ -1346,7 +1357,7 @@ purpose of wiping an old subtree."
 
 (defun org-jira-strip-string (str)
   "Remove the beginning and ending white space for a string STR."
-  (replace-regexp-in-string "\\`\n+\\|\n+\\'" "" str))
+  (s-trim str))
 
 (defun org-jira-get-issue-val-from-org (key)
   "Return the requested value by KEY from the current issue."
@@ -1636,7 +1647,7 @@ otherwise it should return:
    issue-id
    ;; Set up a bunch of values from the org content
    (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
-          (org-issue-description (replace-regexp-in-string "^  " "" (org-jira-get-issue-val-from-org 'description)))
+          (org-issue-description (replace-regexp-in-string "^ +" "" (org-jira-get-issue-val-from-org 'description)))
           (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
           (org-issue-type (org-jira-get-issue-val-from-org 'type))
           (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
