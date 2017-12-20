@@ -39,7 +39,7 @@
 ;;; News:
 
 ;;;; Changes since 2.8.0:
-;; - New version 3.0.0 depcrecates old filing mechanism and files
+;; - New version 3.0.0 deprecates old filing mechanism and files
 ;;   all of the changes under the top level ticket header.
 ;; - If you want other top level headers in the same file, this should
 ;;   work now, as long as they come after the main project one.
@@ -110,7 +110,7 @@
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
-  "Customisation group for org-jira."
+  "Customization group for org-jira."
   :tag "Org JIRA"
   :group 'org)
 
