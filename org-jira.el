@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 2.8.0
+;; Version: 3.0.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (s "0.0.0"))
 
@@ -37,6 +37,12 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 2.8.0:
+;; - New version 3.0.0 depcrecates old filing mechanism and files
+;;   all of the changes under the top level ticket header.
+;; - If you want other top level headers in the same file, this should
+;;   work now, as long as they come after the main project one.
 
 ;;;; Changes since 2.7.0:
 ;; - Clean up multi-buffer handling, disable attachments call until
@@ -100,7 +106,7 @@
 (require 'ls-lisp)
 (require 's)
 
-(defconst org-jira-version "2.8.0"
+(defconst org-jira-version "3.0.0"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
