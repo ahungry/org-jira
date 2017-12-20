@@ -278,7 +278,7 @@ instance."
 
   `(save-excursion
      (unless (looking-at "^\\*\\* ")
-       (search-backward-regexp "^\\*\\* ")) ; go to top heading
+       (search-backward-regexp "^\\*\\* " nil t)) ; go to top heading
      (let ((org-jira-id (org-jira-id)))
        (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) (downcase org-jira-id)))
          (error "Not on an issue region!")))
@@ -472,7 +472,10 @@ to change the property names this sets."
 
 (defun org-jira-get-issue-components (issue)
   "Return the components the ISSUE belongs to."
-  (mapconcat (lambda (comp) (org-jira-find-value comp 'name)) (org-jira-find-value issue 'fields 'components) ", "))
+  (mapconcat
+   (lambda (comp)
+     (org-jira-find-value comp 'name))
+   (org-jira-find-value issue 'fields 'components) ", "))
 
 (defun org-jira-decode (data)
   "Decode text DATA.
@@ -1458,8 +1461,10 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
 Where issue-id will be something such as \"EX-22\"."
   (interactive)
   (save-excursion
-    (org-overview)
-    (beginning-of-buffer)
+    (outline-show-all)
+    (outline-hide-sublevels 2)
+    (goto-char (point-min))
+    (outline-next-visible-heading 1)
     (while (not (org-next-line-empty-p))
       (when (outline-on-heading-p t)
         ;; It's possible we could be on a non-org-jira headline, but
