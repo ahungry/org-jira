@@ -858,9 +858,9 @@ See`org-jira-get-issue-list'"
                                      (org-insert-subheading t))
                                    (org-jira-insert entry-heading "\n"))
 
-                                 ;; Why did this ever insert 2 spaces?  The world may never know...
+                                 ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
                                  (org-jira-insert
-                                  (replace-regexp-in-string "^" "" (org-jira-get-issue-val heading-entry issue))))))
+                                  (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (org-jira-update-comments-for-current-issue)
                       ;; FIXME: Re-enable when attachments are not erroring.
@@ -1083,8 +1083,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                   (unless (string= created updated)
                     (org-jira-entry-put (point) "updated" updated)))
                 (goto-char (point-max))
-                ;; Why did this ever insert 2 extra spaces?  Who knows...
-                (org-jira-insert (replace-regexp-in-string "^" "" (or (org-jira-find-value comment 'body) ""))))))))
+                ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
            (cl-mapcan
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
