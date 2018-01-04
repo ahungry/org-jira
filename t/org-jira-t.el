@@ -207,5 +207,14 @@ CLOCK:")))
     (should (string= "2017-03-16 Thu 22:25" (car (car result))))
     ))
 
+(ert-deftest org-jira-strip-string-test ()
+  (should (string= "dog" (org-jira-strip-string "     dog    "))))
+
+;;  This test sort of sucks, as its just confirming we get back some strings.
+(ert-deftest org-jira-decode-test ()
+  (should (string= "" (org-jira-decode nil)))
+  (should (string= "dog" (org-jira-decode "dog"))))
+
+
 (provide 'org-jira-t)
 ;;; org-jira-t.el ends here

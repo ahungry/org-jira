@@ -15,7 +15,7 @@
 ;; Alex Harsanyi <AlexHarsanyi@gmail.com>
 
 ;; Maintainer: Matthew Carter <m@ahungry.com>
-;; Version: 2.8.0
+;; Version: 3.0.0
 ;; Homepage: https://github.com/ahungry/org-jira
 
 ;; This file is not part of GNU Emacs.
@@ -87,7 +87,7 @@
 (require 'json)
 (require 'url-parse)
 
-(defconst jiralib-version "2.8.0"
+(defconst jiralib-version "3.0.0"
   "Current version of jiralib.el.")
 
 (defgroup jiralib nil
@@ -161,7 +161,7 @@ This will be used with USERNAME to compute password from
   ""
   "The location for the WSDL descriptor for the JIRA service.
 This is specific to your local JIRA installation.  The URL is
-tipically:
+typically:
 
   http://YOUR_INSTALLATION/rpc/soap/jirasoapservice-v2?wsdl
 
@@ -210,7 +210,7 @@ Example: (list '('t \"descriptive-predicate-label\" (lambda (x) x)))"
 (defun jiralib-login (username password)
   "Login into JIRA as user USERNAME with PASSWORD.
 
-After a succesful login, store the authentication token in
+After a successful login, store the authentication token in
 `jiralib-token'."
   ;; NOTE that we cannot rely on `jiralib-call' because `jiralib-call' relies on
   ;; us ;-)
@@ -252,7 +252,7 @@ This function should be used for all JIRA interface calls, as the
 method ensures the user is logged in and invokes `soap-invoke'
 with the correct service name and authentication token.
 
-All JIRA inteface methods take an authentication token as the
+All JIRA interface methods take an authentication token as the
 first argument.  The authentication token is supplied by this
 function, so PARAMS should omit this parameter.  For example, the
 \"getIssue\" method takes two parameters: auth and key, however,
@@ -990,7 +990,7 @@ Variables:
   UNWRAP-WORKLOG-RECORDS-FN is the function used to produce the list of worklog records from within the worklog-obj
   REWRAP-WORKLOG-RECORDS-FN is the function used to reshape the worklog records back into the form they were received in.
 
-Auxilliary Notes:
+Auxiliary Notes:
   Only the WORKLOG-OBJ variable is required.
   The value of PPREDICATE-FN-LST is filled from the jiralib-worklog-import--filters-alist variable by default.
   If PREDICATE-FN-LST is empty the unmodified value of WORKLOG-OBJ is returned.
@@ -1028,7 +1028,7 @@ Auxilliary Notes:
 				      jiralib-worklog-import--filters-alist)))))
       ;; final condition/sanity checks before processing
       (cond
-       ;; pass cases, dont apply filters, return unaltered worklog-obj
+       ;; pass cases, don't apply filters, return unaltered worklog-obj
        ((or (not (boundp 'predicate-fn-lst)) (not (listp predicate-fn-lst)) (null predicate-fn-lst))
 	worklog-obj)
        ;; default-case, apply worklog filters and return only matching worklogs
