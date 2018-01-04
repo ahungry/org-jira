@@ -54,8 +54,8 @@ file, in a format similar to:
 ```conf
 machine your-site.atlassian.net login you@example.com password yourPassword port 80
 ```
-_Please note that in the authinfo file, port 80 should be specified
-even if your jiralib-url is https._
+_Please note that in the authinfo file, port 443 should be specified
+if your jiralib-url is https._
 
 ## Usage
 ### Getting Started
