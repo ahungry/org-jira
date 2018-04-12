@@ -1678,7 +1678,7 @@ otherwise it should return:
      (let ((update-fields
             (list (cons
                    'components
-                   (org-jira-build-components-list project-components))
+                   (or (org-jira-build-components-list project-components) []))
                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                               (jiralib-get-priorities)))
                   (cons 'description org-issue-description)
