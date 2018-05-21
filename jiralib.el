@@ -155,7 +155,7 @@ This will be used with USERNAME to compute password from
 
 (defvar jiralib-mode-hook nil)
 (defvar jiralib-mode-map nil)
-(defvar jiralib-issue-regexp "\\<\\(?:[A-Za-z]+\\)-[0-9]+\\>")
+(defvar jiralib-issue-regexp "\\<\\(?:[A-Za-z0-9]+\\)-[0-9]+\\>")
 
 (defcustom jiralib-wsdl-descriptor-url
   ""
