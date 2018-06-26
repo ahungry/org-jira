@@ -354,6 +354,8 @@ instance."
 (defvar org-jira-entry-mode-map
   (let ((org-jira-map (make-sparse-keymap)))
     (define-key org-jira-map (kbd "C-c pg") 'org-jira-get-projects)
+    (define-key org-jira-map (kbd "C-c bg") 'org-jira-get-boards)
+    (define-key org-jira-map (kbd "C-c iv") 'org-jira-get-issues-by-board)
     (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
     (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
     (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
@@ -1274,6 +1276,7 @@ purpose of wiping an old subtree."
    (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
 
 (defvar org-jira-project-read-history nil)
+(defvar org-jira-boards-read-history nil)
 (defvar org-jira-priority-read-history nil)
 (defvar org-jira-type-read-history nil)
 
@@ -1287,6 +1290,17 @@ purpose of wiping an old subtree."
    nil
    'org-jira-project-read-history
    (car org-jira-project-read-history)))
+
+(defun org-jira-read-board ()
+  "Read board name. Returns cons pair (name . integer-id)"
+  (let* ((boards-alist
+	  (jiralib-make-assoc-list (jiralib-get-boards) 'name 'id))
+	 (board-name
+	  (completing-read "Boards: "  boards-alist
+			   nil  t  nil
+			   'org-jira-boards-read-history
+			   (car org-jira-boards-read-history))))
+    (assoc board-name boards-alist)))
 
 (defun org-jira-read-priority ()
   "Read priority name."
@@ -1697,7 +1711,7 @@ otherwise it should return:
      (let ((update-fields
             (list (cons
                    'components
-                   (org-jira-build-components-list project-components))
+                   (or (org-jira-build-components-list project-components) []))
                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                               (jiralib-get-priorities)))
                   (cons 'description org-issue-description)
@@ -1881,6 +1895,67 @@ See `org-jira-get-issues-from-filter'."
 (defun org-jira-open (path)
   "Open a Jira Link from PATH."
   (org-jira-get-issue path))
+
+;;;###autoload
+(defun org-jira-get-issues-by-board ()
+  "Get list of ISSUES from agile board."
+  (interactive)
+  (let* ((board (org-jira-read-board))
+	 (board-id (cdr board)))
+    (jiralib-get-board-issues board-id org-jira-get-issue-list-callback)))
+
+;;;###autoload
+(defun org-jira-get-issues-by-board-headonly ()
+  "Get list of ISSUES from agile board, head only."
+  (interactive)
+  (let* ((board (org-jira-read-board))
+	 (board-id (cdr board)))
+    (org-jira-get-issues-headonly (jiralib-get-board-issues board-id))))
+
+;;;###autoload
+(defun org-jira-get-boards ()
+  "Get list of projects."
+  (interactive)
+  (lexical-let* ((boards-file (expand-file-name "boards-list.org" org-jira-working-dir))
+		 (existing-buffer (find-buffer-visiting boards-file))
+		 (boards (jiralib-get-boards)))
+    (save-excursion
+      (if existing-buffer
+	  (pop-to-buffer (set-buffer existing-buffer))
+        (find-file boards-file))
+      (org-jira-mode t)
+      (org-save-outline-visibility t
+	(outline-show-all)
+	(save-restriction
+	  (mapc (lambda (board)
+		  (widen)
+		  (goto-char (point-min))
+		  (let* ((board-id (org-jira-find-value board 'id))
+			 (board-name (org-jira-find-value board 'name))
+			 (board-url
+			  (format "%s/secure/RapidBoard.jspa?rapidView=%d"
+				  (replace-regexp-in-string "/*$" "" jiralib-url) board-id))
+			 (board-headline
+			  (format "Board: [[%s][%s]]" board-url board-name))
+			 (headline-pos (org-find-exact-headline-in-buffer
+					board-headline (current-buffer) t)))
+		    (if (and headline-pos (>= headline-pos (point-min))
+                             (<= headline-pos (point-max)))
+			(progn
+                          (goto-char headline-pos)
+                          (org-narrow-to-subtree)
+                          (end-of-line))
+                      (goto-char (point-max))
+                      (unless (looking-at "^")
+			(insert "\n"))
+                      (insert "* ")
+                      (org-jira-insert board-headline)
+                      (org-narrow-to-subtree))
+                    (org-jira-entry-put (point) "name" board-name)
+                    (org-jira-entry-put (point) "type" (cdr (assoc 'type board)))
+		    (org-jira-entry-put (point) "url" board-url)
+                    (org-jira-entry-put (point) "ID" (number-to-string board-id))))
+		boards))))))
 
 (provide 'org-jira)
 ;;; org-jira.el ends here

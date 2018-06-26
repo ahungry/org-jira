@@ -155,7 +155,7 @@ This will be used with USERNAME to compute password from
 
 (defvar jiralib-mode-hook nil)
 (defvar jiralib-mode-map nil)
-(defvar jiralib-issue-regexp "\\<\\(?:[A-Za-z]+\\)-[0-9]+\\>")
+(defvar jiralib-issue-regexp "\\<\\(?:[A-Za-z0-9]+\\)-[0-9]+\\>")
 
 (defcustom jiralib-wsdl-descriptor-url
   ""
@@ -345,6 +345,7 @@ request.el, so if at all possible, it should be avoided."
                      (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params))
                      :data (json-encode `((body . ,(third params))))
                      :type "PUT"))
+      ('getBoards (jiralib--agile-call-it "/rest/agile/1.0/board" 'values))
       ('getComments (org-jira-find-value
                      (jiralib--rest-call-it
                       (format "/rest/api/2/issue/%s/comment" (first params)))
@@ -357,6 +358,9 @@ request.el, so if at all possible, it should be avoided."
                        (format "/rest/api/2/project/%s/components" (first params))))
       ('getIssue (jiralib--rest-call-it
                   (format "/rest/api/2/issue/%s" (first params))))
+      ('getIssuesFromBoard  (jiralib--agile-call-it
+			     (format "rest/agile/1.0/board/%d/issue" (first params))
+			     'issues))
       ('getIssuesFromJqlSearch  (append (cdr ( assoc 'issues (jiralib--rest-call-it
                                                               "/rest/api/2/search"
                                                               :type "POST"
@@ -1039,6 +1043,108 @@ Auxiliary Notes:
 	(funcall rewrap-worklog-records-fn worklogs))))))
 
 
+(defun jiralib-get-boards ()
+  "Return list of jira boards"
+  (jiralib-call "getBoards" nil))
+
+(defun jiralib-get-board-issues (board-id &optional callback)
+  "Return list of jira issues in the specified jira board"
+  (jiralib-call "getIssuesFromBoard" callback board-id))
+
+(defun jiralib--agile-add-paging-params (api max-results start-at)
+  "Add paging parameters to jira agile url"
+  (format "%s?maxResults=%d&startAt=%d" api  max-results start-at))
+
+
+(defun jiralib--agile-call-it (api values-key)
+  "Invoke Jira agile method api and retrieve the results using
+paging.
+
+If JIRALIB-COMPLETE-CALLBACK is non-nil, then the call will be
+performed asynchronously and JIRALIB-COMPLETE-CALLBACK will be
+called when all data are retrieved.
+
+If JIRALIB-COMPLETE-CALLBACK is nil, then the call will be
+performed syncronously and this function will return the
+retrieved data.
+
+API - url that must start with /rest/agile/1.0.
+
+VALUES-KEY - key of the actual reply data in the reply assoc list."
+  (if jiralib-complete-callback
+      (jiralib--agile-call-async api values-key)
+    (jiralib--agile-call-sync api values-key)))
+
+
+(defun jiralib--agile-call-sync (api values-key)
+  "Syncroniously invoke Jira agile method api retrieve all the
+results using paging and return results.
+
+VALUES-KEY - key of the actual reply data in the reply assoc list."
+  (setq jiralib-complete-callback nil)
+  (let ((not-last t)
+	(start-at 0)
+	;; 50 is server side maximum
+	(max-results 10)
+	(values ()))
+    (while not-last
+      (let* ((reply-alist (jiralib--rest-call-it
+			   (jiralib--agile-add-paging-params api  max-results start-at)))
+	     (values-array (cdr (assoc values-key reply-alist)))
+	     (num-entries (length values-array))
+	     (total (cdr (assq 'total reply-alist))))
+	(setf values (append values (append values-array nil)))
+	(setf start-at (+ start-at num-entries))
+	(setf not-last (and (>  num-entries 0)
+			    (or (not total) ;; not always returned
+				(> total start-at))))))
+    values))
+
+(defun jiralib--agile-call-async  (api values-key)
+  "Asyncroniously invoke Jira agile method api,
+retrieve all the results using paging and call
+JIRALIB-COMPLETE_CALLBACK when all the data are retrieved.
+
+VALUES-KEY - key of the actual reply data in the reply assoc list."
+  (lexical-let
+      ((start-at 0)
+       ;; 50 is server side maximum
+       (max-results 50)
+       (values-list ())
+       (vk values-key)
+       (url api)
+       ;; save the call back to be called later after the last page
+       (complete-callback jiralib-complete-callback))
+    ;; setup new callback to be called after each page
+    (setf jiralib-complete-callback
+	  (cl-function
+	   (lambda  (&rest data &allow-other-keys)
+	     (condition-case err
+		 (let* ((reply-alist (cl-getf data :data))
+			(values-array (cdr (assoc vk reply-alist)))
+			(num-entries (length values-array))
+			(total (cdr (assq 'total reply-alist))))
+		   (setf values-list (append values-list (append values-array nil)))
+		   (setf start-at (+ start-at num-entries))
+		   (message "jiralib agile retrieve: got %d values%s%s"
+			    start-at
+			    (if total " of " "")
+			    (if total (int-to-string total) ""))
+		   (if (and (>  num-entries 0)
+  			    (or (not total) ; not always returned
+				(> total start-at)))
+		       (jiralib--rest-call-it
+			(jiralib--agile-add-paging-params url  max-results start-at))
+		     (progn
+		       ;; last page: call originall callback
+		       (message "jiralib agile retrieve: calling callback")
+		       (setf jiralib-complete-callback complete-callback)
+		       (funcall jiralib-complete-callback
+			     :data  (list (cons vk  values-list)))
+		       (message "jiralib agile retrieve: all done"))))
+               ('error (message (format "jiralib agile retrieve: caught error: %s" err)))))))
+    (jiralib--rest-call-it
+     (jiralib--agile-add-paging-params api  max-results start-at))))
 
 (provide 'jiralib)
 ;;; jiralib.el ends here
