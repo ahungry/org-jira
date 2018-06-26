@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 3.1.0
+;; Version: 3.1.1
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (s "0.0.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes since 3.1.0:
+;; - Fix how we were ruining the kill-ring with kill calls.
 
 ;;;; Changes since 3.0.0:
 ;; - Add new org-jira-add-comment call (C-c c c)
@@ -445,6 +448,29 @@ to change the property names this sets."
                       property)))
     (org-entry-put pom property (org-jira-decode value))))
 
+(defun org-jira-kill-line ()
+  "Kill the line, without 'kill-line' side-effects of altering kill ring."
+  (delete-region (point) (line-end-position)))
+
+;; Appropriated from org.el
+(defun org-jira-org-kill-line (&optional _arg)
+  "Kill line, to tags or end of line."
+  (cond
+   ((or (not org-special-ctrl-k)
+	(bolp)
+	(not (org-at-heading-p)))
+    (when (and (get-char-property (min (point-max) (point-at-eol)) 'invisible)
+	       org-ctrl-k-protect-subtree
+	       (or (eq org-ctrl-k-protect-subtree 'error)
+		   (not (y-or-n-p "Kill hidden subtree along with headline? "))))
+      (user-error "C-k aborted as it would kill a hidden subtree"))
+    (call-interactively
+     (if (bound-and-true-p visual-line-mode) 'kill-visual-line 'org-jira-kill-line)))
+   ((looking-at ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$")
+    (delete-region (point) (match-beginning 1))
+    (org-set-tags nil t))
+   (t (delete-region (point) (point-at-eol)))))
+
 ;;;###autoload
 (defun org-jira-get-projects ()
   "Get list of projects."
@@ -613,7 +639,7 @@ Re-create it with CLOCKS.  This is used for worklogs."
              (search-forward (format ":%s:" drawer-name))
              (org-beginning-of-line)
              (org-cycle 0)
-             (dotimes (n 2) (org-kill-line)))
+             (dotimes (n 2) (org-jira-org-kill-line)))
          (progn ;; Otherwise, create a new one at the end of properties list
            (search-forward ":END:")
            (forward-line)))
@@ -621,7 +647,7 @@ Re-create it with CLOCKS.  This is used for worklogs."
        (mapc #'org-jira-insert-clock clocks)
        ;; Clean up leftover newlines (we left 2 behind)
        (search-forward-regexp "^$")
-       (org-kill-line)
+       (org-jira-org-kill-line)
        ))))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
@@ -806,7 +832,7 @@ See`org-jira-get-issue-list'"
                           (progn
                             (goto-char p)
                             (forward-thing 'whitespace)
-                            (kill-line))
+                            (org-jira-kill-line))
                         (goto-char (point-max))
                         (unless (looking-at "^")
                           (insert "\n"))
