@@ -450,6 +450,7 @@ to change the property names this sets."
 
 (defun org-jira-kill-line ()
   "Kill the line, without 'kill-line' side-effects of altering kill ring."
+  (interactive)
   (delete-region (point) (line-end-position)))
 
 ;; Appropriated from org.el
