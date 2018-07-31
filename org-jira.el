@@ -639,16 +639,17 @@ Re-create it with CLOCKS.  This is used for worklogs."
            (progn ;; If we had a logbook, drop it and re-create in a bit.
              (search-forward (format ":%s:" drawer-name))
              (org-beginning-of-line)
-             (org-cycle 0)
-             (dotimes (n 2) (org-jira-org-kill-line)))
+             (delete-region (point) (search-forward ":END:"))
+             )
          (progn ;; Otherwise, create a new one at the end of properties list
            (search-forward ":END:")
            (forward-line)))
        (org-insert-drawer nil (format "%s" drawer-name)) ;; Doc says non-nil, but this requires nil
        (mapc #'org-jira-insert-clock clocks)
        ;; Clean up leftover newlines (we left 2 behind)
-       (search-forward-regexp "^$")
-       (org-jira-org-kill-line)
+       (dotimes (n 2)
+         (search-forward-regexp "^$")
+         (delete-region (point) (1+ (point))))
        ))))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
