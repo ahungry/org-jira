@@ -1991,7 +1991,7 @@ See `org-jira-get-issues-from-filter'."
   (if org-jira-use-status-as-todo
       (upcase (replace-regexp-in-string " " "-" status))
     (let ((known-keyword (assoc status org-jira-keywords-to-jira-status-alist)))
-      (cond (known-keyword known-keyword)
+      (cond (known-keyword (cdr known-keyword))
             ((member status org-jira-done-states) "DONE")
             ("TODO")))))
 
