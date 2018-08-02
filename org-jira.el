@@ -1306,6 +1306,7 @@ purpose of wiping an old subtree."
 
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-boards-read-history nil)
+(defvar org-jira-components-read-history nil)
 (defvar org-jira-priority-read-history nil)
 (defvar org-jira-type-read-history nil)
 
@@ -1330,6 +1331,30 @@ purpose of wiping an old subtree."
 			   'org-jira-boards-read-history
 			   (car org-jira-boards-read-history))))
     (assoc board-name boards-alist)))
+
+(defun org-jira-read-component (project)
+  "Read the components options for PROJECT such as EX."
+  (completing-read
+   "Components (choose Done to stop): "
+   (append '("Done") (mapcar 'cdr (jiralib-get-components project)))
+   nil
+   t
+   nil
+   'org-jira-components-read-history
+   "Done"))
+
+;; TODO: Finish this feature - integrate into org-jira-create-issue
+(defun org-jira-read-components (project)
+  "Types: string PROJECT : string (csv of components).
+
+Get all the components for the PROJECT such as EX,
+that should be bound to an issue."
+  (let (components component)
+    (while (not (equal "Done" component))
+      (setq component (org-jira-read-component project))
+      (unless (equal "Done" component)
+        (push component components)))
+    components))
 
 (defun org-jira-read-priority ()
   "Read priority name."
