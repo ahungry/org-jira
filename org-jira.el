@@ -815,6 +815,12 @@ See`org-jira-get-issue-list'"
   ;; from the JQL style query
   (interactive
    (org-jira-get-issue-list org-jira-get-issue-list-callback))
+  (save-selected-window
+    (save-window-excursion
+      (org-jira--render-issues-from-issue-list issues))))
+
+(defun org-jira--render-issues-from-issue-list (issues)
+  "Add the issues from ISSUES list into the org file(s)."
   (let (project-buffer)
     (mapc (lambda (issue)
             (let* ((proj-key (org-jira-get-issue-project issue))
