@@ -799,9 +799,9 @@ With a prefix argument, allow you to customize the jql.  See
 
 (defvar org-jira-get-issue-list-callback
   (cl-function
-   (lambda (&rest data &allow-other-keys)
+   (lambda (&key data &allow-other-keys)
      "Callback for async, DATA is the response from the request call."
-     (let ((issues (append (cdr (assoc 'issues (cl-getf data :data))) nil)))
+     (let ((issues (append (cdr (assoc 'issues data)) nil)))
        (org-jira-get-issues issues)))))
 
 ;;;###autoload
@@ -918,11 +918,11 @@ See`org-jira-get-issue-list'"
          (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id)))
          (callback-edit
           (cl-function
-           (lambda (&rest data &allow-other-keys)
+           (lambda (&key data &allow-other-keys)
              (org-jira-update-comments-for-current-issue))))
          (callback-add
           (cl-function
-           (lambda (&rest data &allow-other-keys)
+           (lambda (&key data &allow-other-keys)
              ;; @todo :optim: Has to be a better way to do this than delete region (like update the unmarked one)
              (org-jira-delete-current-comment)
              (org-jira-update-comments-for-current-issue)))))
@@ -942,7 +942,7 @@ See`org-jira-get-issue-list'"
      (jiralib-add-comment
       issue-id comment
       (cl-function
-       (lambda (&rest data &allow-other-keys)
+       (lambda (&key data &allow-other-keys)
          (ensure-on-issue-id issue-id (org-jira-update-comments-for-current-issue))))))))
 
 (defun org-jira-org-clock-to-date (org-time)
@@ -1019,7 +1019,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                     (cdr (assoc 'time-spent-seconds worklog))
                     comment-text
                     (cl-function
-                     (lambda (&rest data &allow-other-keys)
+                     (lambda (&key data &allow-other-keys)
                        (org-jira-update-worklogs-for-current-issue))))
                  ;; else
                  (jiralib-add-worklog
@@ -1028,7 +1028,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                   (cdr (assoc 'time-spent-seconds worklog))
                   comment-text
                   (cl-function
-                   (lambda (&rest data &allow-other-keys)
+                   (lambda (&key data &allow-other-keys)
                      (org-jira-update-worklogs-for-current-issue))))
                  )
                )))))
@@ -1096,8 +1096,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
     (jiralib-get-comments
      issue-id
      (cl-function
-      (lambda (&rest data &allow-other-keys)
-        (let ((comments (org-jira-find-value (cl-getf data :data) 'comments)))
+      (lambda (&key data &allow-other-keys)
+        (let ((comments (org-jira-find-value data 'comments)))
           (mapc
            (lambda (comment)
         ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
@@ -1180,7 +1180,7 @@ purpose of wiping an old subtree."
        issue-id
        (save-excursion
          (cl-function
-          (lambda (&rest data &allow-other-keys)
+          (lambda (&key data &allow-other-keys)
         ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
         (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
                (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
@@ -1194,7 +1194,7 @@ purpose of wiping an old subtree."
                    (forward-thing 'whitespace)
                    (when (looking-at "Attachments:")
                      (org-jira-delete-subtree)))))
-            (let ((attachments (org-jira-find-value (cl-getf data :data) 'fields 'attachment)))
+            (let ((attachments (org-jira-find-value data 'fields 'attachment)))
               (when (not (zerop (length attachments)))
                 (ensure-on-issue
                  (if (org-goto-first-child)
@@ -1246,7 +1246,7 @@ purpose of wiping an old subtree."
     (jiralib-get-worklogs
      issue-id
      (cl-function
-      (lambda (&rest data &allow-other-keys)
+      (lambda (&key data &allow-other-keys)
         ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
         (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
                (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
@@ -1255,7 +1255,7 @@ purpose of wiping an old subtree."
           (with-current-buffer project-buffer
             (ensure-on-issue-id
              issue-id
-             (let ((worklogs (org-jira-find-value (cl-getf data :data) 'worklogs)))
+             (let ((worklogs (org-jira-find-value data 'worklogs)))
                (org-jira-logbook-reset
                 issue-id
                 (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
@@ -1574,9 +1574,9 @@ Where issue-id will be something such as \"EX-22\"."
    (let* ((issue-id (org-jira-id))
           (callback
            (cl-function
-            (lambda (&rest data &allow-other-keys)
+            (lambda (&key data &allow-other-keys)
               (message "org-jira-refresh-issue cb")
-              (org-jira-get-issues (list (cl-getf data :data)))))))
+              (org-jira-get-issues (list data))))))
      (jiralib-get-issue issue-id callback))))
 
 (defvar org-jira-fields-values-history nil)
@@ -1635,7 +1635,7 @@ Where issue-id will be something such as \"EX-22\"."
       action
       custom-fields
       (cl-function
-       (lambda (&rest data &allow-other-keys)
+       (lambda (&key data &allow-other-keys)
          (org-jira-refresh-issue)))))))
 
 (defun org-jira-progress-next-action (actions current-status)
@@ -1702,7 +1702,7 @@ Where issue-id will be something such as \"EX-22\"."
           action
           custom-fields
           (cl-function
-           (lambda (&rest data &allow-other-keys)
+           (lambda (&key data &allow-other-keys)
              (org-jira-refresh-issue))))
        (error "No action defined for that step!")))))
 
@@ -1786,18 +1786,18 @@ otherwise it should return:
         update-fields
         ;; This callback occurs on success
         (cl-function
-         (lambda (&rest data &allow-other-keys)
+         (lambda (&key data response &allow-other-keys)
            ;; We have to snag issue-id out of the response because the callback can't see it.
            (let ((issue-id (replace-regexp-in-string
                             ".*issue\\/\\(.*\\)"
                             "\\1"
-                            (request-response-url (cl-getf data :response)))))
+                            (request-response-url response))))
              (message (format "Issue '%s' updated!" issue-id))
              (jiralib-get-issue
               issue-id
               (cl-function
-               (lambda (&rest data &allow-other-keys)
-                 (org-jira-get-issues (list (cl-getf data :data))))))
+               (lambda (&key data &allow-other-keys)
+                 (org-jira-get-issues (list data)))))
              )))
         ))
      )))
