@@ -302,18 +302,13 @@ instance."
      ,@body))
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
-  "Make sure we are on an issue heading with id ISSUE-ID, before executing BODY."
+  "Just do some work on ISSUE-ID, execute BODY."
   (declare (debug (issue-id body)))
   (declare (indent 1))
   `(save-excursion
      (save-restriction
-       (widen)
-       (outline-show-all)
-       (goto-char (point-min))
-       (let (p)
-         (setq p (org-find-entry-with-id ,issue-id))
-         (unless p
-           (error "Issue %s not found!" ,issue-id))
+       (let ((p (org-find-entry-with-id ,issue-id)))
+         (unless p (error "Issue %s not found!" ,issue-id))
          (goto-char p)
          (org-narrow-to-subtree)
          ,@body))))
@@ -1425,6 +1420,7 @@ that should be bound to an issue."
              (priority (id . ,priority))
              (assignee (name . ,(or (cdr (assoc user jira-users)) user)))))))
     ticket-struct))
+
 ;;;###autoload
 (defun org-jira-create-issue (project type summary description)
   "Create an issue in PROJECT, of type TYPE, with given SUMMARY and DESCRIPTION."
