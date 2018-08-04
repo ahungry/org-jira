@@ -303,7 +303,7 @@ instance."
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Make sure we are on an issue heading with id ISSUE-ID, before executing BODY."
-  (declare (debug (body)))
+  (declare (debug (issue-id body)))
   (declare (indent 1))
   `(save-excursion
      (save-restriction
@@ -1559,31 +1559,41 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
   "Iterate across all entries in current buffer, refreshing on issue :ID:.
 Where issue-id will be something such as \"EX-22\"."
   (interactive)
-  (save-excursion
-    (outline-show-all)
-    (outline-hide-sublevels 2)
-    (goto-char (point-min))
-    (outline-next-visible-heading 1)
-    (while (not (org-next-line-empty-p))
-      (when (outline-on-heading-p t)
-        ;; It's possible we could be on a non-org-jira headline, but
-        ;; that should be an exceptional case and not necessitating a
-        ;; fix atm.
-        (org-jira-refresh-issue))
-      (outline-next-visible-heading 1))))
+  (save-restriction
+    (save-excursion
+      (outline-show-all)
+      (outline-hide-sublevels 2)
+      (goto-char (point-min))
+      (outline-next-visible-heading 1)
+      (while (not (org-next-line-empty-p))
+        (when (outline-on-heading-p t)
+          ;; It's possible we could be on a non-org-jira headline, but
+          ;; that should be an exceptional case and not necessitating a
+          ;; fix atm.
+          (org-jira-refresh-issue))
+        (outline-next-visible-heading 1)))))
 
 ;;;###autoload
 (defun org-jira-refresh-issue ()
-  "Refresh issue from jira to org."
+  "Refresh current issue from jira to org."
   (interactive)
   (ensure-on-issue
-   (let* ((issue-id (org-jira-id))
-          (callback
-           (cl-function
-            (lambda (&key data &allow-other-keys)
-              (message "org-jira-refresh-issue cb")
-              (org-jira-get-issues (list data))))))
-     (jiralib-get-issue issue-id callback))))
+   (org-jira--refresh-issue (org-jira-id))))
+
+(defun org-jira--refresh-issue (issue-id)
+  "Refresh issue from jira to org using ISSUE-ID."
+  (let ((callback
+         (cl-function
+          (lambda (&key data &allow-other-keys)
+            ;; (message "org-jira-refresh-issue cb")
+            (org-jira-get-issues (list data))))))
+    (jiralib-get-issue issue-id callback)))
+
+(defun org-jira--refresh-issue-by-id (issue-id)
+  "Refresh issue from jira to org using ISSUE-ID."
+  (ensure-on-issue-id
+   issue-id
+   (org-jira--refresh-issue issue-id)))
 
 (defvar org-jira-fields-values-history nil)
 ;;;###autoload
