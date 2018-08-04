@@ -7,6 +7,7 @@ test:
 	-l ert \
 	-l t/batch-runner/s.el \
 	-l t/batch-runner/request.el \
+	-l t/batch-runner/names.el \
 	-l jiralib.el \
 	-l org-jira.el \
 	-l t/org-jira-t.el \
