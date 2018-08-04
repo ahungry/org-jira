@@ -840,7 +840,7 @@ See`org-jira-get-issue-list'"
                             (org-deadline nil duedate))))
 
                       (mapc (lambda (heading-entry)
-                              (ensure-on-issue-id
+                              (org-jira-ensure-on-issue-id
                                issue-id
                                (let* ((entry-heading (concat (symbol-name heading-entry) (format ": [[%s][%s]]" (concat jiralib-url "/browse/" issue-id) issue-id))))
                                  (setq p (org-find-exact-headline-in-buffer entry-heading))
@@ -911,7 +911,7 @@ See`org-jira-get-issue-list'"
       issue-id comment
       (cl-function
        (lambda (&key data &allow-other-keys)
-         (ensure-on-issue-id issue-id (update-comments-for-current-issue))))))))
+         (org-jira-ensure-on-issue-id issue-id (update-comments-for-current-issue))))))))
 
 (defun org-clock-to-date (org-time)
   "Convert ORG-TIME formatted date into a plain date string."
@@ -1074,7 +1074,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                     (project-buffer (or (find-buffer-visiting project-file)
                                         (find-file project-file))))
                (with-current-buffer project-buffer
-                 (ensure-on-issue-id
+                 (org-jira-ensure-on-issue-id
                   issue-id
                   (let* ((comment-id (org-jira-get-comment-id comment))
                          (comment-author (or (car (rassoc
@@ -1221,7 +1221,7 @@ purpose of wiping an old subtree."
                (project-buffer (or (find-buffer-visiting project-file)
                                    (find-file project-file))))
           (with-current-buffer project-buffer
-            (ensure-on-issue-id
+            (org-jira-ensure-on-issue-id
              issue-id
              (let ((worklogs (org-jira--find-value data 'worklogs)))
                (org-jira-logbook-reset
