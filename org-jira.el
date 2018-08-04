@@ -864,7 +864,7 @@ See`org-jira-get-issue-list'"
                                    "^" "  "
                                    (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
-                      (update-comments-for-current-issue)
+                      (org-jira-update-comments-for-current-issue)
                       ;; FIXME: Re-enable when attachments are not erroring.
                       ;;(update-attachments-for-current-issue)
 
@@ -886,13 +886,13 @@ See`org-jira-get-issue-list'"
          (callback-edit
           (cl-function
            (lambda (&key data &allow-other-keys)
-             (update-comments-for-current-issue))))
+             (org-jira-update-comments-for-current-issue))))
          (callback-add
           (cl-function
            (lambda (&key data &allow-other-keys)
              ;; @todo :optim: Has to be a better way to do this than delete region (like update the unmarked one)
-             (delete-current-comment)
-             (update-comments-for-current-issue)))))
+             (org-jira-delete-current-comment)
+             (org-jira-update-comments-for-current-issue)))))
     (if comment-id
         (jiralib-edit-comment issue-id comment-id comment callback-edit)
       (jiralib-add-comment issue-id comment callback-add))))
@@ -911,7 +911,7 @@ See`org-jira-get-issue-list'"
       issue-id comment
       (cl-function
        (lambda (&key data &allow-other-keys)
-         (org-jira-ensure-on-issue-id issue-id (update-comments-for-current-issue))))))))
+         (org-jira-ensure-on-issue-id issue-id (org-jira-update-comments-for-current-issue))))))))
 
 (defun org-clock-to-date (org-time)
   "Convert ORG-TIME formatted date into a plain date string."
@@ -1102,7 +1102,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                         (entry-put (point) "updated" updated)))
                     (goto-char (point-max))
                     ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                    (org-jira--insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
+                    (org-jira--insert (replace-regexp-in-string "^" "  " (or (org-jira--find-value comment 'body) ""))))))))
            (cl-mapcan
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
@@ -1569,7 +1569,7 @@ Where issue-id will be something such as \"EX-22\"."
    (let* ((issue-id (id))
           (actions (jiralib-get-available-actions
                     issue-id
-                    (get-issue-val-from-org 'status)))
+                    (org-jira-get-issue-val-from-org 'status)))
           (action (read-action actions))
           (fields (jiralib-get-fields-for-action issue-id action))
           (rest-fields fields)
@@ -1635,8 +1635,8 @@ Where issue-id will be something such as \"EX-22\"."
    (let* ((issue-id (id))
           (actions (jiralib-get-available-actions
                     issue-id
-                    (get-issue-val-from-org 'status)))
-          (action (progress-next-action actions (get-issue-val-from-org 'status)))
+                    (org-jira-get-issue-val-from-org 'status)))
+          (action (progress-next-action actions (org-jira-get-issue-val-from-org 'status)))
           (fields (jiralib-get-fields-for-action issue-id action))
           (rest-fields fields)
           (field-key)
@@ -1721,67 +1721,67 @@ otherwise it should return:
             (split-string org-issue-components ",\\s *")))))
 
 (defun update-issue-details (issue-id &rest rest)
-  "Update the details of issue ISSUE-ID.  REST will contain optional input."
-  (ensure-on-issue-id
-   issue-id
-   ;; Set up a bunch of values from the org content
-   (let* ((org-issue-components (get-issue-val-from-org 'components))
-          (org-issue-description (replace-regexp-in-string "^ +" "" (get-issue-val-from-org 'description)))
-          (org-issue-priority (get-issue-val-from-org 'priority))
-          (org-issue-type (get-issue-val-from-org 'type))
-          (org-issue-assignee (cl-getf rest :assignee (get-issue-val-from-org 'assignee)))
-          (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
-          (project-components (jiralib-get-components project)))
+  "Update the details of the ISSUE-ID.  REST will contain optional input."
+  (ensure-on-issue-id issue-id (org-jira--update-issue-details issue-id rest)))
 
-     ;; Lets fire off a worklog update async with the main issue
-     ;; update, why not?  This is better to fire first, because it
-     ;; doesn't auto-refresh any areas, while the end of the main
-     ;; update does a callback that reloads the worklog entries (so,
-     ;; we hope that wont occur until after this successfully syncs
-     ;; up).  Only do this sync if the user defcustom defines it as such.
-     (when worklog-sync-p
-       (update-worklogs-from-org-clocks))
-
-     ;; Send the update to jira
-     (let ((update-fields
-            (list (cons
-                   'components
-                   (or (build-components-list project-components) []))
-                  (cons 'priority (get-id-name-alist org-issue-priority
-                                                              (jiralib-get-priorities)))
-                  (cons 'description org-issue-description)
-                  (cons 'assignee (jiralib-get-user org-issue-assignee))
-                  (cons 'summary (get-issue-val-from-org 'summary))
-                  (cons 'issuetype (get-id-name-alist org-issue-type
-                                                               (jiralib-get-issue-types))))))
-
-       ;; If we enable duedate sync and we have a deadline present
-       (when (and deadline-duedate-sync-p
-                  (get-issue-val-from-org 'deadline))
-         (setq update-fields
-               (append update-fields
-                       (list (cons 'duedate (get-issue-val-from-org 'deadline))))))
-
-       (jiralib-update-issue
+(defun -update-issue-details-cb ()
+  "The callback after updating."
+  ;; This callback occurs on success
+  (cl-function
+   (lambda (&key data response &allow-other-keys)
+     ;; We have to snag issue-id out of the response because the callback can't see it.
+     (let ((issue-id (replace-regexp-in-string
+                      ".*issue\\/\\(.*\\)"
+                      "\\1"
+                      (request-response-url response))))
+       (message (format "Issue '%s' updated!" issue-id))
+       (jiralib-get-issue
         issue-id
-        update-fields
-        ;; This callback occurs on success
         (cl-function
-         (lambda (&key data response &allow-other-keys)
-           ;; We have to snag issue-id out of the response because the callback can't see it.
-           (let ((issue-id (replace-regexp-in-string
-                            ".*issue\\/\\(.*\\)"
-                            "\\1"
-                            (request-response-url response))))
-             (message (format "Issue '%s' updated!" issue-id))
-             (jiralib-get-issue
-              issue-id
-              (cl-function
-               (lambda (&key data &allow-other-keys)
-                 (get-issues (list data)))))
-             )))
-        ))
-     )))
+         (lambda (&key data &allow-other-keys)
+           (get-issues (list data)))))))))
+
+(defun -update-issue-details (issue-id &rest rest)
+  "Update the details of issue ISSUE-ID.  REST will contain optional input."
+  ;; Set up a bunch of values from the org content
+  (let* ((org-issue-components (get-issue-val-from-org 'components))
+         (org-issue-description (replace-regexp-in-string "^ +" "" (get-issue-val-from-org 'description)))
+         (org-issue-priority (get-issue-val-from-org 'priority))
+         (org-issue-type (get-issue-val-from-org 'type))
+         (org-issue-assignee (cl-getf rest :assignee (get-issue-val-from-org 'assignee)))
+         (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
+         (project-components (jiralib-get-components project)))
+
+    ;; Lets fire off a worklog update async with the main issue
+    ;; update, why not?  This is better to fire first, because it
+    ;; doesn't auto-refresh any areas, while the end of the main
+    ;; update does a callback that reloads the worklog entries (so,
+    ;; we hope that wont occur until after this successfully syncs
+    ;; up).  Only do this sync if the user defcustom defines it as such.
+    (when worklog-sync-p
+      (update-worklogs-from-org-clocks))
+
+    ;; Send the update to jira
+    (let ((update-fields
+           (list (cons
+                  'components
+                  (or (build-components-list project-components) []))
+                 (cons 'priority (get-id-name-alist org-issue-priority
+                                                    (jiralib-get-priorities)))
+                 (cons 'description org-issue-description)
+                 (cons 'assignee (jiralib-get-user org-issue-assignee))
+                 (cons 'summary (get-issue-val-from-org 'summary))
+                 (cons 'issuetype (get-id-name-alist org-issue-type
+                                                     (jiralib-get-issue-types))))))
+
+      ;; If we enable duedate sync and we have a deadline present
+      (when (and deadline-duedate-sync-p
+                 (get-issue-val-from-org 'deadline))
+        (setq update-fields
+              (append update-fields
+                      (list (cons 'duedate (get-issue-val-from-org 'deadline))))))
+
+      (jiralib-update-issue issue-id update-fields (-update-issue-details-cb)))))
 
 (defun parse-issue-id ()
   "Get issue id from org text."
