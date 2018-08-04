@@ -301,7 +301,7 @@ instance."
   `(save-excursion
      (unless (looking-at "^\\*\\* ")
        (search-backward-regexp "^\\*\\* " nil t)) ; go to top heading
-     (let ((id (id)))
+     (let ((id (org-jira-id)))
        (unless (and id (string-match (jiralib-get-issue-regexp) (downcase id)))
          (error "Not on an issue region!")))
      ,@body))
@@ -358,53 +358,6 @@ instance."
      (save-restriction
        (org-narrow-to-subtree)
        ,@body)))
-
-(defvar entry-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c pg") 'org-jira-get-projects)
-    (define-key map (kbd "C-c bg") 'org-jira-get-boards)
-    (define-key map (kbd "C-c iv") 'org-jira-get-issues-by-board)
-    (define-key map (kbd "C-c ib") 'org-jira-browse-issue)
-    (define-key map (kbd "C-c ig") 'org-jira-get-issues)
-    (define-key map (kbd "C-c ih") 'org-jira-get-issues-headonly)
-    ;;(define-key map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
-    ;;(define-key map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
-    (define-key map (kbd "C-c iu") 'org-jira-update-issue)
-    (define-key map (kbd "C-c iw") 'org-jira-progress-issue)
-    (define-key map (kbd "C-c in") 'org-jira-progress-issue-next)
-    (define-key map (kbd "C-c ia") 'org-jira-assign-issue)
-    (define-key map (kbd "C-c ir") 'org-jira-refresh-issue)
-    (define-key map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
-    (define-key map (kbd "C-c ic") 'org-jira-create-issue)
-    (define-key map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
-    (define-key map (kbd "C-c sc") 'org-jira-create-subtask)
-    (define-key map (kbd "C-c sg") 'org-jira-get-subtasks)
-    (define-key map (kbd "C-c cc") 'org-jira-add-comment)
-    (define-key map (kbd "C-c cu") 'org-jira-update-comment)
-    (define-key map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
-    (define-key map (kbd "C-c tj") 'org-jira-todo-to-jira)
-    (define-key map (kbd "C-c if") 'org-jira-get-issues-by-fixversion)
-    map))
-
-:autoload
-(define-minor-mode mode
-  "Toggle org-jira mode.
-With no argument, the mode is toggled on/off.
-Non-nil argument turns mode on.
-Nil argument turns mode off.
-
-Commands:
-\\{org-jira-entry-mode-map}
-
-Entry to this mode calls the value of `org-jira-mode-hook'."
-
-  :init-value nil
-  :lighter " jira"
-  :group 'org-jira
-  :keymap entry-mode-map
-
-  (if mode
-      (run-mode-hooks 'org-jira-mode-hook)))
 
 (defun get-project-name (proj)
   "For the given PROJ, get the id/name."
@@ -487,7 +440,7 @@ to change the property names this sets."
   (let ((projects-file (expand-file-name "projects-list.org" working-dir)))
     (or (find-buffer-visiting projects-file)
         (find-file projects-file))
-    (mode t)
+    (org-jira-mode t)
     (save-excursion
       (let* ((oj-projs (jiralib-get-projects)))
         (mapc (lambda (proj)
@@ -508,7 +461,7 @@ to change the property names this sets."
                       (unless (looking-at "^")
                         (insert "\n"))
                       (insert "* ")
-                      (-insert proj-headline)
+                      (org-jira--insert proj-headline)
                       (org-narrow-to-subtree))
                     (entry-put (point) "name" (get-project-name proj))
                     (entry-put (point) "key" (-find-value proj 'key))
@@ -645,19 +598,19 @@ Re-create it with CLOCKS.  This is used for worklogs."
      (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
        (if existing-logbook-p
            (progn ;; If we had a logbook, drop it and re-create in a bit.
-             (search-forward (format ":%s:" drawer-name))
+             (search-forward (format ":%s:" drawer-name) nil 1 1)
              (org-beginning-of-line)
-             (delete-region (point) (search-forward ":END:"))
+             (delete-region (point) (search-forward ":END:" nil 1 1))
              )
          (progn ;; Otherwise, create a new one at the end of properties list
-           (search-forward ":END:")
+           (search-forward ":END:" nil 1 1)
            (forward-line)))
        (org-insert-drawer nil (format "%s" drawer-name)) ;; Doc says non-nil, but this requires nil
        (mapc #'org-jira--insert-clock clocks)
        ;; Clean up leftover newlines (we left 2 behind)
        (dotimes (n 2)
-         (search-forward-regexp "^$")
-         (delete-region (point) (1+ (point))))
+         (search-forward-regexp "^$" nil 1 1)
+         (delete-region (point) (min (point-max) (1+ (point)))))
        ))))
 
 (defun get-worklog-val (key WORKLOG)
@@ -769,7 +722,7 @@ With a prefix argument, allow you to customize the jql.  See
       (mapc (lambda (issue)
               (let ((issue-id (get-issue-key issue))
                     (issue-summary (get-issue-summary issue)))
-                (-insert (format "- [jira:%s] %s\n" issue-id issue-summary))))
+                (org-jira--insert (format "- [jira:%s] %s\n" issue-id issue-summary))))
             issues))
     (switch-to-buffer issues-headonly-buffer)))
 
@@ -838,7 +791,7 @@ See`org-jira-get-issue-list'"
                                          (find-file project-file)))
                 (with-current-buffer project-buffer
                   (save-excursion
-                    (mode t)
+                    (org-jira-mode t)
                     (widen)
                     (outline-show-all)
                     (goto-char (point-min))
@@ -857,9 +810,9 @@ See`org-jira-get-issue-list'"
                           (insert "\n"))
                         (insert "** "))
                       (let ((status (get-issue-val 'status issue)))
-                        (-insert (concat (get-keyword-from-status status) " " issue-headline)))
+                        (org-jira--insert (concat (get-keyword-from-status status) " " issue-headline)))
                       (save-excursion
-                        (unless (search-forward "\n" (point-max) 1)
+                        (unless (search-forward "\n" (point-max) 1 1)
                           (insert "\n")))
                       (org-narrow-to-subtree)
                       (org-change-tag-in-region
@@ -903,11 +856,13 @@ See`org-jira-get-issue-list'"
                                        (org-insert-heading)
                                      (goto-char (point-max))
                                      (org-insert-subheading t))
-                                   (-insert entry-heading "\n"))
+                                   (org-jira--insert entry-heading "\n"))
 
                                  ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                                 (-insert
-                                  (replace-regexp-in-string "^" "  " (get-issue-val heading-entry issue))))))
+                                 (org-jira--insert
+                                  (replace-regexp-in-string
+                                   "^" "  "
+                                   (org-jira-get-issue-val heading-entry issue))))))
                             '(description))
                       (update-comments-for-current-issue)
                       ;; FIXME: Re-enable when attachments are not erroring.
@@ -1001,7 +956,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
   (let ((issue-id (get-from-org 'issue 'key)))
     (ensure-on-issue-id
      issue-id
-     (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
+     (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK")) nil 1 1)
      (org-beginning-of-line)
      (org-cycle 1)
      (while (search-forward "CLOCK: " nil 1 1)
@@ -1121,11 +1076,11 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                (with-current-buffer project-buffer
                  (ensure-on-issue-id
                   issue-id
-                  (let* ((comment-id (get-comment-id comment))
+                  (let* ((comment-id (org-jira-get-comment-id comment))
                          (comment-author (or (car (rassoc
-                                                   (get-comment-author comment)
-                                                   users))
-                                             (get-comment-author comment)))
+                                                   (org-jira-get-comment-author comment)
+                                                   org-jira-users))
+                                             (org-jira-get-comment-author comment)))
                          (comment-headline (format "Comment: %s" comment-author)))
                     (setq p (org-find-entry-with-id comment-id))
                     (when (and p (>= p (point-min))
@@ -1137,17 +1092,17 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                     (unless (looking-at "^")
                       (insert "\n"))
                     (insert "*** ")
-                    (-insert comment-headline "\n")
+                    (org-jira--insert comment-headline "\n")
                     (org-narrow-to-subtree)
-                    (entry-put (point) "ID" comment-id)
-                    (let ((created (get-comment-val 'created comment))
-                          (updated (get-comment-val 'updated comment)))
-                      (entry-put (point) "created" created)
+                    (org-jira-entry-put (point) "ID" comment-id)
+                    (let ((created (org-jira-get-comment-val 'created comment))
+                          (updated (org-jira-get-comment-val 'updated comment)))
+                      (org-jira-entry-put (point) "created" created)
                       (unless (string= created updated)
                         (entry-put (point) "updated" updated)))
                     (goto-char (point-max))
                     ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                    (-insert (replace-regexp-in-string "^" "  " (or (-find-value comment 'body) ""))))))))
+                    (org-jira--insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
            (cl-mapcan
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
@@ -1268,11 +1223,12 @@ purpose of wiping an old subtree."
           (with-current-buffer project-buffer
             (ensure-on-issue-id
              issue-id
-             (let ((worklogs (-find-value data 'worklogs)))
-               (logbook-reset
+             (let ((worklogs (org-jira--find-value data 'worklogs)))
+               (org-jira-logbook-reset
                 issue-id
-                (sort-org-clocks (worklogs-to-org-clocks
-                                           (jiralib-worklog-import--filter-apply worklogs)))))))))))))
+                (org-jira-sort-org-clocks
+                 (org-jira-worklogs-to-org-clocks
+                  (jiralib-worklog-import--filter-apply worklogs)))))))))))))
 
 :autoload
 (defun assign-issue ()
@@ -1883,7 +1839,7 @@ it is a symbol, it will be converted to string."
    (goto-char (point-min))
    ;; so that search for :END: won't fail
    (entry-put (point) "ID" comment-id)
-   (search-forward ":END:")
+   (search-forward ":END:" nil 1 1)
    (forward-line)
    (strip-string (buffer-substring-no-properties (point) (point-max)))))
 
@@ -1893,7 +1849,7 @@ it is a symbol, it will be converted to string."
    (goto-char (point-min))
    ;; so that search for :END: won't fail
    (entry-put (point) "ID" worklog-id)
-   (search-forward ":END:")
+   (search-forward ":END:" nil 1 1)
    (forward-line)
    (strip-string (buffer-substring-no-properties (point) (point-max)))))
 
@@ -2002,7 +1958,7 @@ See `org-jira-get-issues-from-filter'."
       (if existing-buffer
 	  (pop-to-buffer (set-buffer existing-buffer))
         (find-file boards-file))
-      (mode t)
+      (org-jira-mode t)
       (org-save-outline-visibility t
 	(outline-show-all)
 	(save-restriction
@@ -2028,7 +1984,7 @@ See `org-jira-get-issues-from-filter'."
                       (unless (looking-at "^")
 			(insert "\n"))
                       (insert "* ")
-                      (-insert board-headline)
+                      (org-jira--insert board-headline)
                       (org-narrow-to-subtree))
                     (entry-put (point) "name" board-name)
                     (entry-put (point) "type" (cdr (assoc 'type board)))
@@ -2046,6 +2002,54 @@ See `org-jira-get-issues-from-filter'."
             ("TODO")))))
 
 )
+;; ends the org-jira- namespace
+
+(defvar org-jira-entry-mode-map
+  (let ((org-jira-map (make-sparse-keymap)))
+    (define-key org-jira-map (kbd "C-c pg") 'org-jira-get-projects)
+    (define-key org-jira-map (kbd "C-c bg") 'org-jira-get-boards)
+    (define-key org-jira-map (kbd "C-c iv") 'org-jira-get-issues-by-board)
+    (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
+    (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
+    (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
+    ;;(define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
+    ;;(define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
+    (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
+    (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
+    (define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
+    (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
+    (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
+    (define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
+    (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
+    (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
+    (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
+    (define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
+    (define-key org-jira-map (kbd "C-c cc") 'org-jira-add-comment)
+    (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
+    (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
+    (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
+    (define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-by-fixversion)
+    org-jira-map))
+
+;;;###autoload
+(define-minor-mode org-jira-mode
+  "Toggle org-jira mode.
+With no argument, the mode is toggled on/off.
+Non-nil argument turns mode on.
+Nil argument turns mode off.
+
+Commands:
+\\{org-jira-entry-mode-map}
+
+Entry to this mode calls the value of `org-jira-mode-hook'."
+
+  :init-value nil
+  :lighter " jira"
+  :group 'org-jira
+  :keymap org-jira-entry-mode-map
+
+  (if org-jira-mode
+      (run-mode-hooks 'org-jira-mode-hook)))
 
 (provide 'org-jira)
 

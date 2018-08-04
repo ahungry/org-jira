@@ -346,11 +346,11 @@ request.el, so if at all possible, it should be avoided."
                      :data (json-encode `((body . ,(third params))))
                      :type "PUT"))
       ('getBoards (jiralib--agile-call-it "/rest/agile/1.0/board" 'values))
-      ('getComments (org-jira-find-value
+      ('getComments (org-jira--find-value
                      (jiralib--rest-call-it
                       (format "/rest/api/2/issue/%s/comment" (first params)))
                      'comments))
-      ('getAttachmentsFromIssue (org-jira-find-value
+      ('getAttachmentsFromIssue (org-jira--find-value
                      (jiralib--rest-call-it
                       (format "/rest/api/2/issue/%s?fields=attachment" (first params)))
                      'comments))
@@ -380,11 +380,11 @@ request.el, so if at all possible, it should be avoided."
         (lambda (trans)
           `(,(assoc 'name trans) ,(assoc 'id trans)))
         (cdadr (jiralib--rest-call-it (format "/rest/api/2/issue/%s/transitions" (first params))))))
-      ('getFieldsForAction (org-jira-find-value (car (let ((issue (first params))
+      ('getFieldsForAction (org-jira--find-value (car (let ((issue (first params))
                                                            (action (second params)))
                                                        (seq-filter (lambda (trans)
-                                                                     (or (string-equal action (org-jira-find-value trans 'id))
-                                                                         (string-equal action (org-jira-find-value trans 'name))))
+                                                                     (or (string-equal action (org-jira--find-value trans 'id))
+                                                                         (string-equal action (org-jira--find-value trans 'name))))
                                                                    (cdadr (jiralib--rest-call-it
                                                                            (format "/rest/api/2/issue/%s/transitions" (first params))
                                                                            :params '((expand . "transitions.fields")))))))
@@ -681,8 +681,8 @@ Possible side-effects:
         (mapcar (lambda (field)
                   (cons (symbol-name (car field))
                         (format "%s (required: %s)"
-                                (org-jira-find-value field 'name)
-                                (if (eq (org-jira-find-value field 'required) :json-false)
+                                (org-jira--find-value field 'name)
+                                (if (eq (org-jira--find-value field 'required) :json-false)
                                     "nil"
                                   "t"))))
                 fields))
