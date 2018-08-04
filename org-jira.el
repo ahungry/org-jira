@@ -931,12 +931,13 @@ See`org-jira-get-issue-list'"
         (jiralib-edit-comment issue-id comment-id comment callback-edit)
       (jiralib-add-comment issue-id comment callback-add))))
 
-(defun org-jira-add-comment (comment)
-  "Add a new COMMENT string to the issue region."
+(defun org-jira-add-comment (issue-id comment)
+  "For ISSUE-ID, add a new COMMENT string to the issue region."
   (interactive
-   (let ((comment (read-string "Comment: ")))
-     (list comment)))
-  (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
+   (let* ((issue-id (org-jira-id))
+          (comment (read-string (format  "Comment (%s): " issue-id))))
+     (list issue-id comment)))
+  (lexical-let ((issue-id issue-id))
     (ensure-on-issue-id
      issue-id
      (goto-char (point-max))
