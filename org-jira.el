@@ -292,14 +292,15 @@ instance."
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
   (declare (debug (body)))
-
   `(save-excursion
-     (unless (looking-at "^\\*\\* ")
-       (search-backward-regexp "^\\*\\* " nil t)) ; go to top heading
-     (let ((org-jira-id (org-jira-id)))
-       (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) (downcase org-jira-id)))
-         (error "Not on an issue region!")))
-     ,@body))
+     (save-restriction
+       (widen)
+       (unless (looking-at "^\\*\\* ")
+         (search-backward-regexp "^\\*\\* " nil t)) ; go to top heading
+       (let ((org-jira-id (org-jira-id)))
+         (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) (downcase org-jira-id)))
+           (error "Not on an issue region!")))
+       ,@body)))
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
@@ -307,6 +308,7 @@ instance."
   (declare (indent 1))
   `(save-excursion
      (save-restriction
+       (widen)
        (let ((p (org-find-entry-with-id ,issue-id)))
          (unless p (error "Issue %s not found!" ,issue-id))
          (goto-char p)
@@ -1552,12 +1554,16 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
                                      resolutions))))
       (cons 'name resolution-name))))
 
+;; TODO: Refactor to just scoop all ids from buffer, run ensure-on-issue-id on
+;; each using a map, and refresh them that way.  That way we don't have to iterate
+;; on the user headings etc.
 (defun org-jira-refresh-issues-in-buffer ()
   "Iterate across all entries in current buffer, refreshing on issue :ID:.
 Where issue-id will be something such as \"EX-22\"."
   (interactive)
-  (save-restriction
-    (save-excursion
+  (save-excursion
+    (save-restriction
+      (widen)
       (outline-show-all)
       (outline-hide-sublevels 2)
       (goto-char (point-min))
