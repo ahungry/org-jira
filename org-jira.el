@@ -250,6 +250,13 @@ instance."
   :group 'org-jira
   :type '(alist :key-type string :value-type string))
 
+(defcustom org-jira-priority-to-org-priority-alist nil
+  "Alist mapping jira priority keywords to `org-mode' priority cookies.
+
+See `org-default-priority' for more info."
+  :group 'org-jira
+  :type '(alist :key-type string :value-type character))
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -864,8 +871,12 @@ representing ISSUE."
                           (insert "\n"))
                         (insert "** "))
                       (let ((status (org-jira-get-issue-val 'status issue)))
-                        (org-jira-insert (concat (org-jira-get-keyword-from-status status) " "
-                                                 (org-jira--get-org-headline-from-issue issue))))
+                        (org-jira-insert
+                         (concat (org-jira-get-keyword-from-status status)
+                                 " "
+                                 (org-jira-get-org-priority-cookie-from-issue
+                                  (org-jira-get-issue-val 'priority issue))
+                                 (org-jira--get-org-headline-from-issue issue))))
                       (save-excursion
                         (unless (search-forward "\n" (point-max) 1)
                           (insert "\n")))
@@ -2049,6 +2060,15 @@ See `org-jira-get-issues-from-filter'."
       (cond (known-keyword (cdr known-keyword))
             ((member status org-jira-done-states) "DONE")
             ("TODO")))))
+
+(defun org-jira-get-org-priority-cookie-from-issue (priority)
+  "Get the `org-mode' [#X] priority cookie "
+  (let ((character (cdr (assoc priority org-jira-priority-to-org-priority-alist))))
+    (if character
+        (if (eq character org-default-priority)
+            ""
+          (format "[#%c] " character))
+      "")))
 
 (provide 'org-jira)
 ;;; org-jira.el ends here
