@@ -464,12 +464,12 @@ to change the property names this sets."
   "Kill line, to tags or end of line."
   (cond
    ((or (not org-special-ctrl-k)
-	(bolp)
-	(not (org-at-heading-p)))
+        (bolp)
+        (not (org-at-heading-p)))
     (when (and (get-char-property (min (point-max) (point-at-eol)) 'invisible)
-	       org-ctrl-k-protect-subtree
-	       (or (eq org-ctrl-k-protect-subtree 'error)
-		   (not (y-or-n-p "Kill hidden subtree along with headline? "))))
+               org-ctrl-k-protect-subtree
+               (or (eq org-ctrl-k-protect-subtree 'error)
+                   (not (y-or-n-p "Kill hidden subtree along with headline? "))))
       (user-error "C-k aborted as it would kill a hidden subtree"))
     (call-interactively
      (if (bound-and-true-p visual-line-mode) 'kill-visual-line 'org-jira-kill-line)))
@@ -1108,41 +1108,41 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
         (let ((comments (org-jira-find-value data 'comments)))
           (mapc
            (lambda (comment)
-        ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
-        (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
-               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
-               (project-buffer (or (find-buffer-visiting project-file)
-                                  (find-file project-file))))
-          (with-current-buffer project-buffer
-             (ensure-on-issue-id
-              issue-id
-              (let* ((comment-id (org-jira-get-comment-id comment))
-                     (comment-author (or (car (rassoc
-                                               (org-jira-get-comment-author comment)
-                                               org-jira-users))
-                                         (org-jira-get-comment-author comment)))
-                     (comment-headline (format "Comment: %s" comment-author)))
-                (setq p (org-find-entry-with-id comment-id))
-                (when (and p (>= p (point-min))
-                           (<= p (point-max)))
-                  (goto-char p)
-                  (org-narrow-to-subtree)
-                  (delete-region (point-min) (point-max)))
-                (goto-char (point-max))
-                (unless (looking-at "^")
-                  (insert "\n"))
-                (insert "*** ")
-                (org-jira-insert comment-headline "\n")
-                (org-narrow-to-subtree)
-                (org-jira-entry-put (point) "ID" comment-id)
-                (let ((created (org-jira-get-comment-val 'created comment))
-                      (updated (org-jira-get-comment-val 'updated comment)))
-                  (org-jira-entry-put (point) "created" created)
-                  (unless (string= created updated)
-                    (org-jira-entry-put (point) "updated" updated)))
-                (goto-char (point-max))
-                ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
+             ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
+             (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
+                    (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+                    (project-buffer (or (find-buffer-visiting project-file)
+                                        (find-file project-file))))
+               (with-current-buffer project-buffer
+                 (ensure-on-issue-id
+                  issue-id
+                  (let* ((comment-id (org-jira-get-comment-id comment))
+                         (comment-author (or (car (rassoc
+                                                   (org-jira-get-comment-author comment)
+                                                   org-jira-users))
+                                             (org-jira-get-comment-author comment)))
+                         (comment-headline (format "Comment: %s" comment-author)))
+                    (setq p (org-find-entry-with-id comment-id))
+                    (when (and p (>= p (point-min))
+                               (<= p (point-max)))
+                      (goto-char p)
+                      (org-narrow-to-subtree)
+                      (delete-region (point-min) (point-max)))
+                    (goto-char (point-max))
+                    (unless (looking-at "^")
+                      (insert "\n"))
+                    (insert "*** ")
+                    (org-jira-insert comment-headline "\n")
+                    (org-narrow-to-subtree)
+                    (org-jira-entry-put (point) "ID" comment-id)
+                    (let ((created (org-jira-get-comment-val 'created comment))
+                          (updated (org-jira-get-comment-val 'updated comment)))
+                      (org-jira-entry-put (point) "created" created)
+                      (unless (string= created updated)
+                        (org-jira-entry-put (point) "updated" updated)))
+                    (goto-char (point-max))
+                    ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+                    (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
            (cl-mapcan
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
@@ -1189,52 +1189,52 @@ purpose of wiping an old subtree."
        (save-excursion
          (cl-function
           (lambda (&key data &allow-other-keys)
-        ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
-        (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
-               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
-               (project-buffer (or (find-buffer-visiting project-file)
-                                  (find-file project-file))))
-          (with-current-buffer project-buffer
-            ;; delete old attachment node
-            (ensure-on-issue
-             (if (org-goto-first-child)
-                 (while (org-goto-sibling)
-                   (forward-thing 'whitespace)
-                   (when (looking-at "Attachments:")
-                     (org-jira-delete-subtree)))))
-            (let ((attachments (org-jira-find-value data 'fields 'attachment)))
-              (when (not (zerop (length attachments)))
+            ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
+            (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
+                   (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+                   (project-buffer (or (find-buffer-visiting project-file)
+                                       (find-file project-file))))
+              (with-current-buffer project-buffer
+                ;; delete old attachment node
                 (ensure-on-issue
                  (if (org-goto-first-child)
-                     (progn
-                       (while (org-goto-sibling))
-                       (org-insert-heading-after-current))
-                   (org-insert-subheading nil))
+                     (while (org-goto-sibling)
+                       (forward-thing 'whitespace)
+                       (when (looking-at "Attachments:")
+                         (org-jira-delete-subtree)))))
+                (let ((attachments (org-jira-find-value data 'fields 'attachment)))
+                  (when (not (zerop (length attachments)))
+                    (ensure-on-issue
+                     (if (org-goto-first-child)
+                         (progn
+                           (while (org-goto-sibling))
+                           (org-insert-heading-after-current))
+                       (org-insert-subheading nil))
 
-                 (insert "Attachments:")
-                 (mapc
-                  (lambda (attachment)
-                    (let ((attachment-id (org-jira-get-comment-id attachment))
-                          (author (org-jira-get-comment-author attachment))
-                          (created (org-jira-transform-time-format
-                                    (org-jira-find-value attachment 'created)))
-                          (size (org-jira-find-value attachment 'size))
-                          (mimeType (org-jira-find-value attachment 'mimeType))
-                          (content (org-jira-find-value attachment 'content))
-                          (filename (org-jira-find-value attachment 'filename)))
-                      (if (looking-back "Attachments:")
-                          (org-insert-subheading nil)
-                        (org-insert-heading-respect-content))
-                      (insert "[[" content "][" filename "]]")
-                      (org-narrow-to-subtree)
-                      (org-jira-entry-put (point) "ID" attachment-id)
-                      (org-jira-entry-put (point) "Author" author)
-                      (org-jira-entry-put (point) "Name" filename)
-                      (org-jira-entry-put (point) "Created" created)
-                      (org-jira-entry-put (point) "Size" (ls-lisp-format-file-size size t))
-                      (org-jira-entry-put (point) "Content" content)
-                      (widen)))
-                  attachments)))))))))))))
+                     (insert "Attachments:")
+                     (mapc
+                      (lambda (attachment)
+                        (let ((attachment-id (org-jira-get-comment-id attachment))
+                              (author (org-jira-get-comment-author attachment))
+                              (created (org-jira-transform-time-format
+                                        (org-jira-find-value attachment 'created)))
+                              (size (org-jira-find-value attachment 'size))
+                              (mimeType (org-jira-find-value attachment 'mimeType))
+                              (content (org-jira-find-value attachment 'content))
+                              (filename (org-jira-find-value attachment 'filename)))
+                          (if (looking-back "Attachments:")
+                              (org-insert-subheading nil)
+                            (org-insert-heading-respect-content))
+                          (insert "[[" content "][" filename "]]")
+                          (org-narrow-to-subtree)
+                          (org-jira-entry-put (point) "ID" attachment-id)
+                          (org-jira-entry-put (point) "Author" author)
+                          (org-jira-entry-put (point) "Name" filename)
+                          (org-jira-entry-put (point) "Created" created)
+                          (org-jira-entry-put (point) "Size" (ls-lisp-format-file-size size t))
+                          (org-jira-entry-put (point) "Content" content)
+                          (widen)))
+                      attachments)))))))))))))
 
 (defun org-jira-sort-org-clocks (clocks)
   "Given a CLOCKS list, sort it by start date descending."
@@ -1259,7 +1259,7 @@ purpose of wiping an old subtree."
         (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
                (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
                (project-buffer (or (find-buffer-visiting project-file)
-                                  (find-file project-file))))
+                                   (find-file project-file))))
           (with-current-buffer project-buffer
             (ensure-on-issue-id
              issue-id
@@ -1332,12 +1332,12 @@ purpose of wiping an old subtree."
 (defun org-jira-read-board ()
   "Read board name. Returns cons pair (name . integer-id)"
   (let* ((boards-alist
-	  (jiralib-make-assoc-list (jiralib-get-boards) 'name 'id))
-	 (board-name
-	  (completing-read "Boards: "  boards-alist
-			   nil  t  nil
-			   'org-jira-boards-read-history
-			   (car org-jira-boards-read-history))))
+          (jiralib-make-assoc-list (jiralib-get-boards) 'name 'id))
+         (board-name
+          (completing-read "Boards: "  boards-alist
+                           nil  t  nil
+                           'org-jira-boards-read-history
+                           (car org-jira-boards-read-history))))
     (assoc board-name boards-alist)))
 
 (defun org-jira-read-component (project)
@@ -1978,7 +1978,7 @@ See `org-jira-get-issues-from-filter'."
   "Get list of ISSUES from agile board."
   (interactive)
   (let* ((board (org-jira-read-board))
-	 (board-id (cdr board)))
+         (board-id (cdr board)))
     (jiralib-get-board-issues board-id org-jira-get-issue-list-callback)))
 
 ;;;###autoload
@@ -1986,7 +1986,7 @@ See `org-jira-get-issues-from-filter'."
   "Get list of ISSUES from agile board, head only."
   (interactive)
   (let* ((board (org-jira-read-board))
-	 (board-id (cdr board)))
+         (board-id (cdr board)))
     (org-jira-get-issues-headonly (jiralib-get-board-issues board-id))))
 
 ;;;###autoload
@@ -1994,45 +1994,45 @@ See `org-jira-get-issues-from-filter'."
   "Get list of projects."
   (interactive)
   (lexical-let* ((boards-file (expand-file-name "boards-list.org" org-jira-working-dir))
-		 (existing-buffer (find-buffer-visiting boards-file))
-		 (boards (jiralib-get-boards)))
+                 (existing-buffer (find-buffer-visiting boards-file))
+                 (boards (jiralib-get-boards)))
     (save-excursion
       (if existing-buffer
-	  (pop-to-buffer (set-buffer existing-buffer))
+          (pop-to-buffer (set-buffer existing-buffer))
         (find-file boards-file))
       (org-jira-mode t)
       (org-save-outline-visibility t
-	(outline-show-all)
-	(save-restriction
-	  (mapc (lambda (board)
-		  (widen)
-		  (goto-char (point-min))
-		  (let* ((board-id (org-jira-find-value board 'id))
-			 (board-name (org-jira-find-value board 'name))
-			 (board-url
-			  (format "%s/secure/RapidBoard.jspa?rapidView=%d"
-				  (replace-regexp-in-string "/*$" "" jiralib-url) board-id))
-			 (board-headline
-			  (format "Board: [[%s][%s]]" board-url board-name))
-			 (headline-pos (org-find-exact-headline-in-buffer
-					board-headline (current-buffer) t)))
-		    (if (and headline-pos (>= headline-pos (point-min))
+        (outline-show-all)
+        (save-restriction
+          (mapc (lambda (board)
+                  (widen)
+                  (goto-char (point-min))
+                  (let* ((board-id (org-jira-find-value board 'id))
+                         (board-name (org-jira-find-value board 'name))
+                         (board-url
+                          (format "%s/secure/RapidBoard.jspa?rapidView=%d"
+                                  (replace-regexp-in-string "/*$" "" jiralib-url) board-id))
+                         (board-headline
+                          (format "Board: [[%s][%s]]" board-url board-name))
+                         (headline-pos (org-find-exact-headline-in-buffer
+                                        board-headline (current-buffer) t)))
+                    (if (and headline-pos (>= headline-pos (point-min))
                              (<= headline-pos (point-max)))
-			(progn
+                        (progn
                           (goto-char headline-pos)
                           (org-narrow-to-subtree)
                           (end-of-line))
                       (goto-char (point-max))
                       (unless (looking-at "^")
-			(insert "\n"))
+                        (insert "\n"))
                       (insert "* ")
                       (org-jira-insert board-headline)
                       (org-narrow-to-subtree))
                     (org-jira-entry-put (point) "name" board-name)
                     (org-jira-entry-put (point) "type" (cdr (assoc 'type board)))
-		    (org-jira-entry-put (point) "url" board-url)
+                    (org-jira-entry-put (point) "url" board-url)
                     (org-jira-entry-put (point) "ID" (number-to-string board-id))))
-		boards))))))
+                boards))))))
 
 (defun org-jira-get-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."
