@@ -857,13 +857,9 @@ See`org-jira-get-issue-list'"
                         (unless (search-forward "\n" (point-max) 1)
                           (insert "\n")))
                       (org-narrow-to-subtree)
-                      (org-change-tag-in-region
-                       (point-min)
-                       (save-excursion
-                         (forward-line 1)
-                         (point))
-                       (replace-regexp-in-string "-" "_" issue-id)
-                       nil)
+                      (save-excursion
+                        (org-back-to-heading t)
+                        (org-set-tags-to (replace-regexp-in-string "-" "_" issue-id)))
 
                       (mapc (lambda (entry)
                               (let ((val (org-jira-get-issue-val entry issue)))
