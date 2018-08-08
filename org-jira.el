@@ -291,7 +291,8 @@ instance."
 
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
-  (declare (debug (body)))
+  (declare (debug t))
+  (declare (indent 'defun))
   `(save-excursion
      (save-restriction
        (widen)
@@ -304,8 +305,8 @@ instance."
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
-  (declare (debug (issue-id body)))
-  (declare (indent 1))
+  (declare (debug t))
+  (declare (indent 'defun))
   `(save-excursion
      (save-restriction
        (widen)
@@ -317,7 +318,8 @@ instance."
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."
-  (declare (debug (body)))
+  (declare (debug t))
+  (declare (indent 'defun))
   `(save-excursion
      (save-restriction
        (let ((continue t)
@@ -334,7 +336,8 @@ instance."
 
 (defmacro ensure-on-comment (&rest body)
   "Make sure we are on a comment heading, before executing BODY."
-  (declare (debug (body)))
+  (declare (debug t))
+  (declare (indent 'defun))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
@@ -346,7 +349,8 @@ instance."
 
 (defmacro ensure-on-worklog (&rest body)
   "Make sure we are on a worklog heading, before executing BODY."
-  (declare (debug (body)))
+  (declare (debug t))
+  (declare (indent 'defun))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
