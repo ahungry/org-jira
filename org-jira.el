@@ -1147,15 +1147,13 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                     (goto-char (point-max))
                     ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
                     (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
-           (cl-mapcan
+           (cl-remove-if
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
               ;; comment displaying.
-              (if (member-ignore-case
-                   (org-jira-get-comment-author comment)
-                   org-jira-ignore-comment-user-list)
-                  nil
-                (list comment)))
+              (member-ignore-case
+               (org-jira-get-comment-author comment)
+               org-jira-ignore-comment-user-list))
             comments))))))))
 
 (defun org-jira-delete-subtree ()
