@@ -918,7 +918,7 @@ representing ISSUE."
 
                       ))))))
           issues)
-    (switch-to-buffer project-buffer)))
+    (switch-to-buffer project-buffer))
 
 ;;;###autoload
 (defun org-jira-update-comment ()
