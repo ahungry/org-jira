@@ -240,8 +240,8 @@ instance."
   :group 'org-jira
   :type 'boolean)
 
-(defcustom org-jira-keywords-to-jira-status-alist nil
-  "Custom alist of 'org-mode' keyword stored in car and jira status in the cdr."
+(defcustom org-jira-jira-status-to-org-keyword-alist nil
+  "Custom alist of jira status stored in car and 'org-mode' keyword stored in cdr."
   :group 'org-jira
   :type '(alist :value-type string))
 
@@ -852,7 +852,7 @@ See`org-jira-get-issue-list'"
                           (insert "\n"))
                         (insert "** "))
                       (let ((status (org-jira-get-issue-val 'status issue)))
-                        (org-jira-insert (concat (org-jira-get-keyword-from-status status) " " issue-headline)))
+                        (org-jira-insert (concat (org-jira-get-org-keyword-from-status status) " " issue-headline)))
                       (save-excursion
                         (unless (search-forward "\n" (point-max) 1)
                           (insert "\n")))
@@ -2034,11 +2034,11 @@ See `org-jira-get-issues-from-filter'."
                     (org-jira-entry-put (point) "ID" (number-to-string board-id))))
 		boards))))))
 
-(defun org-jira-get-keyword-from-status (status)
+(defun org-jira-get-org-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."
   (if org-jira-use-status-as-todo
       (upcase (replace-regexp-in-string " " "-" status))
-    (let ((known-keyword (assoc status org-jira-keywords-to-jira-status-alist)))
+    (let ((known-keyword (assoc status org-jira-jira-status-to-org-keyword-alist)))
       (cond (known-keyword (cdr known-keyword))
             ((member status org-jira-done-states) "DONE")
             ("TODO")))))
