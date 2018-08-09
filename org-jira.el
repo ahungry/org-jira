@@ -136,6 +136,11 @@
   :group 'org-jira
   :type '(repeat (string :tag "Jira username:")))
 
+(defcustom org-jira-reverse-comment-order nil
+  "If non-nil, order comments from most recent to least recent."
+  :group 'org-jira
+  :type 'boolean)
+
 (defcustom org-jira-done-states
   '("Closed" "Resolved" "Done")
   "Jira states that should be considered as DONE for `org-mode'."
@@ -1109,7 +1114,9 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
      issue-id
      (cl-function
       (lambda (&key data &allow-other-keys)
-        (let ((comments (org-jira-find-value data 'comments)))
+        (let ((comments (if org-jira-reverse-comment-order
+                            (reverse (org-jira-find-value data 'comments))
+                          (org-jira-find-value data 'comments))))
           (mapc
            (lambda (comment)
              ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
