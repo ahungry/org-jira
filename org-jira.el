@@ -820,6 +820,13 @@ See`org-jira-get-issue-list'"
     (save-window-excursion
       (org-jira--render-issues-from-issue-list issues))))
 
+(defun org-jira--get-org-headline-from-issue (issue)
+  "Get org task headline from Jira ISSUE.
+
+The returned string will be used as the headline for the org task
+representing ISSUE."
+  (org-jira-get-issue-summary issue))
+
 (defun org-jira--render-issues-from-issue-list (issues)
   "Add the issues from ISSUES list into the org file(s)."
   (let (project-buffer)
@@ -851,8 +858,9 @@ See`org-jira-get-issue-list'"
                         (unless (looking-at "^")
                           (insert "\n"))
                         (insert "** "))
-                      (let ((status (org-jira-get-issue-val 'status issue)))
-                        (org-jira-insert (concat (org-jira-get-org-keyword-from-status status) " " issue-headline)))
+                      (let ((status (org-jira-get-issue-val 'status issue))))
+                        (org-jira-insert (concat (org-jira-get-keyword-from-status status) " "
+                                                 (org-jira--get-org-headline-from-issue issue))))
                       (save-excursion
                         (unless (search-forward "\n" (point-max) 1)
                           (insert "\n")))
