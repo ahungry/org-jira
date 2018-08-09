@@ -351,16 +351,16 @@ request.el, so if at all possible, it should be avoided."
                       (format "/rest/api/2/issue/%s/comment" (first params)))
                      'comments))
       ('getAttachmentsFromIssue (org-jira-find-value
-                     (jiralib--rest-call-it
-                      (format "/rest/api/2/issue/%s?fields=attachment" (first params)))
-                     'comments))
+                                 (jiralib--rest-call-it
+                                  (format "/rest/api/2/issue/%s?fields=attachment" (first params)))
+                                 'comments))
       ('getComponents (jiralib--rest-call-it
                        (format "/rest/api/2/project/%s/components" (first params))))
       ('getIssue (jiralib--rest-call-it
                   (format "/rest/api/2/issue/%s" (first params))))
       ('getIssuesFromBoard  (jiralib--agile-call-it
-			     (format "rest/agile/1.0/board/%d/issue" (first params))
-			     'issues))
+                             (format "rest/agile/1.0/board/%d/issue" (first params))
+                             'issues))
       ('getIssuesFromJqlSearch  (append (cdr ( assoc 'issues (jiralib--rest-call-it
                                                               "/rest/api/2/search"
                                                               :type "POST"
@@ -421,7 +421,7 @@ passing ARGS to REQUEST."
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
                   :parser 'json-read
                   :complete jiralib-complete-callback
-                  args))
+             args))
           nil))
 
 (defun jiralib--call-it (method &rest params)
@@ -1010,37 +1010,37 @@ Auxiliary Notes:
     ;; let-body
     (progn
       (setq unwrap-worklog-records-fn
-	    (if (and
-		 (boundp 'unwrap-worklog-records-fn)
-		 (functionp unwrap-worklog-records-fn))
-		unwrap-worklog-records-fn
-	      (lambda (x) (coerce x 'list))))
+            (if (and
+                 (boundp 'unwrap-worklog-records-fn)
+                 (functionp unwrap-worklog-records-fn))
+                unwrap-worklog-records-fn
+              (lambda (x) (coerce x 'list))))
       (setq rewrap-worklog-records-fn
-	    (if (and
-		 (boundp 'rewrap-worklog-records-fn)
-		 (functionp rewrap-worklog-records-fn))
-		rewrap-worklog-records-fn
-	      (lambda (x) (remove 'nil (coerce x 'vector)))))
+            (if (and
+                 (boundp 'rewrap-worklog-records-fn)
+                 (functionp rewrap-worklog-records-fn))
+                rewrap-worklog-records-fn
+              (lambda (x) (remove 'nil (coerce x 'vector)))))
       (setq predicate-fn-lst
-	    (if (and (boundp 'predicate-fn-lst)
-		     (not (null predicate-fn-lst))
-		     (listp predicate-fn-lst))
-		predicate-fn-lst
-	      (mapcar 'caddr
-		      (remove 'nil
-			      (mapcar (lambda (x) (unless (null (car x)) x))
-				      jiralib-worklog-import--filters-alist)))))
+            (if (and (boundp 'predicate-fn-lst)
+                     (not (null predicate-fn-lst))
+                     (listp predicate-fn-lst))
+                predicate-fn-lst
+              (mapcar 'caddr
+                      (remove 'nil
+                              (mapcar (lambda (x) (unless (null (car x)) x))
+                                      jiralib-worklog-import--filters-alist)))))
       ;; final condition/sanity checks before processing
       (cond
        ;; pass cases, don't apply filters, return unaltered worklog-obj
        ((or (not (boundp 'predicate-fn-lst)) (not (listp predicate-fn-lst)) (null predicate-fn-lst))
-	worklog-obj)
+        worklog-obj)
        ;; default-case, apply worklog filters and return only matching worklogs
        (t
-	(setq worklogs (funcall unwrap-worklog-records-fn worklogs))
-	(while (setq predicate-fn (pop predicate-fn-lst))
-	  (setq worklogs (mapcar predicate-fn worklogs)))
-	(funcall rewrap-worklog-records-fn worklogs))))))
+        (setq worklogs (funcall unwrap-worklog-records-fn worklogs))
+        (while (setq predicate-fn (pop predicate-fn-lst))
+          (setq worklogs (mapcar predicate-fn worklogs)))
+        (funcall rewrap-worklog-records-fn worklogs))))))
 
 
 (defun jiralib-get-boards ()
@@ -1083,21 +1083,21 @@ results using paging and return results.
 VALUES-KEY - key of the actual reply data in the reply assoc list."
   (setq jiralib-complete-callback nil)
   (let ((not-last t)
-	(start-at 0)
-	;; 50 is server side maximum
-	(max-results 10)
-	(values ()))
+        (start-at 0)
+        ;; 50 is server side maximum
+        (max-results 10)
+        (values ()))
     (while not-last
       (let* ((reply-alist (jiralib--rest-call-it
-			   (jiralib--agile-add-paging-params api  max-results start-at)))
-	     (values-array (cdr (assoc values-key reply-alist)))
-	     (num-entries (length values-array))
-	     (total (cdr (assq 'total reply-alist))))
-	(setf values (append values (append values-array nil)))
-	(setf start-at (+ start-at num-entries))
-	(setf not-last (and (>  num-entries 0)
-			    (or (not total) ;; not always returned
-				(> total start-at))))))
+                           (jiralib--agile-add-paging-params api  max-results start-at)))
+             (values-array (cdr (assoc values-key reply-alist)))
+             (num-entries (length values-array))
+             (total (cdr (assq 'total reply-alist))))
+        (setf values (append values (append values-array nil)))
+        (setf start-at (+ start-at num-entries))
+        (setf not-last (and (>  num-entries 0)
+                            (or (not total) ;; not always returned
+                                (> total start-at))))))
     values))
 
 (defun jiralib--agile-call-async  (api values-key)
@@ -1117,31 +1117,31 @@ VALUES-KEY - key of the actual reply data in the reply assoc list."
        (complete-callback jiralib-complete-callback))
     ;; setup new callback to be called after each page
     (setf jiralib-complete-callback
-	  (cl-function
-	   (lambda  (&rest data &allow-other-keys)
-	     (condition-case err
-		 (let* ((reply-alist (cl-getf data :data))
-			(values-array (cdr (assoc vk reply-alist)))
-			(num-entries (length values-array))
-			(total (cdr (assq 'total reply-alist))))
-		   (setf values-list (append values-list (append values-array nil)))
-		   (setf start-at (+ start-at num-entries))
-		   (message "jiralib agile retrieve: got %d values%s%s"
-			    start-at
-			    (if total " of " "")
-			    (if total (int-to-string total) ""))
-		   (if (and (>  num-entries 0)
-  			    (or (not total) ; not always returned
-				(> total start-at)))
-		       (jiralib--rest-call-it
-			(jiralib--agile-add-paging-params url  max-results start-at))
-		     (progn
-		       ;; last page: call originall callback
-		       (message "jiralib agile retrieve: calling callback")
-		       (setf jiralib-complete-callback complete-callback)
-		       (funcall jiralib-complete-callback
-			     :data  (list (cons vk  values-list)))
-		       (message "jiralib agile retrieve: all done"))))
+          (cl-function
+           (lambda  (&rest data &allow-other-keys)
+             (condition-case err
+                 (let* ((reply-alist (cl-getf data :data))
+                        (values-array (cdr (assoc vk reply-alist)))
+                        (num-entries (length values-array))
+                        (total (cdr (assq 'total reply-alist))))
+                   (setf values-list (append values-list (append values-array nil)))
+                   (setf start-at (+ start-at num-entries))
+                   (message "jiralib agile retrieve: got %d values%s%s"
+                            start-at
+                            (if total " of " "")
+                            (if total (int-to-string total) ""))
+                   (if (and (>  num-entries 0)
+                            (or (not total) ; not always returned
+                                (> total start-at)))
+                       (jiralib--rest-call-it
+                        (jiralib--agile-add-paging-params url  max-results start-at))
+                     (progn
+                       ;; last page: call originall callback
+                       (message "jiralib agile retrieve: calling callback")
+                       (setf jiralib-complete-callback complete-callback)
+                       (funcall jiralib-complete-callback
+                                :data  (list (cons vk  values-list)))
+                       (message "jiralib agile retrieve: all done"))))
                ('error (message (format "jiralib agile retrieve: caught error: %s" err)))))))
     (jiralib--rest-call-it
      (jiralib--agile-add-paging-params api  max-results start-at))))
