@@ -43,30 +43,32 @@
 
 (require 'org-jira)
 
+(set-time-zone-rule t)
+
 (ert-deftest org-jira-date-strip-letter-t-test ()
   (should
-   (string= "2017-01-01 00:00:00-0500"
-            (org-jira-date-strip-letter-t "2017-01-01T00:00:00.000-0500")))
+   (string= "2017-01-01 00:00:00+0000"
+            (org-jira-date-strip-letter-t "2017-01-01T00:00:00.000+0000")))
   )
 
 (ert-deftest org-jira-date-to-org-clock-test ()
   (should
    (string= "2017-01-01 Sun 00:00"
-            (org-jira-date-to-org-clock "2017-01-01T00:00:00.000-0500")))
+            (org-jira-date-to-org-clock "2017-01-01T00:00:00.000+0000")))
   (should
    (string= "2017-02-05 Sun 00:00"
-            (org-jira-date-to-org-clock "2017-02-05T00:00:00.000-0500")))
+            (org-jira-date-to-org-clock "2017-02-05T00:00:00.000+0000")))
   )
 
 (ert-deftest org-jira-org-clock-to-date-test ()
   (should
-   (string= "2017-01-01T00:00:00.000-0500"
+   (string= "2017-01-01T00:00:00.000+0000"
             (org-jira-org-clock-to-date "2017-01-01 Sun 00:00")))
   )
 
 (ert-deftest org-jira-time-stamp-to-org-clock-test ()
   (should
-   (string= "2016-12-31 Sat 19:05"
+   (string= "2017-01-01 Sun 00:05"
             (org-jira-time-stamp-to-org-clock '(22632 18348))))
   )
 
@@ -105,9 +107,9 @@
                  (active . t)
                  (timeZone . "America/New_York"))
                 (comment . "Some comment here")
-                (created . "2017-02-27T23:47:04.261-0500")
-                (updated . "2017-02-27T23:47:04.261-0500")
-                (started . "2017-02-26T00:08:00.000-0500")
+                (created . "2017-02-27T23:47:04.261+0000")
+                (updated . "2017-02-27T23:47:04.261+0000")
+                (started . "2017-02-26T00:08:00.000+0000")
                 (timeSpent . "1h")
                 (timeSpentSeconds . 3600)
                 (id . "10101")
@@ -142,9 +144,9 @@
                  (active . t)
                  (timeZone . "America/New_York"))
                 (comment . "Add 32 minutes")
-                (created . "2017-03-16T23:25:45.396-0400")
-                (updated . "2017-03-16T23:25:45.396-0400")
-                (started . "2017-03-16T22:25:00.000-0400")
+                (created . "2017-03-16T23:25:45.396+0000")
+                (updated . "2017-03-16T23:25:45.396+0000")
+                (started . "2017-03-16T22:25:00.000+0000")
                 (timeSpent . "32m")
                 (timeSpentSeconds . 1920)
                 (id . "10200")
@@ -182,7 +184,7 @@
 CLOCK:")))
     (should (string= "10101" (cdr (assoc 'worklog-id result))))
     (should (string= "Success!" (cdr (assoc 'comment result))))
-    (should (string= "2017-04-05T01:00:00.000-0400" (cdr (assoc 'started result))))
+    (should (string= "2017-04-05T01:00:00.000+0000" (cdr (assoc 'started result))))
     (should (= 2760.0 (cdr (assoc 'time-spent-seconds result))))
     ))
 
@@ -194,7 +196,7 @@ CLOCK:")))
 CLOCK:")))
     (should (equal nil (cdr (assoc 'worklog-id result))))
     (should (string= "My sweet comment!" (cdr (assoc 'comment result))))
-    (should (string= "2017-04-05T01:00:00.000-0400" (cdr (assoc 'started result))))
+    (should (string= "2017-04-05T01:00:00.000+0000" (cdr (assoc 'started result))))
     (should (= 2760.0 (cdr (assoc 'time-spent-seconds result))))
     ))
 
