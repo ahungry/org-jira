@@ -241,9 +241,9 @@ instance."
   :type 'boolean)
 
 (defcustom org-jira-jira-status-to-org-keyword-alist nil
-  "Custom alist of jira status stored in car and 'org-mode' keyword stored in cdr."
+  "Custom alist of jira status stored in car and `org-mode' keyword stored in cdr."
   :group 'org-jira
-  :type '(alist :value-type string))
+  :type '(alist :key-type string :value-type string))
 
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
