@@ -168,8 +168,10 @@ re-query the endpoints to get these lists:
 
 ## About
 ### Maintainer
+
 You can reach me directly: Matthew Carter <m@ahungry.com>, or file an
 issue here on https://github.com/ahungry/org-jira.
 
 ### License
+
 GPLv3
