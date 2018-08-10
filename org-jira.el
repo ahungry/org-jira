@@ -858,7 +858,7 @@ representing ISSUE."
                         (unless (looking-at "^")
                           (insert "\n"))
                         (insert "** "))
-                      (let ((status (org-jira-get-issue-val 'status issue))))
+                      (let ((status (org-jira-get-issue-val 'status issue)))
                         (org-jira-insert (concat (org-jira-get-keyword-from-status status) " "
                                                  (org-jira--get-org-headline-from-issue issue))))
                       (save-excursion
@@ -914,11 +914,9 @@ representing ISSUE."
 
                       ;; only sync worklog clocks when the user sets it to be so.
                       (when org-jira-worklog-sync-p
-                        (org-jira-update-worklogs-for-current-issue))
-
-                      ))))))
+                        (org-jira-update-worklogs-for-current-issue))))))))
           issues)
-    (switch-to-buffer project-buffer))
+    (switch-to-buffer project-buffer)))
 
 ;;;###autoload
 (defun org-jira-update-comment ()
