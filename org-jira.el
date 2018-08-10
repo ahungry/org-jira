@@ -136,6 +136,11 @@
   :group 'org-jira
   :type '(repeat (string :tag "Jira username:")))
 
+(defcustom org-jira-reverse-comment-order nil
+  "If non-nil, order comments from most recent to least recent."
+  :group 'org-jira
+  :type 'boolean)
+
 (defcustom org-jira-done-states
   '("Closed" "Resolved" "Done")
   "Jira states that should be considered as DONE for `org-mode'."
@@ -1107,7 +1112,9 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
      issue-id
      (cl-function
       (lambda (&key data &allow-other-keys)
-        (let ((comments (org-jira-find-value data 'comments)))
+        (let ((comments (if org-jira-reverse-comment-order
+                            (reverse (org-jira-find-value data 'comments))
+                          (org-jira-find-value data 'comments))))
           (mapc
            (lambda (comment)
              ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
@@ -1145,15 +1152,13 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                     (goto-char (point-max))
                     ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
                     (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
-           (cl-mapcan
+           (cl-remove-if
             (lambda (comment)
               ;; Allow user to specify a list of excluded usernames for
               ;; comment displaying.
-              (if (member-ignore-case
-                   (org-jira-get-comment-author comment)
-                   org-jira-ignore-comment-user-list)
-                  nil
-                (list comment)))
+              (member-ignore-case
+               (org-jira-get-comment-author comment)
+               org-jira-ignore-comment-user-list))
             comments))))))))
 
 (defun org-jira-delete-subtree ()
