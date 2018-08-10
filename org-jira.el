@@ -253,6 +253,8 @@ instance."
 (defcustom org-jira-priority-to-org-priority-alist nil
   "Alist mapping jira priority keywords to `org-mode' priority cookies.
 
+A sample value might be (list (cons \"High\" ?A) (cons \"Medium\" ?B) (cons \"Low\" ?C)).
+
 See `org-default-priority' for more info."
   :group 'org-jira
   :type '(alist :key-type string :value-type character))
@@ -655,18 +657,18 @@ Re-create it with CLOCKS.  This is used for worklogs."
      (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
        (if existing-logbook-p
            (progn ;; If we had a logbook, drop it and re-create in a bit.
-             (search-forward (format ":%s:" drawer-name))
+             (search-forward (format ":%s:" drawer-name) nil 1 1)
              (org-beginning-of-line)
-             (delete-region (point) (search-forward ":END:"))
+             (delete-region (point) (search-forward ":END:" nil 1 1))
              )
          (progn ;; Otherwise, create a new one at the end of properties list
-           (search-forward ":END:")
+           (search-forward ":END:" nil 1 1)
            (forward-line)))
        (org-insert-drawer nil (format "%s" drawer-name)) ;; Doc says non-nil, but this requires nil
        (mapc #'org-jira-insert-clock clocks)
        ;; Clean up leftover newlines (we left 2 behind)
        (dotimes (n 2)
-         (search-forward-regexp "^$")
+         (search-forward-regexp "^$" nil 1 1)
          (delete-region (point) (1+ (point))))
        ))))
 
@@ -1899,7 +1901,7 @@ it is a symbol, it will be converted to string."
    (goto-char (point-min))
    ;; so that search for :END: won't fail
    (org-jira-entry-put (point) "ID" comment-id)
-   (search-forward ":END:")
+   (search-forward ":END:" nil 1 1)
    (forward-line)
    (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
 
@@ -1909,7 +1911,7 @@ it is a symbol, it will be converted to string."
    (goto-char (point-min))
    ;; so that search for :END: won't fail
    (org-jira-entry-put (point) "ID" worklog-id)
-   (search-forward ":END:")
+   (search-forward ":END:" nil 1 1)
    (forward-line)
    (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
 
@@ -2062,13 +2064,9 @@ See `org-jira-get-issues-from-filter'."
             ("TODO")))))
 
 (defun org-jira-get-org-priority-cookie-from-issue (priority)
-  "Get the `org-mode' [#X] priority cookie "
+  "Get the `org-mode' [#X] PRIORITY cookie."
   (let ((character (cdr (assoc priority org-jira-priority-to-org-priority-alist))))
-    (if character
-        (if (eq character org-default-priority)
-            ""
-          (format "[#%c] " character))
-      "")))
+    (if character (format "[#%c] " character) "")))
 
 (provide 'org-jira)
 ;;; org-jira.el ends here
