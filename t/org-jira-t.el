@@ -217,6 +217,16 @@ CLOCK:")))
   (should (string= "" (org-jira-decode nil)))
   (should (string= "dog" (org-jira-decode "dog"))))
 
+(ert-deftest org-jira-t-get-org-priority-string ()
+  (let ((org-jira-priority-to-org-priority-omit-default-priority nil)
+        (org-default-priority ?B))
+    (should (string= "[#B] " (org-jira-get-org-priority-string ?B)))
+    (setq org-jira-priority-to-org-priority-omit-default-priority t)
+    (should (string= "" (org-jira-get-org-priority-string ?B)))
+    (should (string= "" (org-jira-get-org-priority-string nil)))
+    )
+  )
+
 
 (provide 'org-jira-t)
 ;;; org-jira-t.el ends here

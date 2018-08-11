@@ -250,10 +250,21 @@ instance."
   :group 'org-jira
   :type '(alist :key-type string :value-type string))
 
+(defcustom org-jira-priority-to-org-priority-omit-default-priority nil
+  "Whether to omit insertion of priority when it matches the default.
+
+When set to t, will omit the insertion of the matched value from
+org-jira-priority-to-org-priority-alist when it matches the org-default-priority."
+  :group 'org-jira
+  :type 'boolean)
+
 (defcustom org-jira-priority-to-org-priority-alist nil
   "Alist mapping jira priority keywords to `org-mode' priority cookies.
 
-A sample value might be (list (cons \"High\" ?A) (cons \"Medium\" ?B) (cons \"Low\" ?C)).
+A sample value might be
+  (list (cons \"High\" ?A)
+        (cons \"Medium\" ?B)
+        (cons \"Low\" ?C)).
 
 See `org-default-priority' for more info."
   :group 'org-jira
@@ -2063,10 +2074,17 @@ See `org-jira-get-issues-from-filter'."
             ((member status org-jira-done-states) "DONE")
             ("TODO")))))
 
+(defun org-jira-get-org-priority-string (character)
+  "Return an org-priority-string based on CHARACTER and user settings."
+  (cond ((not character) "")
+        ((and org-jira-priority-to-org-priority-omit-default-priority
+              (eq character org-default-priority)) "")
+        (t (format "[#%c] " character))))
+
 (defun org-jira-get-org-priority-cookie-from-issue (priority)
   "Get the `org-mode' [#X] PRIORITY cookie."
   (let ((character (cdr (assoc priority org-jira-priority-to-org-priority-alist))))
-    (if character (format "[#%c] " character) "")))
+    (org-jira-get-org-priority-string character)))
 
 (provide 'org-jira)
 ;;; org-jira.el ends here
