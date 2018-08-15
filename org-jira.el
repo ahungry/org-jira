@@ -883,7 +883,7 @@ representing ISSUE."
                         (unless (looking-at "^")
                           (insert "\n"))
                         (insert "** "))
-                      (let ((status (org-jira-get-issue-val 'status issue)))
+                      (let ((status (org-jira-decode (org-jira-get-issue-val 'status issue))))
                         (org-jira-insert
                          (concat (org-jira-get-org-keyword-from-status status)
                                  " "
