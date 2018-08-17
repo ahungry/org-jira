@@ -49,6 +49,8 @@
 
 (defun org-jira-sdk-string-but-first (s) (cl-subseq s 1))
 
+(defun org-jira-sdk-to-string (s) (format "%s" s))
+
 (defun org-jira-sdk-to-prefixed-string (s) (format "org-jira-sdk-%s" s))
 
 (defun org-jira-sdk-record-type-to-symbol (record-type)
@@ -70,6 +72,17 @@
 
 (cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-record)))
 
+(cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-record))
+  "A decent pretty print/object dump for working with the class items."
+  (let ((slots (mapcar (lambda (slot) (aref slot 1)) (eieio-class-slots 'org-jira-sdk-issue))))
+    (setq slots (cl-remove-if (lambda (s) (not (slot-boundp rec s))) slots))
+    (apply #'concat
+     (mapcar (lambda (slot)
+               (let ((slot (intern (org-jira-sdk-to-string slot))))
+                 (format "\n%+16s:   %s" slot (slot-value rec (intern (org-jira-sdk-to-string slot)))))
+               )
+             slots))))
+
 (defun org-jira-sdk-path (alist key-chain)
   (cl-reduce (lambda (a k) (alist-get k a)) key-chain :initial-value alist))
 
@@ -89,21 +102,11 @@
    (hfn :initform #'jiralib-get-issue))
   "An issue on the end.  ID of the form EX-1, or a numeric such as 10000.")
 
-(cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-issue))
-  (with-slots (proj-key issue-id summary status type priority) rec
-    (format "
-Key: %s
-ID: %s
-Summary: %s
-Status: %s
-Type: %s
-Priority: %s
-" proj-key issue-id summary status type priority)))
-
 (cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-issue))
   (with-slots (data proj-key issue-id) rec
     (flet ((path (keys) (org-jira-sdk-path data keys)))
       (org-jira-sdk-issue
+       :id (path '(key))
        :proj-key (path '(fields project key))
        :issue-id (path '(id))
        :summary (path '(fields summary))
