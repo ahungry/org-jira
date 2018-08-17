@@ -43,21 +43,80 @@
 
 (defclass org-jira-sdk-record ()
   ((id :initarg :id :type string :required t)
+   (data :initarg :data :documentation "The area to hold a big alist of data.")
    (hfn :initform (lambda (id) (message "Not implemented."))))
   "The ID of the record.")
 
+(defun org-jira-sdk-string-but-first (s) (cl-subseq s 1))
+
+(defun org-jira-sdk-to-prefixed-string (s) (format "org-jira-sdk-%s" s))
+
 (defun org-jira-sdk-record-type-to-symbol (record-type)
-  "Convert RECORD-TYPE such as :record to org-jira-sdk-record."
-  (intern (format "org-jira-sdk-%s" (cl-subseq (symbol-name record-type) 1))))
+  (-> record-type symbol-name org-jira-sdk-string-but-first org-jira-sdk-to-prefixed-string intern))
 
-(defun org-jira-sdk-new (record-type id)
-  "Create a new eieio class of RECORD-TYPE bound to ID."
-  (funcall (org-jira-sdk-record-type-to-symbol record-type) :id (format "%s" id)))
+(defun org-jira-sdk-create-from-id (record-type id &optional callback)
+  (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type) :id (format "%s" id))))
+    (with-slots (data) rec
+      (setf data (org-jira-sdk-hydrate rec callback)))))
 
-(cl-defmethod org-jira-sdk-hydrate ((rec org-jira-sdk-record))
+(defun org-jira-sdk-create-from-data (record-type data)
+  (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type) :data data)))
+    (org-jira-sdk-from-data rec)))
+
+(cl-defmethod org-jira-sdk-hydrate ((rec org-jira-sdk-record) &optional callback)
   "Populate the record with data from the remote endpoint."
   (with-slots (id hfn) rec
-      (funcall hfn id)))
+      (funcall hfn id callback)))
+
+(cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-record)))
+
+(defun org-jira-sdk-path (alist key-chain)
+  (cl-reduce (lambda (a k) (alist-get k a)) key-chain :initial-value alist))
+
+(defclass org-jira-sdk-issue (org-jira-sdk-record)
+  ((proj-key :type string :initarg :proj-key)
+   (issue-id :type string :initarg :issue-id)
+   (summary :type string :initarg :summary)
+   (created :type string :initarg :created)
+   (updated :type string :initarg :updated)
+   (start-date :type string :initarg :start-date)
+   (status :type string :initarg :status)
+   (resolution :type string :initarg :resolution)
+   (type :type string :initarg :type)
+   (priority :type string :initarg :priority)
+   (description :type string :initarg :description)
+   (data :initarg :data :documentation "The remote Jira data object (alist).")
+   (hfn :initform #'jiralib-get-issue))
+  "An issue on the end.  ID of the form EX-1, or a numeric such as 10000.")
+
+(cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-issue))
+  (with-slots (proj-key issue-id summary status type priority) rec
+    (format "
+Key: %s
+ID: %s
+Summary: %s
+Status: %s
+Type: %s
+Priority: %s
+" proj-key issue-id summary status type priority)))
+
+(cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-issue))
+  (with-slots (data proj-key issue-id) rec
+    (flet ((path (keys) (org-jira-sdk-path data keys)))
+      (org-jira-sdk-issue
+       :proj-key (path '(fields project key))
+       :issue-id (path '(id))
+       :summary (path '(fields summary))
+       ;; TODO: Implement
+       :created ""
+       :updated ""
+       :start-date ""
+       :status (path '(fields status name))
+       :resolution ""
+       :type (path '(fields issuetype name))
+       :priority (path '(fields priority name))
+       :description ""
+       ))))
 
 (provide 'org-jira-sdk)
 ;;; org-jira-sdk.el ends here
