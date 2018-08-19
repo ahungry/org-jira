@@ -1,9 +1,7 @@
 # org-jira mode
 
 [![Build Status](https://travis-ci.com/ahungry/org-jira.svg?branch=master)](https://travis-ci.com/ahungry/org-jira)
-
 [![Join the chat at https://gitter.im/org-jira/Lobby](https://badges.gitter.im/org-jira/Lobby.svg)](https://gitter.im/org-jira/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [![MELPA](http://melpa.org/packages/org-jira-badge.svg)](http://melpa.org/#/org-jira)
 
 Use Jira in Emacs org-mode.
