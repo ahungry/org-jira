@@ -111,6 +111,7 @@
 (require 'cl-lib)
 (require 'url)
 (require 'ls-lisp)
+(require 'dash)
 (require 's)
 
 (defconst org-jira-version "3.0.0"
@@ -685,7 +686,7 @@ Re-create it with CLOCKS.  This is used for worklogs."
        ;; Clean up leftover newlines (we left 2 behind)
        (dotimes (n 2)
          (search-forward-regexp "^$" nil 1 1)
-         (delete-region (point) (1+ (point))))
+         (delete-region (point) (min (point-max) (1+ (point)))))
        ))))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
@@ -835,6 +836,7 @@ With a prefix argument, allow you to customize the jql.  See
 
 Will send a list of org-jira-sdk-issue objects to the list printer."
      (org-jira-log "Received data for org-jira-get-issue-list-callback.")
+     (print data)
      (--> data
           (org-jira-sdk-path it '(issues))
           (append it nil)               ; convert the conses into a proper list.
@@ -915,12 +917,12 @@ ISSUES is a list of org-jira-sdk-issue records."
                              (org-jira-entry-put (point) (symbol-name entry) val))))
                        '(assignee reporter type priority resolution status components created updated))
 
-                 (org-jira-entry-put (point) "ID" id)
-                 (org-jira-entry-put (point) "CUSTOM_ID" id)
+                 (org-jira-entry-put (point) "ID" issue-id)
+                 (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
 
                  ;; Insert the duedate as a deadline if it exists
                  (when org-jira-deadline-duedate-sync-p
-                   (let ((duedate (org-jira-get-issue-val 'duedate issue)))
+                   (let ((duedate (oref issue duedate)))
                      (when (> (length duedate) 0)
                        (org-deadline nil duedate))))
 
@@ -928,9 +930,10 @@ ISSUES is a list of org-jira-sdk-issue records."
                   (lambda (heading-entry)
                     (ensure-on-issue-id
                      issue-id
-                     (let* ((entry-heading (concat (symbol-name heading-entry)
-                                                   (format ": [[%s][%s]]"
-                                                           (concat jiralib-url "/browse/" issue-id) issue-id))))
+                     (let* ((entry-heading
+                             (concat (symbol-name heading-entry)
+                                     (format ": [[%s][%s]]"
+                                             (concat jiralib-url "/browse/" issue-id) issue-id))))
                        (setq p (org-find-exact-headline-in-buffer entry-heading))
                        (if (and p (>= p (point-min))
                                 (<= p (point-max)))
@@ -948,7 +951,7 @@ ISSUES is a list of org-jira-sdk-issue records."
 
                        ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
                        (org-jira-insert
-                        (replace-regexp-in-string "^" "  " (org-jira-get-issue-val heading-entry issue))))))
+                        (replace-regexp-in-string "^" "  " (slot-value issue heading-entry))))))
                   '(description))
                  (org-jira-update-comments-for-current-issue)
                  ;; FIXME: Re-enable when attachments are not erroring.
