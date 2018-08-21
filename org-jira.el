@@ -1797,9 +1797,8 @@ Where issue-id will be something such as \"EX-22\"."
           issue-id
           action
           custom-fields
-          (cl-function
-           (lambda (&key data &allow-other-keys)
-             (org-jira-refresh-issue))))
+          (org-jira-with-callback
+           (ensure-on-issue-id issue-id (org-jira-refresh-issue))))
        (error "No action defined for that step!")))))
 
 (defun org-jira-get-id-name-alist (name ids-to-names)
