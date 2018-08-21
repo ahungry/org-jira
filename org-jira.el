@@ -1,4 +1,4 @@
-;;; org-jira.el --- Syncing between Jira and Org-mode. -*- lexical-binding:nil -*-
+;;; org-jira.el --- Syncing between Jira and Org-mode. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016-2018 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
@@ -106,13 +106,13 @@
 
 (require 'org)
 (require 'org-clock)
-(require 'jiralib)
-(require 'org-jira-sdk)
 (require 'cl-lib)
 (require 'url)
 (require 'ls-lisp)
 (require 'dash)
 (require 's)
+(require 'jiralib)
+(require 'org-jira-sdk)
 
 (defconst org-jira-version "3.0.0"
   "Current version of org-jira.el.")
@@ -730,6 +730,8 @@ Re-create it with CLOCKS.  This is used for worklogs."
            tmp))))
 
 (defvar org-jira-jql-history nil)
+
+;;;###autoload
 (defun org-jira-get-issue-list (&optional callback)
   "Get list of issues, using jql (jira query language), invoke CALLBACK after.
 
@@ -870,15 +872,20 @@ representing ISSUE."
   "Add the issues from ISSUES list into the org file(s).
 
 ISSUES is a list of org-jira-sdk-issue records."
+  ;; FIXME: Some type of loading error - the first async callback does not know about
+  ;; the issues existing as a class, so we may need to instantiate here if we have none.
+  (when (eq 0 (->> issues (cl-remove-if-not #'org-jira-sdk-isa-issue?) length))
+    (setq issues  (org-jira-sdk-create-issues-from-data-list issues)))
+
   ;; First off, we never ever want to run on non-issues, so check our types early.
   (setq issues (cl-remove-if-not #'org-jira-sdk-isa-issue? issues))
   (org-jira-log (format "About to render %d issues." (length issues)))
+
   ;; If we have any left, we map over them.
   (let (project-buffer)
     (mapc
      (lambda (issue)
        (org-jira-log "Rendering issue from issue list")
-       (print issue)
        (org-jira-sdk-dump issue)
        (with-slots (proj-key issue-id summary status priority headline id) issue
          (let ((project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir)))
