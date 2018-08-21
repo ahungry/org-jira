@@ -334,6 +334,14 @@ See `org-default-priority' for more info."
            (error "Not on an issue region!")))
        ,@body)))
 
+(defmacro org-jira-with-callback (&rest body)
+  "Simpler way to write the data callbacks."
+  (declare (debug t))
+  (declare (indent 'defun))
+  `(lambda (&rest request-response)
+     (let ((cb-data (cl-getf request-response :data)))
+       ,@body)))
+
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
   (declare (debug t))
@@ -1798,7 +1806,7 @@ Where issue-id will be something such as \"EX-22\"."
     `((id . ,id)
       (name . ,name))))
 
-(defun org-jira-build-components-list (project-components)
+(defun org-jira-build-components-list (project-components org-issue-components)
   "Given PROJECT-COMPONENTS, attempt to build a list.
 
 If the PROJECT-COMPONENTS are nil, this should return:
@@ -1831,6 +1839,7 @@ otherwise it should return:
    issue-id
    ;; Set up a bunch of values from the org content
    (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
+          ;; TODO: Need to strip Priority out when updating
           (org-issue-description (replace-regexp-in-string "^ +" "" (org-jira-get-issue-val-from-org 'description)))
           (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
           (org-issue-type (org-jira-get-issue-val-from-org 'type))
@@ -1851,7 +1860,9 @@ otherwise it should return:
      (let ((update-fields
             (list (cons
                    'components
-                   (or (org-jira-build-components-list project-components) []))
+                   (or (org-jira-build-components-list
+                        project-components
+                        org-issue-components) []))
                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                               (jiralib-get-priorities)))
                   (cons 'description org-issue-description)
@@ -1871,21 +1882,13 @@ otherwise it should return:
         issue-id
         update-fields
         ;; This callback occurs on success
-        (cl-function
-         (lambda (&key data response &allow-other-keys)
-           ;; We have to snag issue-id out of the response because the callback can't see it.
-           (let ((issue-id (replace-regexp-in-string
-                            ".*issue\\/\\(.*\\)"
-                            "\\1"
-                            (request-response-url response))))
-             (message (format "Issue '%s' updated!" issue-id))
-             (jiralib-get-issue
-              issue-id
-              (cl-function
-               (lambda (&key data &allow-other-keys)
-                 (org-jira-log "Update get issue for refresh callback hit.")
-                 (-> data list org-jira-get-issues))))
-             )))
+        (org-jira-with-callback
+         (message (format "Issue '%s' updated!" issue-id))
+         (jiralib-get-issue
+          issue-id
+          (org-jira-with-callback
+           (org-jira-log "Update get issue for refresh callback hit.")
+           (-> cb-data list org-jira-get-issues))))
         ))
      )))
 
