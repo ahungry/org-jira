@@ -59,14 +59,12 @@
 (defun org-jira-sdk-create-from-id (record-type id &optional callback)
   (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type) :id (format "%s" id))))
     (with-slots (data) rec
-      (setf data (org-jira-sdk-hydrate rec callback)))))
+      (setf data (org-jira-sdk-hydrate rec callback))
+      (org-jira-sdk-from-data rec))))
 
 (defun org-jira-sdk-create-from-data (record-type data)
   (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type) :data data)))
     (org-jira-sdk-from-data rec)))
-
-(defun org-jira-sdk-create-record-from-data (record-type)
-  (lambda (data) (org-jira-sdk-create-from-data record-type data)))
 
 (cl-defmethod org-jira-sdk-hydrate ((rec org-jira-sdk-record) &optional callback)
   "Populate the record with data from the remote endpoint."
@@ -91,19 +89,19 @@
   (cl-reduce (lambda (a k) (alist-get k a)) key-chain :initial-value alist))
 
 (defclass org-jira-sdk-issue (org-jira-sdk-record)
-  ((assignee :type string :initarg :assignee)
+  ((assignee :type (or null string) :initarg :assignee)
    (components :type string :initarg :components)
    (created :type string :initarg :created)
    (description :type string :initarg :description)
-   (duedate :type string :initarg :duedate)
+   (duedate :type (or null string) :initarg :duedate)
    (headline :type string :initarg :headline)
    (id :type string :initarg :id)
    (issue-id :type string :initarg :issue-id)
    (priority :type string :initarg :priority)
    (proj-key :type string :initarg :proj-key)
    (reporter :type string :initarg :reporter)
-   (resolution :type string :initarg :resolution)
-   (start-date :type string :initarg :start-date)
+   (resolution :type (or null string) :initarg :resolution)
+   (start-date :type (or null string) :initarg :start-date)
    (status :type string :initarg :status)
    (summary :type string :initarg :summary)
    (type :type string :initarg :type)
@@ -114,7 +112,7 @@
 
 (cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-issue))
   (with-slots (data proj-key issue-id) rec
-    (flet ((path (keys) (org-jira-sdk-path data keys)))
+    (cl-flet ((path (keys) (org-jira-sdk-path data keys)))
       (org-jira-sdk-issue
        :assignee (path '(fields assignee)) ; confirm
        :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
@@ -126,14 +124,14 @@
        :issue-id (path '(id))
        :priority (path '(fields priority name))
        :proj-key (path '(fields project key))
-       :reporter (path '(fields reporter)) ; confirm
+       :reporter (path '(fields reporter name)) ; reporter could be an object of its own slot values
        :resolution (path '(fields resolution)) ; confirm
        :start-date (path '(fields start-date)) ; confirm
        :status (org-jira-decode (path '(fields status name)))
        :summary (path '(fields summary))
        :type (path '(fields issuetype name))
        :updated (path '(fields updated)) ; confirm
-       :data data        ; TODO: stop gap, eventually we can drop this
+       ;; :data data        ; TODO: stop gap, eventually we can drop this
        ))))
 
 (defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
@@ -141,4 +139,5 @@
 (defun org-jira-sdk-create-issues-from-data-list (ds) (mapcar #'org-jira-sdk-create-issue-from-data ds))
 
 (provide 'org-jira-sdk)
+
 ;;; org-jira-sdk.el ends here

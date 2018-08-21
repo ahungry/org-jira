@@ -315,6 +315,10 @@ See `org-default-priority' for more info."
 (defvar org-jira-fixversion-id-history '()
   "Prompt history for fixversion id.")
 
+(defvar org-jira-verbosity 'debug)
+
+(defun org-jira-log (s) (when (eq 'debug org-jira-verbosity) (message (format "%s" s))))
+
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
   (declare (debug t))
@@ -830,6 +834,7 @@ With a prefix argument, allow you to customize the jql.  See
      "Callback for async, DATA is the response from the request call.
 
 Will send a list of org-jira-sdk-issue objects to the list printer."
+     (org-jira-log "Received data for org-jira-get-issue-list-callback.")
      (--> data
           (org-jira-sdk-path it '(issues))
           (append it nil)               ; convert the conses into a proper list.
@@ -847,6 +852,7 @@ See`org-jira-get-issue-list'"
   ;; from the JQL style query
   (interactive
    (org-jira-get-issue-list org-jira-get-issue-list-callback))
+  (org-jira-log "Fetching issues...")
   (save-selected-window
     (save-window-excursion
       (org-jira--render-issues-from-issue-list issues))))
