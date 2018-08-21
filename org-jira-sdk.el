@@ -112,29 +112,28 @@
   "An issue on the end.  ID of the form EX-1, or a numeric such as 10000.")
 
 (cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-issue))
-  (with-slots (data proj-key issue-id) rec
-    (cl-flet ((path (keys) (org-jira-sdk-path data keys)))
-      (org-jira-sdk-issue
-       :assignee (path '(fields assignee name))
-       :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
-       :created (path '(fields created))   ; confirm
-       :description (path '(fields description)) ; confirm
-       :duedate (path '(fields duedate))         ; confirm
-       :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
-       :id (path '(key))
-       :internal-issue-id (path '(id))
-       :issue-id (path '(key))
-       :priority (path '(fields priority name))
-       :proj-key (path '(fields project key))
-       :reporter (path '(fields reporter name)) ; reporter could be an object of its own slot values
-       :resolution (path '(fields resolution)) ; confirm
-       :start-date (path '(fields start-date)) ; confirm
-       :status (org-jira-decode (path '(fields status name)))
-       :summary (path '(fields summary))
-       :type (path '(fields issuetype name))
-       :updated (path '(fields updated)) ; confirm
-       ;; :data data        ; TODO: stop gap, eventually we can drop this
-       ))))
+  (cl-flet ((path (keys) (org-jira-sdk-path (oref rec data) keys)))
+    (org-jira-sdk-issue
+     :assignee (path '(fields assignee name))
+     :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
+     :created (path '(fields created))     ; confirm
+     :description (path '(fields description)) ; confirm
+     :duedate (path '(fields duedate))         ; confirm
+     :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
+     :id (path '(key))
+     :internal-issue-id (path '(id))
+     :issue-id (path '(key))
+     :priority (path '(fields priority name))
+     :proj-key (path '(fields project key))
+     :reporter (path '(fields reporter name)) ; reporter could be an object of its own slot values
+     :resolution (path '(fields resolution))  ; confirm
+     :start-date (path '(fields start-date))  ; confirm
+     :status (org-jira-decode (path '(fields status name)))
+     :summary (path '(fields summary))
+     :type (path '(fields issuetype name))
+     :updated (path '(fields updated))  ; confirm
+     ;; :data data        ; TODO: stop gap, eventually we can drop this
+     )))
 
 (defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
 

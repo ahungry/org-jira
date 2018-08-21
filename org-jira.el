@@ -1639,8 +1639,8 @@ Where issue-id will be something such as \"EX-22\"."
   (let ((callback
          (cl-function
           (lambda (&key data &allow-other-keys)
-            ;; (message "org-jira-refresh-issue cb")
-            (org-jira-get-issues (list data))))))
+            (org-jira-log "Received refresh issue data")
+            (--> data (list it) org-jira-sdk-create-issues-from-data-list org-jira-get-issues)))))
     (jiralib-get-issue issue-id callback)))
 
 (defun org-jira--refresh-issue-by-id (issue-id)
