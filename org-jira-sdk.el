@@ -96,8 +96,8 @@
    (duedate :type (or null string) :initarg :duedate)
    (headline :type string :initarg :headline)
    (id :type string :initarg :id)       ; TODO: Probably remove me
-   (internal-issue-id :type string :initarg :internal-issue-id :documentation "The internal Jira ID, such as 12345.")
    (issue-id :type string :initarg :issue-id :documentation "The common ID/key, such as EX-1.")
+   (issue-id-int :type string :initarg :issue-id-int :documentation "The internal Jira ID, such as 12345.")
    (priority :type string :initarg :priority)
    (proj-key :type string :initarg :proj-key)
    (reporter :type string :initarg :reporter)
@@ -117,12 +117,12 @@
      :assignee (path '(fields assignee name))
      :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
      :created (path '(fields created))     ; confirm
-     :description (path '(fields description)) ; confirm
+     :description (or (path '(fields description)) "")
      :duedate (path '(fields duedate))         ; confirm
      :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
      :id (path '(key))
-     :internal-issue-id (path '(id))
      :issue-id (path '(key))
+     :issue-id-int (path '(id))
      :priority (path '(fields priority name))
      :proj-key (path '(fields project key))
      :reporter (path '(fields reporter name)) ; reporter could be an object of its own slot values
@@ -138,6 +138,8 @@
 (defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
 
 (defun org-jira-sdk-create-issues-from-data-list (ds) (mapcar #'org-jira-sdk-create-issue-from-data ds))
+
+(defun org-jira-sdk-isa-issue? (i) (typep i 'org-jira-sdk-issue))
 
 (provide 'org-jira-sdk)
 

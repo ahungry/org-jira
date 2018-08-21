@@ -1,4 +1,4 @@
-;;; org-jira.el --- Syncing between Jira and Org-mode. -*- lexical-binding:t -*-
+;;; org-jira.el --- Syncing between Jira and Org-mode. -*- lexical-binding:nil -*-
 
 ;; Copyright (C) 2016-2018 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
@@ -736,6 +736,7 @@ Re-create it with CLOCKS.  This is used for worklogs."
 Default is unresolved issues assigned to current login user; with
 a prefix argument you are given the chance to enter your own
 jql."
+  (org-jira-log (format "I was called, was it with a callback? %s" (if callback "yes" "no")))
   (let ((jql org-jira-default-jql))
     (when current-prefix-arg
       (setq jql (read-string "Jql: "
@@ -836,7 +837,6 @@ With a prefix argument, allow you to customize the jql.  See
 
 Will send a list of org-jira-sdk-issue objects to the list printer."
      (org-jira-log "Received data for org-jira-get-issue-list-callback.")
-     (print data)
      (--> data
           (org-jira-sdk-path it '(issues))
           (append it nil)               ; convert the conses into a proper list.
@@ -870,9 +870,16 @@ representing ISSUE."
   "Add the issues from ISSUES list into the org file(s).
 
 ISSUES is a list of org-jira-sdk-issue records."
+  ;; First off, we never ever want to run on non-issues, so check our types early.
+  (setq issues (cl-remove-if-not #'org-jira-sdk-isa-issue? issues))
+  (org-jira-log (format "About to render %d issues." (length issues)))
+  ;; If we have any left, we map over them.
   (let (project-buffer)
     (mapc
      (lambda (issue)
+       (org-jira-log "Rendering issue from issue list")
+       (print issue)
+       (org-jira-sdk-dump issue)
        (with-slots (proj-key issue-id summary status priority headline id) issue
          (let ((project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir)))
            (setq project-buffer (or (find-buffer-visiting project-file)
@@ -951,7 +958,9 @@ ISSUES is a list of org-jira-sdk-issue records."
 
                        ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
                        (org-jira-insert
-                        (replace-regexp-in-string "^" "  " (slot-value issue heading-entry))))))
+                        (replace-regexp-in-string
+                         "^" "  "
+                         (format "%s" (slot-value issue heading-entry)))))))
                   '(description))
                  (org-jira-update-comments-for-current-issue)
                  ;; FIXME: Re-enable when attachments are not erroring.
