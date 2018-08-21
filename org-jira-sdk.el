@@ -47,29 +47,26 @@
    (hydrate-fn :initform (lambda (id) (message "Not implemented."))))
   "The ID of the record.")
 
-;; string → string
 (defun org-jira-sdk-string-but-first (s) (cl-subseq s 1))
 
-;; atom → string
 (defun org-jira-sdk-to-string (s) (format "%s" s))
 
-;; atom → string
 (defun org-jira-sdk-to-prefixed-string (s) (format "org-jira-sdk-%s" s))
 
-;; string → symbol
 (defun org-jira-sdk-record-type-to-symbol (record-type)
   (-> record-type symbol-name org-jira-sdk-string-but-first org-jira-sdk-to-prefixed-string intern))
 
-;; symbol string ƒ → record
 (defun org-jira-sdk-create-from-id (record-type id &optional callback)
   (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type) :id (format "%s" id))))
     (with-slots (data) rec
       (setf data (org-jira-sdk-hydrate rec callback)))))
 
-;; symbol alist → record
 (defun org-jira-sdk-create-from-data (record-type data)
   (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type) :data data)))
     (org-jira-sdk-from-data rec)))
+
+(defun org-jira-sdk-create-record-from-data (record-type)
+  (lambda (data) (org-jira-sdk-create-from-data record-type data)))
 
 (cl-defmethod org-jira-sdk-hydrate ((rec org-jira-sdk-record) &optional callback)
   "Populate the record with data from the remote endpoint."
@@ -127,6 +124,9 @@
        :priority (path '(fields priority name))
        :description ""
        ))))
+
+(defun org-jira-sdk-create-issues-from-data-list (data)
+  (mapcar (lambda (i) (org-jira-sdk-create-from-data :issue i)) data))
 
 (provide 'org-jira-sdk)
 ;;; org-jira-sdk.el ends here
