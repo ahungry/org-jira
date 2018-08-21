@@ -339,6 +339,7 @@ See `org-default-priority' for more info."
   (declare (debug t))
   (declare (indent 'defun))
   `(lambda (&rest request-response)
+     (declare (ignore cb-data))
      (let ((cb-data (cl-getf request-response :data)))
        ,@body)))
 
@@ -1834,14 +1835,16 @@ otherwise it should return:
                   nil)))
             (split-string org-issue-components ",\\s *")))))
 
+(defun org-jira-strip-priority-tags (s)
+  (->> s (replace-regexp-in-string "\\[#.*?\\]" "") s-trim))
+
 (defun org-jira-update-issue-details (issue-id &rest rest)
   "Update the details of issue ISSUE-ID.  REST will contain optional input."
   (ensure-on-issue-id
    issue-id
    ;; Set up a bunch of values from the org content
    (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
-          ;; TODO: Need to strip Priority out when updating
-          (org-issue-description (replace-regexp-in-string "^ +" "" (org-jira-get-issue-val-from-org 'description)))
+          (org-issue-description (s-trim (org-jira-get-issue-val-from-org 'description)))
           (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
           (org-issue-type (org-jira-get-issue-val-from-org 'type))
           (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
@@ -1868,7 +1871,7 @@ otherwise it should return:
                                                               (jiralib-get-priorities)))
                   (cons 'description org-issue-description)
                   (cons 'assignee (jiralib-get-user org-issue-assignee))
-                  (cons 'summary (org-jira-get-issue-val-from-org 'summary))
+                  (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                   (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
                                                                (jiralib-get-issue-types))))))
 

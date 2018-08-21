@@ -227,6 +227,11 @@ CLOCK:")))
     )
   )
 
+(ert-deftest org-jira-t-strip-priority-tags ()
+  (should (string= "good and clean" (org-jira-strip-priority-tags "[#C] good and clean")))
+  (should (string= "food and clean" (org-jira-strip-priority-tags "  [#C] [#D] food and clean ")))
+  )
+
 
 (provide 'org-jira-t)
 ;;; org-jira-t.el ends here
