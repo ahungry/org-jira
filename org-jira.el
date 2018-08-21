@@ -1473,7 +1473,7 @@ that should be bound to an issue."
      nil
      t
      nil
-     'initial-input
+     initial-input
      (car initial-input))))
 
 (defun org-jira-read-subtask-type ()
