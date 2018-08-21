@@ -91,17 +91,23 @@
   (cl-reduce (lambda (a k) (alist-get k a)) key-chain :initial-value alist))
 
 (defclass org-jira-sdk-issue (org-jira-sdk-record)
-  ((proj-key :type string :initarg :proj-key)
-   (issue-id :type string :initarg :issue-id)
-   (summary :type string :initarg :summary)
+  ((assignee :type string :initarg :assignee)
+   (components :type string :initarg :components)
    (created :type string :initarg :created)
-   (updated :type string :initarg :updated)
+   (description :type string :initarg :description)
+   (duedate :type string :initarg :duedate)
+   (headline :type string :initarg :headline)
+   (id :type string :initarg :id)
+   (issue-id :type string :initarg :issue-id)
+   (priority :type string :initarg :priority)
+   (proj-key :type string :initarg :proj-key)
+   (reporter :type string :initarg :reporter)
+   (resolution :type string :initarg :resolution)
    (start-date :type string :initarg :start-date)
    (status :type string :initarg :status)
-   (resolution :type string :initarg :resolution)
+   (summary :type string :initarg :summary)
    (type :type string :initarg :type)
-   (priority :type string :initarg :priority)
-   (description :type string :initarg :description)
+   (updated :type string :initarg :updated)
    (data :initarg :data :documentation "The remote Jira data object (alist).")
    (hydrate-fn :initform #'jiralib-get-issue :initarg :hydrate-fn))
   "An issue on the end.  ID of the form EX-1, or a numeric such as 10000.")
@@ -110,23 +116,29 @@
   (with-slots (data proj-key issue-id) rec
     (flet ((path (keys) (org-jira-sdk-path data keys)))
       (org-jira-sdk-issue
+       :assignee (path '(fields assignee)) ; confirm
+       :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
+       :created (path '(fields created))   ; confirm
+       :description (path '(fields description)) ; confirm
+       :duedate (path '(fields duedate))         ; confirm
+       :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
        :id (path '(key))
-       :proj-key (path '(fields project key))
        :issue-id (path '(id))
-       :summary (path '(fields summary))
-       ;; TODO: Implement
-       :created ""
-       :updated ""
-       :start-date ""
-       :status (path '(fields status name))
-       :resolution ""
-       :type (path '(fields issuetype name))
        :priority (path '(fields priority name))
-       :description ""
+       :proj-key (path '(fields project key))
+       :reporter (path '(fields reporter)) ; confirm
+       :resolution (path '(fields resolution)) ; confirm
+       :start-date (path '(fields start-date)) ; confirm
+       :status (org-jira-decode (path '(fields status name)))
+       :summary (path '(fields summary))
+       :type (path '(fields issuetype name))
+       :updated (path '(fields updated)) ; confirm
+       :data data        ; TODO: stop gap, eventually we can drop this
        ))))
 
-(defun org-jira-sdk-create-issues-from-data-list (data)
-  (mapcar (lambda (i) (org-jira-sdk-create-from-data :issue i)) data))
+(defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
+
+(defun org-jira-sdk-create-issues-from-data-list (ds) (mapcar #'org-jira-sdk-create-issue-from-data ds))
 
 (provide 'org-jira-sdk)
 ;;; org-jira-sdk.el ends here
