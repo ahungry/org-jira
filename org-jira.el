@@ -865,9 +865,10 @@ See`org-jira-get-issue-list'"
   (interactive
    (org-jira-get-issue-list org-jira-get-issue-list-callback))
   (org-jira-log "Fetching issues...")
-  (save-selected-window
-    (save-window-excursion
-      (org-jira--render-issues-from-issue-list issues))))
+  (when (> (length issues) 0)
+    (save-selected-window
+      (save-window-excursion
+        (org-jira--render-issues-from-issue-list issues)))))
 
 (defun org-jira--get-org-headline-from-issue (issue)
   "Get org task headline from Jira ISSUE.
