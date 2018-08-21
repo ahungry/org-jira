@@ -1,4 +1,4 @@
-;;; org-jira.el --- Syncing between Jira and Org-mode.
+;;; org-jira.el --- Syncing between Jira and Org-mode. -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2016-2018 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
@@ -1640,7 +1640,7 @@ Where issue-id will be something such as \"EX-22\"."
          (cl-function
           (lambda (&key data &allow-other-keys)
             (org-jira-log "Received refresh issue data")
-            (--> data (list it) org-jira-sdk-create-issues-from-data-list org-jira-get-issues)))))
+            (-> data list org-jira-sdk-create-issues-from-data-list org-jira-get-issues)))))
     (jiralib-get-issue issue-id callback)))
 
 (defun org-jira--refresh-issue-by-id (issue-id)
@@ -1867,7 +1867,8 @@ otherwise it should return:
               issue-id
               (cl-function
                (lambda (&key data &allow-other-keys)
-                 (org-jira-get-issues (list data)))))
+                 (org-jira-log "Update get issue for refresh callback hit.")
+                 (-> data list org-jira-get-issues))))
              )))
         ))
      )))
