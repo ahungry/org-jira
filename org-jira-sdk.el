@@ -126,7 +126,7 @@
      :priority (path '(fields priority name))
      :proj-key (path '(fields project key))
      :reporter (path '(fields reporter name)) ; reporter could be an object of its own slot values
-     :resolution (path '(fields resolution))  ; confirm
+     :resolution (path '(fields resolution name))  ; confirm
      :start-date (path '(fields start-date))  ; confirm
      :status (org-jira-decode (path '(fields status name)))
      :summary (path '(fields summary))
