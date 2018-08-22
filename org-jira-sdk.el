@@ -56,8 +56,10 @@
 (defun org-jira-sdk-record-type-to-symbol (record-type)
   (-> record-type symbol-name org-jira-sdk-string-but-first org-jira-sdk-to-prefixed-string intern))
 
-(defun org-jira-sdk-create-from-id (record-type id &optional callback)
-  (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type) :id (format "%s" id))))
+(defun org-jira-sdk-create-from-id (record-type id &optional proj-key callback)
+  (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type)
+                      :id (format "%s" id)
+                      :proj-key proj-key)))
     (with-slots (data) rec
       (setf data (org-jira-sdk-hydrate rec callback))
       (org-jira-sdk-from-data rec))))
@@ -71,11 +73,11 @@
   (with-slots (id hydrate-fn) rec
     (funcall hydrate-fn id callback)))
 
-(cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-record)))
+(cl-defgeneric org-jira-sdk-from-data ((rec org-jira-sdk-record)))
 
-(cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-record))
+(cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-record) &optional type)
   "A decent pretty print/object dump for working with the class items."
-  (let ((slots (mapcar (lambda (slot) (aref slot 1)) (eieio-class-slots 'org-jira-sdk-issue))))
+  (let ((slots (mapcar (lambda (slot) (aref slot 1)) (eieio-class-slots (or type 'org-jira-sdk-issue)))))
     (setq slots (cl-remove-if (lambda (s) (not (slot-boundp rec s))) slots))
     (apply #'concat
      (mapcar (lambda (slot)
@@ -111,6 +113,22 @@
    (hydrate-fn :initform #'jiralib-get-issue :initarg :hydrate-fn))
   "An issue on the end.  ID of the form EX-1, or a numeric such as 10000.")
 
+(defclass org-jira-sdk-comment (org-jira-sdk-record)
+  ((author :type string :initarg :author)
+   (body :type string :initarg :body)
+   (comment-id :type string :initarg :comment-id :documentation "The comment ID, such as 12345.")
+   (created :type string :initarg :created)
+   (headline :type string :initarg :headline)
+   (proj-key :type string :initarg :proj-key)
+   (updated :type string :initarg :updated)
+   (data :initarg :data :documentation "The reomte Jira data object (alist).")
+   (hydrate-fn :initform #'jiralib-get-comment :initarg :hydrate-fn)))
+
+(cl-defmethod org-jira-sdk-hydrate ((rec org-jira-sdk-comment) &optional callback)
+  "Populate the record with data from the remote endpoint."
+  (with-slots (id proj-key hydrate-fn) rec
+    (funcall hydrate-fn proj-key id callback)))
+
 (cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-issue))
   (cl-flet ((path (keys) (org-jira-sdk-path (oref rec data) keys)))
     (org-jira-sdk-issue
@@ -132,14 +150,34 @@
      :summary (path '(fields summary))
      :type (path '(fields issuetype name))
      :updated (path '(fields updated))  ; confirm
-     ;; :data data        ; TODO: stop gap, eventually we can drop this
+     ;; TODO: Remove this
+     ;; :data (oref rec data)
      )))
 
-(defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
+(cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-comment))
+  (cl-flet ((path (keys) (org-jira-sdk-path (oref rec data) keys)))
+    (org-jira-sdk-comment
+     :author (path '(author name))
+     :body (path '(body))
+     :comment-id (path '(id))
+     :created (path '(created))
+     :headline "Comment"
+     :proj-key (oref rec proj-key)
+     :updated (path '(updated))
+     ;; TODO: Remove this
+     ;; :data (oref rec data)
+     )))
 
+;; Issue
+(defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
 (defun org-jira-sdk-create-issues-from-data-list (ds) (mapcar #'org-jira-sdk-create-issue-from-data ds))
 
+;; Comment
+(defun org-jira-sdk-create-comment-from-data (d) (org-jira-sdk-create-from-data :comment d))
+(defun org-jira-sdk-create-comments-from-data-list (ds) (mapcar #'org-jira-sdk-create-comment-from-data ds))
+
 (defun org-jira-sdk-isa-issue? (i) (typep i 'org-jira-sdk-issue))
+(defun org-jira-sdk-isa-comment? (i) (typep i 'org-jira-sdk-comment))
 
 (provide 'org-jira-sdk)
 

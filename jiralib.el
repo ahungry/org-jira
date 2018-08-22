@@ -346,6 +346,10 @@ request.el, so if at all possible, it should be avoided."
                      :data (json-encode `((body . ,(third params))))
                      :type "PUT"))
       ('getBoards (jiralib--agile-call-it "/rest/agile/1.0/board" 'values))
+      ('getComment (org-jira-find-value
+                     (jiralib--rest-call-it
+                      (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params)))
+                     'comments))
       ('getComments (org-jira-find-value
                      (jiralib--rest-call-it
                       (format "/rest/api/2/issue/%s/comment" (first params)))
@@ -864,6 +868,10 @@ will cache it."
     (setq jiralib-subtask-types-cache
           (jiralib-make-assoc-list (jiralib-call "getSubTaskIssueTypes" nil) 'id 'name)))
   jiralib-subtask-types-cache)
+
+(defun jiralib-get-comment (issue-key comment-id &optional callback)
+  "Return all comments associated with issue ISSUE-KEY, invoking CALLBACK."
+  (jiralib-call "getComment" callback issue-key comment-id))
 
 (defun jiralib-get-comments (issue-key &optional callback)
   "Return all comments associated with issue ISSUE-KEY, invoking CALLBACK."
