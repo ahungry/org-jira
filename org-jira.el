@@ -1227,9 +1227,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
     (org-jira-log "In the callback for org-jira-update-comments-for-issue.")
     (-->
      (org-jira-find-value cb-data 'comments)
-     org-jira-extract-comments-from-data
-     (org-jira-log (format "About to render %s comments for issue-id: %s" (length it) issue-id))
-     (mapc 'org-jira--render-comment)))))
+     (org-jira-extract-comments-from-data it)
+     (mapc (lambda (Comment) (org-jira--render-comment issue-id Comment)) it)))))
 
 (defun org-jira-update-comments-for-current-issue ()
   "Update comments for the current issue."
