@@ -75,9 +75,9 @@
 
 (cl-defgeneric org-jira-sdk-from-data ((rec org-jira-sdk-record)))
 
-(cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-record) &optional type)
+(cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-record))
   "A decent pretty print/object dump for working with the class items."
-  (let ((slots (mapcar (lambda (slot) (aref slot 1)) (eieio-class-slots (or type 'org-jira-sdk-issue)))))
+  (let ((slots (mapcar (lambda (slot) (aref slot 1)) (eieio-class-slots (type-of rec)))))
     (setq slots (cl-remove-if (lambda (s) (not (slot-boundp rec s))) slots))
     (apply #'concat
      (mapcar (lambda (slot)
@@ -176,6 +176,7 @@
 (defun org-jira-sdk-create-comment-from-data (d) (org-jira-sdk-create-from-data :comment d))
 (defun org-jira-sdk-create-comments-from-data-list (ds) (mapcar #'org-jira-sdk-create-comment-from-data ds))
 
+(defun org-jira-sdk-isa-record? (i) (typep i 'org-jira-sdk-record))
 (defun org-jira-sdk-isa-issue? (i) (typep i 'org-jira-sdk-issue))
 (defun org-jira-sdk-isa-comment? (i) (typep i 'org-jira-sdk-comment))
 
