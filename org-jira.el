@@ -330,6 +330,13 @@ See `org-default-priority' for more info."
          (save-window-excursion
            ,@body)))))
 
+(defun org-jira-freeze-ui-test ()
+  (interactive)
+  (org-jira-freeze-ui
+   (widen)
+   (org-cycle)                          ; This is not freezable...
+   (org-narrow-to-subtree)))
+
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
   (declare (debug t))
@@ -363,12 +370,13 @@ See `org-default-priority' for more info."
            (project-buffer (or (find-buffer-visiting project-file)
                                (find-file project-file))))
       (with-current-buffer project-buffer
-        (widen)
-        (let ((p (org-find-entry-with-id ,issue-id)))
-          (unless p (error "Issue %s not found!" ,issue-id))
-          (goto-char p)
-          (org-narrow-to-subtree)
-          ,@body)))))
+        (org-save-outline-visibility t
+            (widen)
+          (let ((p (org-find-entry-with-id ,issue-id)))
+            (unless p (error "Issue %s not found!" ,issue-id))
+            (goto-char p)
+            (org-narrow-to-subtree)
+            ,@body))))))
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."
@@ -906,17 +914,17 @@ ISSUES is a list of org-jira-sdk-issue records."
   (org-jira-log (format "About to render %d issues." (length Issues)))
 
   ;; If we have any left, we map over them.
-  (org-jira-freeze-ui
-   (let (project-buffer)
-     (mapc
-      (lambda (Issue)
-        (org-jira-log "Rendering issue from issue list")
-        (org-jira-sdk-dump Issue)
-        (with-slots (proj-key issue-id summary status priority headline id) Issue
-          (let (p
-                (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir)))
-            (setq project-buffer (or (find-buffer-visiting project-file)
-                                     (find-file project-file)))
+  (let (project-buffer)
+    (mapc
+     (lambda (Issue)
+       (org-jira-log "Rendering issue from issue list")
+       (org-jira-sdk-dump Issue)
+       (with-slots (proj-key issue-id summary status priority headline id) Issue
+         (let (p
+               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir)))
+           (setq project-buffer (or (find-buffer-visiting project-file)
+                                    (find-file project-file)))
+           (org-jira-freeze-ui
             (with-current-buffer project-buffer
               (save-excursion
                 (org-jira-mode t)
@@ -1001,9 +1009,9 @@ ISSUES is a list of org-jira-sdk-issue records."
 
                   ;; only sync worklog clocks when the user sets it to be so.
                   (when org-jira-worklog-sync-p
-                    (org-jira-update-worklogs-for-current-issue))))))))
-      Issues)
-     (switch-to-buffer project-buffer))))
+                    (org-jira-update-worklogs-for-current-issue)))))))))
+     Issues)
+    (switch-to-buffer project-buffer)))
 
 ;;;###autoload
 (defun org-jira-update-comment ()
@@ -1087,7 +1095,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
      issue-id
      (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
      (org-beginning-of-line)
-     (org-cycle 1)
+     ;; (org-cycle 1)
      (while (search-forward "CLOCK: " nil 1 1)
        (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
          (forward-line)
