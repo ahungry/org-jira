@@ -357,14 +357,18 @@ See `org-default-priority' for more info."
   "Just do some work on ISSUE-ID, execute BODY."
   (declare (debug t))
   (declare (indent 'defun))
-  `(save-excursion
-     (save-restriction
-       (widen)
-       (let ((p (org-find-entry-with-id ,issue-id)))
-         (unless p (error "Issue %s not found!" ,issue-id))
-         (goto-char p)
-         (org-narrow-to-subtree)
-         ,@body))))
+  `(org-jira-freeze-ui
+    (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
+           (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+           (project-buffer (or (find-buffer-visiting project-file)
+                               (find-file project-file))))
+      (with-current-buffer project-buffer
+        (widen)
+        (let ((p (org-find-entry-with-id ,issue-id)))
+          (unless p (error "Issue %s not found!" ,issue-id))
+          (goto-char p)
+          (org-narrow-to-subtree)
+          ,@body)))))
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."

@@ -161,7 +161,7 @@
      :body (path '(body))
      :comment-id (path '(id))
      :created (path '(created))
-     :headline "Comment"
+     :headline (format "Comment: %s" (path '(author displayName)))
      :parent-id (if (slot-boundp rec 'parent-id) (oref rec parent-id) "")
      :updated (path '(updated))
      ;; TODO: Remove this
