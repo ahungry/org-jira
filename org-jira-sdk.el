@@ -157,7 +157,7 @@
 (cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-comment))
   (cl-flet ((path (keys) (org-jira-sdk-path (oref rec data) keys)))
     (org-jira-sdk-comment
-     :author (path '(author name))
+     :author (path '(author displayName))
      :body (path '(body))
      :comment-id (path '(id))
      :created (path '(created))

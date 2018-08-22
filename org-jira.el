@@ -1181,62 +1181,50 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira-get-comment-author (comment)
   (org-jira-find-value comment 'author 'displayName))
 
-(defun org-jira-update-comments-for-current-issue ()
-  "Update the comments for the current issue."
-  (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
-    ;; Run the call
-    (jiralib-get-comments
-     issue-id
-     (cl-function
-      (lambda (&key data &allow-other-keys)
-        (let ((comments (if org-jira-reverse-comment-order
-                            (reverse (org-jira-find-value data 'comments))
-                          (org-jira-find-value data 'comments))))
-          (mapc
-           (lambda (comment)
-             ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
-             (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
-                    (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
-                    (project-buffer (or (find-buffer-visiting project-file)
-                                        (find-file project-file))))
-               (with-current-buffer project-buffer
-                 (ensure-on-issue-id
-                  issue-id
-                  (let* ((comment-id (org-jira-get-comment-id comment))
-                         (comment-author (or (car (rassoc
-                                                   (org-jira-get-comment-author comment)
-                                                   org-jira-users))
-                                             (org-jira-get-comment-author comment)))
-                         (comment-headline (format "Comment: %s" comment-author)))
-                    (setq p (org-find-entry-with-id comment-id))
-                    (when (and p (>= p (point-min))
-                               (<= p (point-max)))
-                      (goto-char p)
-                      (org-narrow-to-subtree)
-                      (delete-region (point-min) (point-max)))
-                    (goto-char (point-max))
-                    (unless (looking-at "^")
-                      (insert "\n"))
-                    (insert "*** ")
-                    (org-jira-insert comment-headline "\n")
-                    (org-narrow-to-subtree)
-                    (org-jira-entry-put (point) "ID" comment-id)
-                    (let ((created (org-jira-get-comment-val 'created comment))
-                          (updated (org-jira-get-comment-val 'updated comment)))
-                      (org-jira-entry-put (point) "created" created)
-                      (unless (string= created updated)
-                        (org-jira-entry-put (point) "updated" updated)))
-                    (goto-char (point-max))
-                    ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                    (org-jira-insert (replace-regexp-in-string "^" "  " (or (org-jira-find-value comment 'body) ""))))))))
-           (cl-remove-if
-            (lambda (comment)
-              ;; Allow user to specify a list of excluded usernames for
-              ;; comment displaying.
-              (member-ignore-case
-               (org-jira-get-comment-author comment)
-               org-jira-ignore-comment-user-list))
-            comments))))))))
+(defun org-jira-isa-ignored-comment? (comment)
+  (member-ignore-case (oref comment author) org-jira-ignore-comment-user-list))
+
+(defun org-jira-maybe-reverse-comments (comments)
+  (if org-jira-reverse-comment-order (reverse comments) comments))
+
+(defun org-jira-extract-comments-from-data (data)
+  (->> (find-value data 'comments)
+       (cl-remove-if #'org-jira-isa-ignored-comment?)
+       org-jira-maybe-reverse-comments
+       org-jira-sdk-create-comments-from-data-list))
+
+(defun org-jira--render-comment (issue-id Comment)
+  (with-slots (comment-id author headline created updated body) Comment
+    (org-jira-freeze-ui
+     (ensure-on-issue-id
+      issue-id
+      (setq p (org-find-entry-with-id comment-id))
+      (when (and p (>= p (point-min))
+                 (<= p (point-max)))
+        (goto-char p)
+        (org-narrow-to-subtree)
+        (delete-region (point-min) (point-max)))
+      (goto-char (point-max))
+      (unless (looking-at "^")
+        (insert "\n"))
+      (insert "*** ")
+      (org-jira-insert headline "\n")
+      (org-narrow-to-subtree)
+      (org-jira-entry-put (point) "ID" comment-id)
+      (org-jira-entry-put (point) "created" created)
+      (unless (string= created updated)
+        (org-jira-entry-put (point) "updated" updated))
+      (goto-char (point-max))
+      ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+      (org-jira-insert (replace-regexp-in-string "^" "  " (or body "")))))))
+
+(defun org-jira-update-comments-for-issue (issue-id)
+  "Update the comments for the specified ISSUE-ID issue."
+  (jiralib-get-comments
+   issue-id
+   (org-jira-with-callback
+    (->> (org-jira--extract-comments-from-data cb-data)
+         (mapc 'org-jira--render-comment)))))
 
 (defun org-jira-delete-subtree ()
   "Derived from org-cut-subtree.
