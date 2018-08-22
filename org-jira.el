@@ -1211,28 +1211,27 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 
 (defun org-jira--render-comment (issue-id Comment)
   (with-slots (comment-id author headline created updated body) Comment
-    (org-jira-freeze-ui
-     (ensure-on-issue-id
-      issue-id
-      (setq p (org-find-entry-with-id comment-id))
-      (when (and p (>= p (point-min))
-                 (<= p (point-max)))
-        (goto-char p)
-        (org-narrow-to-subtree)
-        (delete-region (point-min) (point-max)))
-      (goto-char (point-max))
-      (unless (looking-at "^")
-        (insert "\n"))
-      (insert "*** ")
-      (org-jira-insert headline "\n")
-      (org-narrow-to-subtree)
-      (org-jira-entry-put (point) "ID" comment-id)
-      (org-jira-entry-put (point) "created" created)
-      (unless (string= created updated)
-        (org-jira-entry-put (point) "updated" updated))
-      (goto-char (point-max))
-      ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-      (org-jira-insert (replace-regexp-in-string "^" "  " (or body "")))))))
+    (ensure-on-issue-id
+     issue-id
+     (setq p (org-find-entry-with-id comment-id))
+     (when (and p (>= p (point-min))
+                (<= p (point-max)))
+       (goto-char p)
+       (org-narrow-to-subtree)
+       (delete-region (point-min) (point-max)))
+     (goto-char (point-max))
+     (unless (looking-at "^")
+       (insert "\n"))
+     (insert "*** ")
+     (org-jira-insert headline "\n")
+     (org-narrow-to-subtree)
+     (org-jira-entry-put (point) "ID" comment-id)
+     (org-jira-entry-put (point) "created" created)
+     (unless (string= created updated)
+       (org-jira-entry-put (point) "updated" updated))
+     (goto-char (point-max))
+     ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+     (org-jira-insert (replace-regexp-in-string "^" "  " (or body ""))))))
 
 (defun org-jira-update-comments-for-issue (issue-id)
   "Update the comments for the specified ISSUE-ID issue."
