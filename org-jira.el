@@ -930,8 +930,6 @@ ISSUES is a list of org-jira-sdk-issue records."
            (with-current-buffer project-buffer
              (org-jira-freeze-ui
               (org-jira-mode t)
-              ;; (widen)
-              ;; (outline-show-all)
               (goto-char (point-min))
               (unless (looking-at (format "^* %s-Tickets" proj-key))
                 (insert (format "* %s-Tickets\n" proj-key)))
@@ -1005,13 +1003,16 @@ ISSUES is a list of org-jira-sdk-issue records."
                         "^" "  "
                         (format "%s" (slot-value Issue heading-entry)))))))
                  '(description))
-                (org-jira-update-comments-for-current-issue)
+
+                (org-jira-update-comments-for-issue issue-id)
+
                 ;; FIXME: Re-enable when attachments are not erroring.
                 ;;(org-jira-update-attachments-for-current-issue)
 
                 ;; only sync worklog clocks when the user sets it to be so.
                 (when org-jira-worklog-sync-p
-                  (org-jira-update-worklogs-for-current-issue))))))))
+                  (org-jira-update-worklogs-for-issue issue-id))
+                ))))))
      Issues)
     (switch-to-buffer project-buffer)))
 
@@ -1344,25 +1345,22 @@ purpose of wiping an old subtree."
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
-  (lexical-let ((issue-id (org-jira-get-from-org 'issue 'key)))
-    ;; Run the call
-    (jiralib-get-worklogs
+  (-> (org-jira-get-from-org 'issue 'key)
+      org-jira-update-worklogs-for-issue))
+
+(defun org-jira-update-worklogs-for-issue (issue-id)
+  "Update the worklogs for the current issue."
+  ;; Run the call
+  (jiralib-get-worklogs
+   issue-id
+   (org-jira-with-callback
+    (ensure-on-issue-id
      issue-id
-     (cl-function
-      (lambda (&key data &allow-other-keys)
-        ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
-        (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
-               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
-               (project-buffer (or (find-buffer-visiting project-file)
-                                   (find-file project-file))))
-          (with-current-buffer project-buffer
-            (ensure-on-issue-id
-             issue-id
-             (let ((worklogs (org-jira-find-value data 'worklogs)))
-               (org-jira-logbook-reset
-                issue-id
-                (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
-                                           (jiralib-worklog-import--filter-apply worklogs)))))))))))))
+     (let ((worklogs (org-jira-find-value cb-data 'worklogs)))
+       (org-jira-logbook-reset
+        issue-id
+        (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
+                           (jiralib-worklog-import--filter-apply worklogs)))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
