@@ -56,10 +56,10 @@
 (defun org-jira-sdk-record-type-to-symbol (record-type)
   (-> record-type symbol-name org-jira-sdk-string-but-first org-jira-sdk-to-prefixed-string intern))
 
-(defun org-jira-sdk-create-from-id (record-type id &optional proj-key callback)
+(defun org-jira-sdk-create-from-id (record-type id &optional parent-id callback)
   (let ((rec (funcall (org-jira-sdk-record-type-to-symbol record-type)
                       :id (format "%s" id)
-                      :proj-key proj-key)))
+                      :parent-id parent-id)))
     (with-slots (data) rec
       (setf data (org-jira-sdk-hydrate rec callback))
       (org-jira-sdk-from-data rec))))
@@ -119,7 +119,7 @@
    (comment-id :type string :initarg :comment-id :documentation "The comment ID, such as 12345.")
    (created :type string :initarg :created)
    (headline :type string :initarg :headline)
-   (proj-key :type string :initarg :proj-key)
+   (parent-id :type string :initarg :parent-id :documentation "The parent issue-id such as EX-1.")
    (updated :type string :initarg :updated)
    (data :initarg :data :documentation "The reomte Jira data object (alist).")
    (hydrate-fn :initform #'jiralib-get-comment :initarg :hydrate-fn)))
@@ -162,7 +162,7 @@
      :comment-id (path '(id))
      :created (path '(created))
      :headline "Comment"
-     :proj-key (oref rec proj-key)
+     :parent-id (if (slot-boundp rec 'parent-id) (oref rec parent-id) "")
      :updated (path '(updated))
      ;; TODO: Remove this
      ;; :data (oref rec data)

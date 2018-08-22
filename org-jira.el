@@ -1189,10 +1189,10 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
   (if org-jira-reverse-comment-order (reverse comments) comments))
 
 (defun org-jira-extract-comments-from-data (data)
-  (->> (find-value data 'comments)
-       (cl-remove-if #'org-jira-isa-ignored-comment?)
+  (->> (append data nil)
+       org-jira-sdk-create-comments-from-data-list
        org-jira-maybe-reverse-comments
-       org-jira-sdk-create-comments-from-data-list))
+       (cl-remove-if #'org-jira-isa-ignored-comment?)))
 
 (defun org-jira--render-comment (issue-id Comment)
   (with-slots (comment-id author headline created updated body) Comment
@@ -1224,11 +1224,16 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
   (jiralib-get-comments
    issue-id
    (org-jira-with-callback
-    (->> (org-jira--extract-comments-from-data cb-data)
-         (mapc 'org-jira--render-comment)))))
+    (org-jira-log "In the callback for org-jira-update-comments-for-issue.")
+    (-->
+     (org-jira-find-value cb-data 'comments)
+     org-jira-extract-comments-from-data
+     (org-jira-log (format "About to render %s comments for issue-id: %s" (length it) issue-id))
+     (mapc 'org-jira--render-comment)))))
 
 (defun org-jira-update-comments-for-current-issue ()
   "Update comments for the current issue."
+  (org-jira-log "About to update comments for current issue.")
   (->  (org-jira-get-from-org 'issue 'key) org-jira-update-comments-for-issue))
 
 (defun org-jira-delete-subtree ()
