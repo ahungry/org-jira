@@ -993,15 +993,14 @@ ISSUES is a list of org-jira-sdk-issue records."
                         (format "%s" (slot-value Issue heading-entry)))))))
                  '(description))
 
-                ;; (org-jira-update-comments-for-issue issue-id)
+                (org-jira-update-comments-for-issue issue-id)
 
                 ;; FIXME: Re-enable when attachments are not erroring.
                 ;;(org-jira-update-attachments-for-current-issue)
 
                 ;; only sync worklog clocks when the user sets it to be so.
-                ;; (when org-jira-worklog-sync-p
-                ;;   (org-jira-update-worklogs-for-issue issue-id))
-                ))))))
+                (when org-jira-worklog-sync-p
+                  (org-jira-update-worklogs-for-issue issue-id))))))))
      Issues)
     (switch-to-buffer project-buffer)))
 
