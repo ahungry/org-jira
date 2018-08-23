@@ -1000,7 +1000,9 @@ ISSUES is a list of org-jira-sdk-issue records."
 
                 ;; only sync worklog clocks when the user sets it to be so.
                 (when org-jira-worklog-sync-p
-                  (org-jira-update-worklogs-for-issue issue-id))))))))
+                  (org-jira-update-worklogs-for-issue issue-id))
+
+                ))))))
      Issues)
     (switch-to-buffer project-buffer)))
 
