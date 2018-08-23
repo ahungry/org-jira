@@ -494,8 +494,8 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
    '(("Unassigned" . ""))
    org-jira-users
    (mapcar (lambda (user)
-             (cons (cdr (assoc 'displayName user))
-                   (cdr (assoc 'key user))))
+             (cons (org-jira-decode (cdr (assoc 'displayName user)))
+                   (org-jira-decode (cdr (assoc 'key user)))))
            (jiralib-get-users project-key))))
 
 (defun org-jira-entry-put (pom property value)
