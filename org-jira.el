@@ -1604,7 +1604,7 @@ that should be bound to an issue."
   "Read (custom) FIELDS for workflow progress."
   (let ((field-desc (completing-read
                      "More fields to set: "
-                     (cons "Thanks, no more fields are *required*." (mapcar 'cdr fields))
+                     (cons "Thanks, no more fields are *required*." (mapcar 'org-jira-decode (mapcar 'cdr fields)))
                      nil
                      t
                      nil
