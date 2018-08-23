@@ -240,8 +240,8 @@ After a successful login, store the authentication token in
     (unless jiralib-wsdl
       (jiralib-load-wsdl))
     (setq jiralib-token
-          (car (soap-invoke jiralib-wsdl "jirasoapservice-v2" "login" username password)))
-    (setq jiralib-user-login-name username)))
+          (car (soap-invoke jiralib-wsdl "jirasoapservice-v2" "login" username password))))
+    (setq jiralib-user-login-name username))
 
 (defvar jiralib-complete-callback nil)
 
