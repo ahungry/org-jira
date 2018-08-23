@@ -2119,7 +2119,7 @@ See `org-jira-get-issues-from-filter'."
       (upcase (replace-regexp-in-string " " "-" status))
     (let ((known-keyword (assoc status org-jira-jira-status-to-org-keyword-alist)))
       (cond (known-keyword (cdr known-keyword))
-            ((member status org-jira-done-states) "DONE")
+            ((member (org-jira-decode status) org-jira-done-states) "DONE")
             ("TODO")))))
 
 (defun org-jira-get-org-priority-string (character)
