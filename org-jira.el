@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 3.1.1
+;; Version: 4.0.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (s "0.0.0"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes in 4.0.0:
+;; - Introduce SDK type for handling records vs random alist structures.
 
 ;;;; Changes since 3.1.0:
 ;; - Fix how we were ruining the kill-ring with kill calls.
