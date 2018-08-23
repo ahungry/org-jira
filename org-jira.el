@@ -326,19 +326,10 @@ See `org-default-priority' for more info."
   (declare (indent 'defun))
   `(save-excursion
      (save-restriction
-       (save-selected-window
-         (save-window-excursion
-           (widen)
-           (org-save-outline-visibility t
-             (outline-show-all)
-             ,@body))))))
-
-(defun org-jira-freeze-ui-test ()
-  (interactive)
-  (org-jira-freeze-ui
-   (widen)
-   (org-cycle)                          ; This is not freezable...
-   (org-narrow-to-subtree)))
+       (widen)
+       (org-save-outline-visibility t
+         (outline-show-all)
+         ,@body))))
 
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
@@ -892,9 +883,7 @@ See`org-jira-get-issue-list'"
    (org-jira-get-issue-list org-jira-get-issue-list-callback))
   (org-jira-log "Fetching issues...")
   (when (> (length issues) 0)
-    (save-selected-window
-      (save-window-excursion
-        (org-jira--render-issues-from-issue-list issues)))))
+    (org-jira--render-issues-from-issue-list issues)))
 
 (defun org-jira--get-org-headline-from-issue (issue)
   "Get org task headline from Jira ISSUE.
@@ -1004,14 +993,14 @@ ISSUES is a list of org-jira-sdk-issue records."
                         (format "%s" (slot-value Issue heading-entry)))))))
                  '(description))
 
-                (org-jira-update-comments-for-issue issue-id)
+                ;; (org-jira-update-comments-for-issue issue-id)
 
                 ;; FIXME: Re-enable when attachments are not erroring.
                 ;;(org-jira-update-attachments-for-current-issue)
 
                 ;; only sync worklog clocks when the user sets it to be so.
-                (when org-jira-worklog-sync-p
-                  (org-jira-update-worklogs-for-issue issue-id))
+                ;; (when org-jira-worklog-sync-p
+                ;;   (org-jira-update-worklogs-for-issue issue-id))
                 ))))))
      Issues)
     (switch-to-buffer project-buffer)))
