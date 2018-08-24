@@ -40,6 +40,7 @@
 (require 's)
 (require 'eieio)
 (require 'dash)
+(require 'cl-generic)
 
 (defclass org-jira-sdk-record ()
   ((id :initarg :id :type string :required t)
