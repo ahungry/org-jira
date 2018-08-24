@@ -89,7 +89,7 @@
 ;; The autoloads.el mechanism which adds package--builtin-versions
 ;; maintenance to loaddefs.el doesn't work for preloaded packages (such
 ;; as this one), so we have to do it by hand!
-(push (purecopy '(cl-generic 1 0)) package--builtin-versions)
+;; (push (purecopy '(cl-generic 1 0)) package--builtin-versions)
 
 ;; Note: For generic functions that dispatch on several arguments (i.e. those
 ;; which use the multiple-dispatch feature), we always use the same "tagcodes"
