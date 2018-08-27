@@ -78,7 +78,7 @@
 
 (cl-defmethod org-jira-sdk-dump ((rec org-jira-sdk-record))
   "A decent pretty print/object dump for working with the class items."
-  (let ((slots (mapcar (lambda (slot) (aref slot 1)) (eieio-class-slots (type-of rec)))))
+  (let ((slots (mapcar (lambda (slot) (aref slot 1)) (eieio-class-slots (eieio-object-class rec)))))
     (setq slots (cl-remove-if (lambda (s) (not (slot-boundp rec s))) slots))
     (apply #'concat
      (mapcar (lambda (slot)
