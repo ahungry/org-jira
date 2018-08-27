@@ -259,7 +259,7 @@ instance."
   "Whether to omit insertion of priority when it matches the default.
 
 When set to t, will omit the insertion of the matched value from
-org-jira-priority-to-org-priority-alist when it matches the org-default-priority."
+`org-jira-priority-to-org-priority-alist' when it matches the `org-default-priority'."
   :group 'org-jira
   :type 'boolean)
 
