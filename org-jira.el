@@ -886,13 +886,6 @@ See`org-jira-get-issue-list'"
   (when (> (length issues) 0)
     (org-jira--render-issues-from-issue-list issues)))
 
-(defun org-jira--get-org-headline-from-issue (issue)
-  "Get org task headline from Jira ISSUE.
-
-The returned string will be used as the headline for the org task
-representing ISSUE."
-  (org-jira-get-issue-summary issue))
-
 (defun org-jira--get-project-buffer (Issue)
   (with-slots (proj-key) Issue
     (let* ((project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
