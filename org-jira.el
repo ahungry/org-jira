@@ -893,10 +893,108 @@ The returned string will be used as the headline for the org task
 representing ISSUE."
   (org-jira-get-issue-summary issue))
 
+(defun org-jira--get-project-buffer (Issue)
+  (with-slots (proj-key) Issue
+    (let* ((project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+           (project-buffer (find-file-noselect project-file)))
+      project-buffer)))
+
+(defun org-jira--render-issue (Issue)
+  "Render single ISSUE."
+  (org-jira-log "Rendering issue from issue list")
+  (org-jira-sdk-dump Issue)
+  (with-slots (proj-key issue-id summary status priority headline id) Issue
+    (let (p)
+      (with-current-buffer (org-jira--get-project-buffer Issue)
+        (org-jira-freeze-ui
+         (org-jira-mode t)
+         (goto-char (point-min))
+         (unless (looking-at (format "^* %s-Tickets" proj-key))
+           (insert (format "* %s-Tickets\n" proj-key)))
+         (setq p (org-find-entry-with-id issue-id))
+         (save-restriction
+           (if (and p (>= p (point-min))
+                    (<= p (point-max)))
+               (progn
+                 (goto-char p)
+                 (forward-thing 'whitespace)
+                 (org-jira-kill-line))
+             (goto-char (point-max))
+             (unless (looking-at "^")
+               (insert "\n"))
+             (insert "** "))
+           (let ((status (org-jira-decode status)))
+             (org-jira-insert
+              (concat (org-jira-get-org-keyword-from-status status)
+                      " "
+                      (org-jira-get-org-priority-cookie-from-issue priority)
+                      headline)))
+           (save-excursion
+             (unless (search-forward "\n" (point-max) 1)
+               (insert "\n")))
+           (org-narrow-to-subtree)
+           (save-excursion
+             (org-back-to-heading t)
+             (org-set-tags-to (replace-regexp-in-string "-" "_" issue-id)))
+           (mapc (lambda (entry)
+                   (let ((val (slot-value Issue entry)))
+                     (when (or (and val (not (string= val "")))
+                               (eq entry 'assignee)) ;; Always show assignee
+                       (org-jira-entry-put (point) (symbol-name entry) val))))
+                 '(assignee reporter type priority resolution status components created updated))
+
+           (org-jira-entry-put (point) "ID" issue-id)
+           (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
+
+           ;; Insert the duedate as a deadline if it exists
+           (when org-jira-deadline-duedate-sync-p
+             (let ((duedate (oref Issue duedate)))
+               (when (> (length duedate) 0)
+                 (org-deadline nil duedate))))
+
+           (mapc
+            (lambda (heading-entry)
+              (ensure-on-issue-id
+               issue-id
+               (let* ((entry-heading
+                       (concat (symbol-name heading-entry)
+                               (format ": [[%s][%s]]"
+                                       (concat jiralib-url "/browse/" issue-id) issue-id))))
+                 (setq p (org-find-exact-headline-in-buffer entry-heading))
+                 (if (and p (>= p (point-min))
+                          (<= p (point-max)))
+                     (progn
+                       (goto-char p)
+                       (org-narrow-to-subtree)
+                       (goto-char (point-min))
+                       (forward-line 1)
+                       (delete-region (point) (point-max)))
+                   (if (org-goto-first-child)
+                       (org-insert-heading)
+                     (goto-char (point-max))
+                     (org-insert-subheading t))
+                   (org-jira-insert entry-heading "\n"))
+
+                 ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+                 (org-jira-insert
+                  (replace-regexp-in-string
+                   "^" "  "
+                   (format "%s" (slot-value Issue heading-entry)))))))
+            '(description))
+
+           (org-jira-update-comments-for-issue issue-id)
+
+           ;; FIXME: Re-enable when attachments are not erroring.
+           ;;(org-jira-update-attachments-for-current-issue)
+
+           ;; only sync worklog clocks when the user sets it to be so.
+           (when org-jira-worklog-sync-p
+             (org-jira-update-worklogs-for-issue issue-id))))))))
+
 (defun org-jira--render-issues-from-issue-list (Issues)
   "Add the issues from ISSUES list into the org file(s).
 
-ISSUES is a list of org-jira-sdk-issue records."
+ISSUES is a list of `org-jira-sdk-issue' records."
   ;; FIXME: Some type of loading error - the first async callback does not know about
   ;; the issues existing as a class, so we may need to instantiate here if we have none.
   (when (eq 0 (->> Issues (cl-remove-if-not #'org-jira-sdk-isa-issue?) length))
@@ -907,105 +1005,8 @@ ISSUES is a list of org-jira-sdk-issue records."
   (org-jira-log (format "About to render %d issues." (length Issues)))
 
   ;; If we have any left, we map over them.
-  (let (project-buffer)
-    (mapc
-     (lambda (Issue)
-       (org-jira-log "Rendering issue from issue list")
-       (org-jira-sdk-dump Issue)
-       (with-slots (proj-key issue-id summary status priority headline id) Issue
-         (let (p
-               (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir)))
-           (setq project-buffer (or (find-buffer-visiting project-file)
-                                    (find-file project-file)))
-           (with-current-buffer project-buffer
-             (org-jira-freeze-ui
-              (org-jira-mode t)
-              (goto-char (point-min))
-              (unless (looking-at (format "^* %s-Tickets" proj-key))
-                (insert (format "* %s-Tickets\n" proj-key)))
-              (setq p (org-find-entry-with-id issue-id))
-              (save-restriction
-                (if (and p (>= p (point-min))
-                         (<= p (point-max)))
-                    (progn
-                      (goto-char p)
-                      (forward-thing 'whitespace)
-                      (org-jira-kill-line))
-                  (goto-char (point-max))
-                  (unless (looking-at "^")
-                    (insert "\n"))
-                  (insert "** "))
-                (let ((status (org-jira-decode status)))
-                  (org-jira-insert
-                   (concat (org-jira-get-org-keyword-from-status status)
-                           " "
-                           (org-jira-get-org-priority-cookie-from-issue priority)
-                           headline)))
-                (save-excursion
-                  (unless (search-forward "\n" (point-max) 1)
-                    (insert "\n")))
-                (org-narrow-to-subtree)
-                (save-excursion
-                  (org-back-to-heading t)
-                  (org-set-tags-to (replace-regexp-in-string "-" "_" issue-id)))
-                (mapc (lambda (entry)
-                        (let ((val (slot-value Issue entry)))
-                          (when (or (and val (not (string= val "")))
-                                    (eq entry 'assignee)) ;; Always show assignee
-                            (org-jira-entry-put (point) (symbol-name entry) val))))
-                      '(assignee reporter type priority resolution status components created updated))
-
-                (org-jira-entry-put (point) "ID" issue-id)
-                (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
-
-                ;; Insert the duedate as a deadline if it exists
-                (when org-jira-deadline-duedate-sync-p
-                  (let ((duedate (oref Issue duedate)))
-                    (when (> (length duedate) 0)
-                      (org-deadline nil duedate))))
-
-                (mapc
-                 (lambda (heading-entry)
-                   (ensure-on-issue-id
-                    issue-id
-                    (let* ((entry-heading
-                            (concat (symbol-name heading-entry)
-                                    (format ": [[%s][%s]]"
-                                            (concat jiralib-url "/browse/" issue-id) issue-id))))
-                      (setq p (org-find-exact-headline-in-buffer entry-heading))
-                      (if (and p (>= p (point-min))
-                               (<= p (point-max)))
-                          (progn
-                            (goto-char p)
-                            (org-narrow-to-subtree)
-                            (goto-char (point-min))
-                            (forward-line 1)
-                            (delete-region (point) (point-max)))
-                        (if (org-goto-first-child)
-                            (org-insert-heading)
-                          (goto-char (point-max))
-                          (org-insert-subheading t))
-                        (org-jira-insert entry-heading "\n"))
-
-                      ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                      (org-jira-insert
-                       (replace-regexp-in-string
-                        "^" "  "
-                        (format "%s" (slot-value Issue heading-entry)))))))
-                 '(description))
-
-                (org-jira-update-comments-for-issue issue-id)
-
-                ;; FIXME: Re-enable when attachments are not erroring.
-                ;;(org-jira-update-attachments-for-current-issue)
-
-                ;; only sync worklog clocks when the user sets it to be so.
-                (when org-jira-worklog-sync-p
-                  (org-jira-update-worklogs-for-issue issue-id))
-
-                ))))))
-     Issues)
-    (switch-to-buffer project-buffer)))
+  (mapc 'org-jira--render-issue Issues)
+  (switch-to-buffer (org-jira--get-project-buffer (-last-item Issues))))
 
 ;;;###autoload
 (defun org-jira-update-comment ()
