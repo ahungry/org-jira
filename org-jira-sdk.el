@@ -103,7 +103,7 @@
    (issue-id-int :type string :initarg :issue-id-int :documentation "The internal Jira ID, such as 12345.")
    (priority :type string :initarg :priority)
    (proj-key :type string :initarg :proj-key)
-   (reporter :type string :initarg :reporter)
+   (reporter :type (or null string) :initarg :reporter)
    (resolution :type (or null string) :initarg :resolution)
    (start-date :type (or null string) :initarg :start-date)
    (status :type string :initarg :status)
