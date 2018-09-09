@@ -275,6 +275,11 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type '(alist :key-type string :value-type character))
 
+(defcustom org-jira-boards-default-limit 50
+  "Default limit for number of issues retrieved from agile boards."
+  :group 'org-jira
+  :type 'integer)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -2052,7 +2057,9 @@ See `org-jira-get-issues-from-filter'."
   (interactive)
   (let* ((board (org-jira-read-board))
          (board-id (cdr board)))
-    (jiralib-get-board-issues board-id org-jira-get-issue-list-callback)))
+    (jiralib-get-board-issues board-id
+			      :callback org-jira-get-issue-list-callback
+			      :limit org-jira-boards-default-limit)))
 
 ;;;###autoload
 (defun org-jira-get-issues-by-board-headonly ()
@@ -2060,7 +2067,9 @@ See `org-jira-get-issues-from-filter'."
   (interactive)
   (let* ((board (org-jira-read-board))
          (board-id (cdr board)))
-    (org-jira-get-issues-headonly (jiralib-get-board-issues board-id))))
+    (org-jira-get-issues-headonly
+     (jiralib-get-board-issues board-id
+			       :limit org-jira-boards-default-limit))))
 
 ;;;###autoload
 (defun org-jira-get-boards ()
