@@ -2059,7 +2059,8 @@ See `org-jira-get-issues-from-filter'."
          (board-id (cdr board)))
     (jiralib-get-board-issues board-id
 			      :callback org-jira-get-issue-list-callback
-			      :limit (org-jira-get-board-limit board-id))))
+			      :limit (org-jira-get-board-limit board-id)
+			      :query-params (org-jira--make-jql-queryparam board-id))))
 
 (defun org-jira-get-board-limit (id)
   "Get limit for number of retrieved issues for a board
@@ -2069,6 +2070,13 @@ id - integer board id"
 	(oref board limit)
       org-jira-boards-default-limit)))
 
+(defun org-jira--make-jql-queryparams (board-id)
+  "make GET query parameters for jql, returns nil if JQL query is not set"
+  (let ((board (org-jira--get-board-from-buffer board-id))
+	(jql (if (and board (slot-boundp board 'jql))
+		 (oref board jql))))
+    (if (and jql (not (string-blank-p jql))) `((jql ,jql)))))
+
 ;;;###autoload
 (defun org-jira-get-issues-by-board-headonly ()
   "Get list of ISSUES from agile board, head only."
@@ -2077,7 +2085,8 @@ id - integer board id"
          (board-id (cdr board)))
     (org-jira-get-issues-headonly
      (jiralib-get-board-issues board-id
-			       :limit (org-jira-get-board-limit board-id)))))
+			       :limit (org-jira-get-board-limit board-id)
+			       :query-params (org-jira--make-jql-queryparam board-id)))))
 
 
 (defun org-jira--render-boards-from-list (boards)

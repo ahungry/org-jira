@@ -1083,10 +1083,13 @@ Auxiliary Notes:
   
 
 (defun jiralib--agile-rest-call-it (api max-results start-at limit query-params)
-  (jiralib--rest-call-it
-   (format "%s?maxResults=%d&startAt=%d" api 
-	   (jiralib--agile-limit-page-size max-results start-at limit)
-	   start-at)))
+  (let ((callurl
+	 (format "%s?%s" api
+		 (url-build-query-string
+		  (append `((maxResults ,(jiralib--agile-limit-page-size max-results start-at limit))
+			    (startAt ,start-at))
+			  query-params)))))
+    (jiralib--rest-call-it callurl)))
 
 (defun jiralib--agile-call-it (api values-key &rest params)
   "Invoke Jira agile method api and retrieve the results using
@@ -1105,6 +1108,8 @@ API - path to called API that must start with /rest/agile/1.0.
 VALUES-KEY - key of the actual reply data in the reply assoc list.
 
 PARAMS - optional additional parameters.
+:limit - limit total number of retrieved entries.
+:query-params - extra query parameters in the format of url-build-query-string.
 "
   (if jiralib-complete-callback
       (apply 'jiralib--agile-call-async api values-key params)
@@ -1118,7 +1123,8 @@ VALUES-KEY - key of the actual reply data in the reply assoc list.
 
 PARAMS - extra parameters (as keyword arguments), the supported parameters are:
 
-limit - limit total number of retrieved entries.
+:limit - limit total number of retrieved entries.
+:query-params - extra query parameters in the format of url-build-query-string.
 "
   (setq jiralib-complete-callback nil)
   (let ((not-last t)
