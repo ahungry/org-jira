@@ -2071,50 +2071,65 @@ See `org-jira-get-issues-from-filter'."
      (jiralib-get-board-issues board-id
 			       :limit org-jira-boards-default-limit))))
 
+
+(defun org-jira--render-boards-from-list (boards)
+  "Add the boards from list into the org file.
+
+boards -  list of `org-jira-sdk-board' records."
+  (mapc 'org-jira--render-board  boards))
+
+
+(defun org-jira--render-board (board)
+  "Render single board"
+  ;;(org-jira-sdk-dump board)
+  (with-slots (id name url board-type) board
+    (with-current-buffer (org-jira--get-boards-buffer)
+      (org-jira-mode t)
+      (org-jira-freeze-ui
+       (org-save-outline-visibility t
+	 (save-restriction
+	   (outline-show-all)
+	   (widen)
+	   (goto-char (point-min))
+	   (let* ((board-headline
+		   (format "Board: [[%s][%s]]" url name))
+		  (headline-pos
+		   (org-find-exact-headline-in-buffer board-headline (current-buffer) t)))
+      	     (if (and headline-pos (>= headline-pos (point-min)) (<= headline-pos (point-max)))
+                 (progn
+                   (goto-char headline-pos)
+                   (org-narrow-to-subtree)
+                   (end-of-line))
+                 (goto-char (point-max))
+                 (unless (looking-at "^")
+                   (insert "\n"))
+                 (insert "* ")
+                 (org-jira-insert board-headline)
+                 (org-narrow-to-subtree))
+               (org-jira-entry-put (point) "name" name)
+               (org-jira-entry-put (point) "type" board-type)
+               (org-jira-entry-put (point) "url"  url)
+               (org-jira-entry-put (point) "ID"   id))))))))
+
+
+(defun org-jira--get-boards-file () 
+  (expand-file-name "boards-list.org" org-jira-working-dir))
+
+(defun org-jira--get-boards-buffer ()
+  (let* ((boards-file  (org-jira--get-boards-file))
+	 (existing-buffer (find-buffer-visiting boards-file)))
+    (if existing-buffer
+        existing-buffer
+      (find-file-noselect boards-file))))
+
 ;;;###autoload
 (defun org-jira-get-boards ()
-  "Get list of projects."
+  "Get list of boards and their properies."
   (interactive)
-  (lexical-let* ((boards-file (expand-file-name "boards-list.org" org-jira-working-dir))
-                 (existing-buffer (find-buffer-visiting boards-file))
-                 (boards (jiralib-get-boards)))
-    (save-excursion
-      (if existing-buffer
-          (pop-to-buffer (set-buffer existing-buffer))
-        (find-file boards-file))
-      (org-jira-mode t)
-      (org-save-outline-visibility t
-        (outline-show-all)
-        (save-restriction
-          (mapc (lambda (board)
-                  (widen)
-                  (goto-char (point-min))
-                  (let* ((board-id (org-jira-find-value board 'id))
-                         (board-name (org-jira-find-value board 'name))
-                         (board-url
-                          (format "%s/secure/RapidBoard.jspa?rapidView=%d"
-                                  (replace-regexp-in-string "/*$" "" jiralib-url) board-id))
-                         (board-headline
-                          (format "Board: [[%s][%s]]" board-url board-name))
-                         (headline-pos (org-find-exact-headline-in-buffer
-                                        board-headline (current-buffer) t)))
-                    (if (and headline-pos (>= headline-pos (point-min))
-                             (<= headline-pos (point-max)))
-                        (progn
-                          (goto-char headline-pos)
-                          (org-narrow-to-subtree)
-                          (end-of-line))
-                      (goto-char (point-max))
-                      (unless (looking-at "^")
-                        (insert "\n"))
-                      (insert "* ")
-                      (org-jira-insert board-headline)
-                      (org-narrow-to-subtree))
-                    (org-jira-entry-put (point) "name" board-name)
-                    (org-jira-entry-put (point) "type" (cdr (assoc 'type board)))
-                    (org-jira-entry-put (point) "url" board-url)
-                    (org-jira-entry-put (point) "ID" (number-to-string board-id))))
-                boards))))))
+  (let* ((datalist (jiralib-get-boards))
+	 (boards (org-jira-sdk-create-boards-from-data-list datalist)))
+    (org-jira--render-boards-from-list boards))
+    (switch-to-buffer (org-jira--get-boards-buffer)))
 
 (defun org-jira-get-org-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."

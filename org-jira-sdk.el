@@ -125,6 +125,14 @@
    (data :initarg :data :documentation "The reomte Jira data object (alist).")
    (hydrate-fn :initform #'jiralib-get-comment :initarg :hydrate-fn)))
 
+(defclass org-jira-sdk-board (org-jira-sdk-record)
+  ((name :type string :initarg :name :required t)
+   (url  :type string :initarg :url  :required t)
+   (board-type :type string :initarg :board-type)
+   ;; unused
+   (parent-id :type string :initarg :parent-id  )
+   (hydrate-fn :initform #'jiralib-get-board :initarg :hydrate-fn)))
+
 (cl-defmethod org-jira-sdk-hydrate ((rec org-jira-sdk-comment) &optional callback)
   "Populate the record with data from the remote endpoint."
   (with-slots (id proj-key hydrate-fn) rec
@@ -169,6 +177,16 @@
      ;; :data (oref rec data)
      )))
 
+(cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-board))
+  (with-slots (data) rec
+    (org-jira-sdk-board
+     :id   (int-to-string (alist-get 'id data))
+     :name (alist-get 'name data)
+     :url  (alist-get 'self data)
+     ;; TODO: remove it? used by org-jira-sdk-create-from-id
+     :parent-id ""
+     :board-type (alist-get 'type data))))
+
 ;; Issue
 (defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
 (defun org-jira-sdk-create-issues-from-data-list (ds) (mapcar #'org-jira-sdk-create-issue-from-data ds))
@@ -180,6 +198,10 @@
 (defun org-jira-sdk-isa-record? (i) (typep i 'org-jira-sdk-record))
 (defun org-jira-sdk-isa-issue? (i) (typep i 'org-jira-sdk-issue))
 (defun org-jira-sdk-isa-comment? (i) (typep i 'org-jira-sdk-comment))
+
+;; Board
+(defun org-jira-sdk-create-board-from-data (d) (org-jira-sdk-create-from-data :board d))
+(defun org-jira-sdk-create-boards-from-data-list (ds) (mapcar #'org-jira-sdk-create-board-from-data ds))
 
 (provide 'org-jira-sdk)
 

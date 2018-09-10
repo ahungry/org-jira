@@ -345,6 +345,7 @@ request.el, so if at all possible, it should be avoided."
                      (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params))
                      :data (json-encode `((body . ,(third params))))
                      :type "PUT"))
+      ('getBoard  (jiralib--rest-call-it (format "/rest/agile/1.0/board/%s"  (first params))))
       ('getBoards (apply 'jiralib--agile-call-it "/rest/agile/1.0/board" 'values params))
       ('getComment (org-jira-find-value
                      (jiralib--rest-call-it
@@ -1051,6 +1052,10 @@ Auxiliary Notes:
           (setq worklogs (mapcar predicate-fn worklogs)))
         (funcall rewrap-worklog-records-fn worklogs))))))
 
+
+(defun jiralib-get-board (id &optional callback)
+  "Return details on given board"
+  (jiralib-call "getBoard" nil id))
 
 (defun jiralib-get-boards ()
   "Return list of jira boards"
