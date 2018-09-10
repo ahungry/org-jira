@@ -2131,6 +2131,27 @@ boards -  list of `org-jira-sdk-board' records."
     (org-jira--render-boards-from-list boards))
     (switch-to-buffer (org-jira--get-boards-buffer)))
 
+(defun org-jira--get-board-from-buffer (id)
+  (with-current-buffer (org-jira--get-boards-buffer)
+    (org-jira-freeze-ui
+     (let ((pos (org-find-property "ID" (int-to-string  id))))
+       (unless pos (error "Board %s not found!" id))
+       (goto-char pos)
+       (let* ((props (org-entry-properties))
+	      (args (reduce (lambda (acc entry)
+			      (let* ((pname   (car entry))
+				     (keyword (cond
+					       ((equal pname "ID") :id)
+					       ((equal pname "URL") :url)
+					       ((equal pname "TYPE") :board-type)
+					       ((equal pname "NAME") :name)
+					       (t nil))))
+				(if keyword
+				    (cons keyword (cons (cdr entry) acc))
+				  acc)))
+			    props :initial-value  ())))
+	 (apply 'org-jira-sdk-board args))))))
+
 (defun org-jira-get-org-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."
   (if org-jira-use-status-as-todo
