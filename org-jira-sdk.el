@@ -129,8 +129,10 @@
   ((name :type string :initarg :name :required t)
    (url  :type string :initarg :url  :required t)
    (board-type :type string :initarg :board-type)
+   (jql  :type string :initarg :jql)
+   (limit :type integer :initarg :limit)
    ;; unused
-   (parent-id :type string :initarg :parent-id  )
+   (parent-id :type string :initarg :parent-id)
    (hydrate-fn :initform #'jiralib-get-board :initarg :hydrate-fn)))
 
 (cl-defmethod org-jira-sdk-hydrate ((rec org-jira-sdk-comment) &optional callback)

@@ -2082,20 +2082,20 @@ boards -  list of `org-jira-sdk-board' records."
 (defun org-jira--render-board (board)
   "Render single board"
   ;;(org-jira-sdk-dump board)
-  (with-slots (id name url board-type) board
+  (with-slots (id name url board-type jql limit) board
     (with-current-buffer (org-jira--get-boards-buffer)
       (org-jira-mode t)
       (org-jira-freeze-ui
        (org-save-outline-visibility t
-	 (save-restriction
-	   (outline-show-all)
-	   (widen)
-	   (goto-char (point-min))
-	   (let* ((board-headline
-		   (format "Board: [[%s][%s]]" url name))
-		  (headline-pos
-		   (org-find-exact-headline-in-buffer board-headline (current-buffer) t)))
-      	     (if (and headline-pos (>= headline-pos (point-min)) (<= headline-pos (point-max)))
+         (save-restriction
+           (outline-show-all)
+           (widen)
+           (goto-char (point-min))
+           (let* ((board-headline
+                   (format "Board: [[%s][%s]]" url name))
+                  (headline-pos
+                   (org-find-exact-headline-in-buffer board-headline (current-buffer) t)))
+             (if (and headline-pos (>= headline-pos (point-min)) (<= headline-pos (point-max)))
                  (progn
                    (goto-char headline-pos)
                    (org-narrow-to-subtree)
@@ -2109,8 +2109,9 @@ boards -  list of `org-jira-sdk-board' records."
                (org-jira-entry-put (point) "name" name)
                (org-jira-entry-put (point) "type" board-type)
                (org-jira-entry-put (point) "url"  url)
+               (org-jira-entry-put (point) "limit" (if (slot-boundp board 'limit) (int-to-string  limit)  ""))
+               (org-jira-entry-put (point) "JQL"   (if (slot-boundp board 'jql) jql ""))
                (org-jira-entry-put (point) "ID"   id))))))))
-
 
 (defun org-jira--get-boards-file () 
   (expand-file-name "boards-list.org" org-jira-working-dir))
@@ -2132,25 +2133,36 @@ boards -  list of `org-jira-sdk-board' records."
     (switch-to-buffer (org-jira--get-boards-buffer)))
 
 (defun org-jira--get-board-from-buffer (id)
+  "Parse board record from org file."
   (with-current-buffer (org-jira--get-boards-buffer)
     (org-jira-freeze-ui
      (let ((pos (org-find-property "ID" (int-to-string  id))))
-       (unless pos (error "Board %s not found!" id))
-       (goto-char pos)
-       (let* ((props (org-entry-properties))
-	      (args (reduce (lambda (acc entry)
-			      (let* ((pname   (car entry))
-				     (keyword (cond
-					       ((equal pname "ID") :id)
-					       ((equal pname "URL") :url)
-					       ((equal pname "TYPE") :board-type)
-					       ((equal pname "NAME") :name)
-					       (t nil))))
-				(if keyword
-				    (cons keyword (cons (cdr entry) acc))
-				  acc)))
-			    props :initial-value  ())))
-	 (apply 'org-jira-sdk-board args))))))
+       (if pos
+	   (progn
+	     (goto-char pos)
+	     (apply 'org-jira-sdk-board
+		    (reduce
+		     #'(lambda (acc entry)
+			 (let* ((pname   (car entry))
+				(pval (cdr entry))
+				(pair (and pval
+					   (not (string-empty-p pval))
+					   (cond
+					    ((equal pname "ID")
+					     (list :id pval))
+					    ((equal pname "URL")
+					     (list :url pval))
+					    ((equal pname "TYPE")
+					     (list :board-type pval))
+					    ((equal pname "NAME")
+					     (list :name pval))
+					    ((equal pname "LIMIT")
+					     (list :limit (string-to-number pval)))
+					    ((equal pname "JQL")
+					     (list :jql pval))
+					    (t nil)))))
+			   (if pair  (append pair acc)  acc)))
+		      (org-entry-properties) :initial-value  ()))))))))
 
 (defun org-jira-get-org-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."
