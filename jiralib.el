@@ -176,6 +176,12 @@ The default value works if JIRA is located at a hostname named
   :type 'string
   :group 'jiralib)
 
+(defcustom jiralib-agile-page-size
+  50
+  "Page size for agile API retrieve. Limited by server property jira.search.views.default.max"
+  :type 'integer
+  :group 'jiralib)
+
 (defvar jiralib-token nil
   "JIRA token used for authentication.")
 
@@ -1132,7 +1138,7 @@ PARAMS - extra parameters (as keyword arguments), the supported parameters are:
 	(limit (getf params :limit))
 	(query-params (getf params :query-params))
 	;; maximum page size, 50 is server side maximum
-        (max-results 50)
+        (max-results jiralib-agile-page-size)
         (values ()))
     (while not-last
       (let* ((reply-alist
@@ -1160,7 +1166,7 @@ limit - limit total number of retrieved entries."
        (limit (getf params :limit))
        (query-params (getf params :query-params))
        ;; maximum page size, 50 is server side maximum
-       (max-results 50)
+       (max-results jiralib-agile-page-size)
        (values-list ())
        (vk values-key)
        (url api)
