@@ -2059,7 +2059,15 @@ See `org-jira-get-issues-from-filter'."
          (board-id (cdr board)))
     (jiralib-get-board-issues board-id
 			      :callback org-jira-get-issue-list-callback
-			      :limit org-jira-boards-default-limit)))
+			      :limit (org-jira-get-board-limit board-id))))
+
+(defun org-jira-get-board-limit (id)
+  "Get limit for number of retrieved issues for a board
+id - integer board id"
+  (let ((board (org-jira--get-board-from-buffer id)))
+    (if (and board (slot-boundp board 'limit))
+	(oref board limit)
+      org-jira-boards-default-limit)))
 
 ;;;###autoload
 (defun org-jira-get-issues-by-board-headonly ()
@@ -2069,7 +2077,7 @@ See `org-jira-get-issues-from-filter'."
          (board-id (cdr board)))
     (org-jira-get-issues-headonly
      (jiralib-get-board-issues board-id
-			       :limit org-jira-boards-default-limit))))
+			       :limit (org-jira-get-board-limit board-id)))))
 
 
 (defun org-jira--render-boards-from-list (boards)
@@ -2112,6 +2120,7 @@ boards -  list of `org-jira-sdk-board' records."
              (org-jira-entry-put (point) "name" name)
              (org-jira-entry-put (point) "type" board-type)
              (org-jira-entry-put (point) "url"  url)
+	     ;; do not overwrite existing user properties with empty values
              (if (or (not entry-exists) limit-value)
                  (org-jira-entry-put (point) "limit" limit-value))
              (if (or (not entry-exists) jql-value)
@@ -2122,6 +2131,7 @@ boards -  list of `org-jira-sdk-board' records."
   (expand-file-name "boards-list.org" org-jira-working-dir))
 
 (defun org-jira--get-boards-buffer ()
+  "Return buffer for list of agile boards. Create one if it does not exist."
   (let* ((boards-file  (org-jira--get-boards-file))
 	 (existing-buffer (find-buffer-visiting boards-file)))
     (if existing-buffer
