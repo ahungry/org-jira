@@ -1066,10 +1066,6 @@ Auxiliary Notes:
   (apply 'jiralib-call "getIssuesFromBoard"
 	 (cl-getf params :callback) board-id params))
 
-(defun jiralib--agile-add-paging-params (api max-results start-at)
-  "Add paging parameters to jira agile url"
-  (format "%s?maxResults=%d&startAt=%d" api  max-results start-at))
-
 (defun jiralib--agile-not-last-entry (num-entries total start-at limit)
   "Return true if need to retrieve next page from agile api"
   (and (> num-entries 0)
@@ -1085,6 +1081,12 @@ Auxiliary Notes:
       (- limit  start-at)
     page-size))
   
+
+(defun jiralib--agile-rest-call-it (api max-results start-at limit query-params)
+  (jiralib--rest-call-it
+   (format "%s?maxResults=%d&startAt=%d" api 
+	   (jiralib--agile-limit-page-size max-results start-at limit)
+	   start-at)))
 
 (defun jiralib--agile-call-it (api values-key &rest params)
   "Invoke Jira agile method api and retrieve the results using
@@ -1108,7 +1110,6 @@ PARAMS - optional additional parameters.
       (apply 'jiralib--agile-call-async api values-key params)
     (apply 'jiralib--agile-call-sync api values-key params)))
 
-
 (defun jiralib--agile-call-sync (api values-key &rest params)
   "Syncroniously invoke Jira agile method api retrieve all the
 results using paging and return results.
@@ -1123,15 +1124,13 @@ limit - limit total number of retrieved entries.
   (let ((not-last t)
         (start-at 0)
 	(limit (getf params :limit))
+	(query-params (getf params :query-params))
 	;; maximum page size, 50 is server side maximum
         (max-results 50)
         (values ()))
     (while not-last
-      (let* ((reply-alist (jiralib--rest-call-it
-                           (jiralib--agile-add-paging-params
-			    api
-			    (jiralib--agile-limit-page-size max-results start-at limit)
-			    start-at)))
+      (let* ((reply-alist
+	      (jiralib--agile-rest-call-it api max-results start-at limit query-params))
              (values-array (cdr (assoc values-key reply-alist)))
              (num-entries (length values-array))
              (total (cdr (assq 'total reply-alist))))
@@ -1153,6 +1152,7 @@ limit - limit total number of retrieved entries."
   (lexical-let
       ((start-at 0)
        (limit (getf params :limit))
+       (query-params (getf params :query-params))
        ;; maximum page size, 50 is server side maximum
        (max-results 50)
        (values-list ())
@@ -1160,7 +1160,6 @@ limit - limit total number of retrieved entries."
        (url api)
        ;; save the call back to be called later after the last page
        (complete-callback jiralib-complete-callback))
-    (setf *global-params* params)
     ;; setup new callback to be called after each page
     (setf jiralib-complete-callback
           (cl-function
@@ -1177,23 +1176,15 @@ limit - limit total number of retrieved entries."
                             (if total " of " "")
                             (if total (int-to-string total) ""))
                    (if (jiralib--agile-not-last-entry num-entries total start-at limit)
-                       (jiralib--rest-call-it
-                        (jiralib--agile-add-paging-params
-			 url
-			 (jiralib--agile-limit-page-size max-results start-at limit)
-			 start-at))
-                     (progn
-                       ;; last page: call originall callback
-                       (message "jiralib agile retrieve: calling callback")
-                       (setf jiralib-complete-callback complete-callback)
-                       (funcall jiralib-complete-callback
-                                :data  (list (cons vk  values-list)))
-                       (message "jiralib agile retrieve: all done"))))
+		       (jiralib--agile-rest-call-it url max-results start-at limit query-params)
+                     ;; last page: call originall callback
+                     (message "jiralib agile retrieve: calling callback")
+                     (setf jiralib-complete-callback complete-callback)
+                     (funcall jiralib-complete-callback
+                              :data  (list (cons vk  values-list)))
+                     (message "jiralib agile retrieve: all done")))
                ('error (message (format "jiralib agile retrieve: caught error: %s" err)))))))
-    (jiralib--rest-call-it
-     (jiralib--agile-add-paging-params  api
-					(jiralib--agile-limit-page-size max-results start-at limit)
-					start-at))))
+    (jiralib--agile-rest-call-it api max-results start-at limit query-params)))
 
 (provide 'jiralib)
 ;;; jiralib.el ends here
