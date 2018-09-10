@@ -86,6 +86,7 @@
 (require 'request)
 (require 'json)
 (require 'url-parse)
+(require 'url-util)
 
 (defconst jiralib-version "3.0.0"
   "Current version of jiralib.el.")
