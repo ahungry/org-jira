@@ -654,13 +654,25 @@ This runs the getAvailableActions SOAP method."
         (unless (assoc status jiralib-available-actions-cache)
           (push (cons status
                       (jiralib-make-assoc-list
-                       (jiralib-call "getAvailableActions" nil issue-key)
+                       (mapcar (lambda (x)
+                                 (let ((namestring (cdr (car x)))
+                                       (id (cdr x)))
+                                   (cons
+                                    (cons 'name (org-jira-decode namestring))
+                                    id)))
+                               (jiralib-call "getAvailableActions" nil issue-key))
                        'id 'name))
                 jiralib-available-actions-cache))
         (cdr (assoc status jiralib-available-actions-cache)))
     (progn
       (jiralib-make-assoc-list
-       (jiralib-call "getAvailableActions" nil issue-key)
+       (mapcar (lambda (x)
+                 (let ((namestring (cdr (car x)))
+                       (id (cdr x)))
+                   (cons
+                    (cons 'name (org-jira-decode namestring))
+                    id)))
+               (jiralib-call "getAvailableActions" nil issue-key))
        'id 'name))))
 
 (defcustom jiralib-fields-for-action-cache-p t
