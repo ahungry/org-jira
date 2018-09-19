@@ -275,6 +275,11 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type '(alist :key-type string :value-type character))
 
+(defcustom org-jira-boards-default-limit 50
+  "Default limit for number of issues retrieved from agile boards."
+  :group 'org-jira
+  :type 'integer)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -2052,7 +2057,25 @@ See `org-jira-get-issues-from-filter'."
   (interactive)
   (let* ((board (org-jira-read-board))
          (board-id (cdr board)))
-    (jiralib-get-board-issues board-id org-jira-get-issue-list-callback)))
+    (jiralib-get-board-issues board-id
+			      :callback org-jira-get-issue-list-callback
+			      :limit (org-jira-get-board-limit board-id)
+			      :query-params (org-jira--make-jql-queryparams board-id))))
+
+(defun org-jira-get-board-limit (id)
+  "Get limit for number of retrieved issues for a board
+id - integer board id"
+  (let ((board (org-jira--get-board-from-buffer id)))
+    (if (and board (slot-boundp board 'limit))
+	(oref board limit)
+      org-jira-boards-default-limit)))
+
+(defun org-jira--make-jql-queryparams (board-id)
+  "make GET query parameters for jql, returns nil if JQL query is not set"
+  (let* ((board (org-jira--get-board-from-buffer board-id))
+	(jql (if (and board (slot-boundp board 'jql))
+		 (oref board jql))))
+    (if (and jql (not (string-blank-p jql))) `((jql ,jql)))))
 
 ;;;###autoload
 (defun org-jira-get-issues-by-board-headonly ()
@@ -2060,52 +2083,110 @@ See `org-jira-get-issues-from-filter'."
   (interactive)
   (let* ((board (org-jira-read-board))
          (board-id (cdr board)))
-    (org-jira-get-issues-headonly (jiralib-get-board-issues board-id))))
+    (org-jira-get-issues-headonly
+     (jiralib-get-board-issues board-id
+			       :limit (org-jira-get-board-limit board-id)
+			       :query-params (org-jira--make-jql-queryparams board-id)))))
+
+
+(defun org-jira--render-boards-from-list (boards)
+  "Add the boards from list into the org file.
+
+boards -  list of `org-jira-sdk-board' records."
+  (mapc 'org-jira--render-board  boards))
+
+
+(defun org-jira--render-board (board)
+  "Render single board"
+  ;;(org-jira-sdk-dump board)
+  (with-slots (id name url board-type jql limit) board
+    (with-current-buffer (org-jira--get-boards-buffer)
+      (org-jira-mode t)
+      (org-jira-freeze-ui
+       (org-save-outline-visibility t
+         (save-restriction
+           (outline-show-all)
+           (widen)
+           (goto-char (point-min))
+           (let* ((board-headline
+                   (format "Board: [[%s][%s]]" url name))
+                  (headline-pos
+                   (org-find-exact-headline-in-buffer board-headline (current-buffer) t))
+                  (entry-exists (and headline-pos (>= headline-pos (point-min)) (<= headline-pos (point-max))))
+                  (limit-value  (if (slot-boundp board 'limit) (int-to-string  limit) nil))
+                  (jql-value    (if (slot-boundp board 'jql) jql nil)))
+             (if entry-exists
+                 (progn
+                   (goto-char headline-pos)
+                   (org-narrow-to-subtree)
+                   (end-of-line))
+               (goto-char (point-max))
+               (unless (looking-at "^")
+                 (insert "\n"))
+               (insert "* ")
+               (org-jira-insert board-headline)
+               (org-narrow-to-subtree))
+             (org-jira-entry-put (point) "name" name)
+             (org-jira-entry-put (point) "type" board-type)
+             (org-jira-entry-put (point) "url"  url)
+	     ;; do not overwrite existing user properties with empty values
+             (if (or (not entry-exists) limit-value)
+                 (org-jira-entry-put (point) "limit" limit-value))
+             (if (or (not entry-exists) jql-value)
+                 (org-jira-entry-put (point) "JQL" jql-value ))
+             (org-jira-entry-put (point) "ID"   id))))))))
+
+(defun org-jira--get-boards-file () 
+  (expand-file-name "boards-list.org" org-jira-working-dir))
+
+(defun org-jira--get-boards-buffer ()
+  "Return buffer for list of agile boards. Create one if it does not exist."
+  (let* ((boards-file  (org-jira--get-boards-file))
+	 (existing-buffer (find-buffer-visiting boards-file)))
+    (if existing-buffer
+        existing-buffer
+      (find-file-noselect boards-file))))
 
 ;;;###autoload
 (defun org-jira-get-boards ()
-  "Get list of projects."
+  "Get list of boards and their properies."
   (interactive)
-  (lexical-let* ((boards-file (expand-file-name "boards-list.org" org-jira-working-dir))
-                 (existing-buffer (find-buffer-visiting boards-file))
-                 (boards (jiralib-get-boards)))
-    (save-excursion
-      (if existing-buffer
-          (pop-to-buffer (set-buffer existing-buffer))
-        (find-file boards-file))
-      (org-jira-mode t)
-      (org-save-outline-visibility t
-        (outline-show-all)
-        (save-restriction
-          (mapc (lambda (board)
-                  (widen)
-                  (goto-char (point-min))
-                  (let* ((board-id (org-jira-find-value board 'id))
-                         (board-name (org-jira-find-value board 'name))
-                         (board-url
-                          (format "%s/secure/RapidBoard.jspa?rapidView=%d"
-                                  (replace-regexp-in-string "/*$" "" jiralib-url) board-id))
-                         (board-headline
-                          (format "Board: [[%s][%s]]" board-url board-name))
-                         (headline-pos (org-find-exact-headline-in-buffer
-                                        board-headline (current-buffer) t)))
-                    (if (and headline-pos (>= headline-pos (point-min))
-                             (<= headline-pos (point-max)))
-                        (progn
-                          (goto-char headline-pos)
-                          (org-narrow-to-subtree)
-                          (end-of-line))
-                      (goto-char (point-max))
-                      (unless (looking-at "^")
-                        (insert "\n"))
-                      (insert "* ")
-                      (org-jira-insert board-headline)
-                      (org-narrow-to-subtree))
-                    (org-jira-entry-put (point) "name" board-name)
-                    (org-jira-entry-put (point) "type" (cdr (assoc 'type board)))
-                    (org-jira-entry-put (point) "url" board-url)
-                    (org-jira-entry-put (point) "ID" (number-to-string board-id))))
-                boards))))))
+  (let* ((datalist (jiralib-get-boards))
+	 (boards (org-jira-sdk-create-boards-from-data-list datalist)))
+    (org-jira--render-boards-from-list boards))
+    (switch-to-buffer (org-jira--get-boards-buffer)))
+
+(defun org-jira--get-board-from-buffer (id)
+  "Parse board record from org file."
+  (with-current-buffer (org-jira--get-boards-buffer)
+    (org-jira-freeze-ui
+     (let ((pos (org-find-property "ID" (int-to-string  id))))
+       (if pos
+	   (progn
+	     (goto-char pos)
+	     (apply 'org-jira-sdk-board
+		    (reduce
+		     #'(lambda (acc entry)
+			 (let* ((pname   (car entry))
+				(pval (cdr entry))
+				(pair (and pval
+					   (not (string-empty-p pval))
+					   (cond
+					    ((equal pname "ID")
+					     (list :id pval))
+					    ((equal pname "URL")
+					     (list :url pval))
+					    ((equal pname "TYPE")
+					     (list :board-type pval))
+					    ((equal pname "NAME")
+					     (list :name pval))
+					    ((equal pname "LIMIT")
+					     (list :limit (string-to-number pval)))
+					    ((equal pname "JQL")
+					     (list :jql pval))
+					    (t nil)))))
+			   (if pair  (append pair acc)  acc)))
+		      (org-entry-properties) :initial-value  ()))))))))
 
 (defun org-jira-get-org-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."
