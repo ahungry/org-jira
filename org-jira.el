@@ -1118,7 +1118,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                     comment-text
                     (cl-function
                      (lambda (&key data &allow-other-keys)
-                       (org-jira-update-worklogs-for-current-issue))))
+                       (org-jira-update-worklogs-for-issue issue-id))))
                  ;; else
                  (jiralib-add-worklog
                   issue-id
@@ -1127,7 +1127,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                   comment-text
                   (cl-function
                    (lambda (&key data &allow-other-keys)
-                     (org-jira-update-worklogs-for-current-issue))))
+                     (org-jira-update-worklogs-for-issue issue-id))))
                  )
                )))))
      )))
@@ -2136,7 +2136,7 @@ boards -  list of `org-jira-sdk-board' records."
                  (org-jira-entry-put (point) "JQL" jql-value ))
              (org-jira-entry-put (point) "ID"   id))))))))
 
-(defun org-jira--get-boards-file () 
+(defun org-jira--get-boards-file ()
   (expand-file-name "boards-list.org" org-jira-working-dir))
 
 (defun org-jira--get-boards-buffer ()
