@@ -330,8 +330,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (save-restriction
        (widen)
@@ -344,8 +344,8 @@ See `org-default-priority' for more info."
 
 (defmacro org-jira-with-callback (&rest body)
   "Simpler way to write the data callbacks."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(lambda (&rest request-response)
      (declare (ignore cb-data))
      (let ((cb-data (cl-getf request-response :data)))
@@ -353,8 +353,8 @@ See `org-default-priority' for more info."
 
 (defmacro org-jira-freeze-ui (&rest body)
   "Freeze the UI layout for the user as much as possible."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (save-restriction
        (widen)
@@ -364,8 +364,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 1))
   `(let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
           (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
           (project-buffer (or (find-buffer-visiting project-file)
@@ -380,8 +380,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (save-restriction
        (let ((continue t)
@@ -398,8 +398,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-comment (&rest body)
   "Make sure we are on a comment heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
@@ -411,8 +411,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-worklog (&rest body)
   "Make sure we are on a worklog heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
