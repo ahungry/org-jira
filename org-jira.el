@@ -2058,23 +2058,23 @@ See `org-jira-get-issues-from-filter'."
   (let* ((board (org-jira-read-board))
          (board-id (cdr board)))
     (jiralib-get-board-issues board-id
-			      :callback org-jira-get-issue-list-callback
-			      :limit (org-jira-get-board-limit board-id)
-			      :query-params (org-jira--make-jql-queryparams board-id))))
+                  :callback org-jira-get-issue-list-callback
+                  :limit (org-jira-get-board-limit board-id)
+                  :query-params (org-jira--make-jql-queryparams board-id))))
 
 (defun org-jira-get-board-limit (id)
   "Get limit for number of retrieved issues for a board
 id - integer board id"
   (let ((board (org-jira--get-board-from-buffer id)))
     (if (and board (slot-boundp board 'limit))
-	(oref board limit)
+    (oref board limit)
       org-jira-boards-default-limit)))
 
 (defun org-jira--make-jql-queryparams (board-id)
   "make GET query parameters for jql, returns nil if JQL query is not set"
   (let* ((board (org-jira--get-board-from-buffer board-id))
-	(jql (if (and board (slot-boundp board 'jql))
-		 (oref board jql))))
+    (jql (if (and board (slot-boundp board 'jql))
+         (oref board jql))))
     (if (and jql (not (string-blank-p jql))) `((jql ,jql)))))
 
 ;;;###autoload
@@ -2085,8 +2085,8 @@ id - integer board id"
          (board-id (cdr board)))
     (org-jira-get-issues-headonly
      (jiralib-get-board-issues board-id
-			       :limit (org-jira-get-board-limit board-id)
-			       :query-params (org-jira--make-jql-queryparams board-id)))))
+                   :limit (org-jira-get-board-limit board-id)
+                   :query-params (org-jira--make-jql-queryparams board-id)))))
 
 
 (defun org-jira--render-boards-from-list (boards)
@@ -2129,7 +2129,7 @@ boards -  list of `org-jira-sdk-board' records."
              (org-jira-entry-put (point) "name" name)
              (org-jira-entry-put (point) "type" board-type)
              (org-jira-entry-put (point) "url"  url)
-	     ;; do not overwrite existing user properties with empty values
+         ;; do not overwrite existing user properties with empty values
              (if (or (not entry-exists) limit-value)
                  (org-jira-entry-put (point) "limit" limit-value))
              (if (or (not entry-exists) jql-value)
@@ -2142,7 +2142,7 @@ boards -  list of `org-jira-sdk-board' records."
 (defun org-jira--get-boards-buffer ()
   "Return buffer for list of agile boards. Create one if it does not exist."
   (let* ((boards-file  (org-jira--get-boards-file))
-	 (existing-buffer (find-buffer-visiting boards-file)))
+     (existing-buffer (find-buffer-visiting boards-file)))
     (if existing-buffer
         existing-buffer
       (find-file-noselect boards-file))))
@@ -2152,7 +2152,7 @@ boards -  list of `org-jira-sdk-board' records."
   "Get list of boards and their properies."
   (interactive)
   (let* ((datalist (jiralib-get-boards))
-	 (boards (org-jira-sdk-create-boards-from-data-list datalist)))
+     (boards (org-jira-sdk-create-boards-from-data-list datalist)))
     (org-jira--render-boards-from-list boards))
     (switch-to-buffer (org-jira--get-boards-buffer)))
 
@@ -2162,31 +2162,31 @@ boards -  list of `org-jira-sdk-board' records."
     (org-jira-freeze-ui
      (let ((pos (org-find-property "ID" (int-to-string  id))))
        (if pos
-	   (progn
-	     (goto-char pos)
-	     (apply 'org-jira-sdk-board
-		    (reduce
-		     #'(lambda (acc entry)
-			 (let* ((pname   (car entry))
-				(pval (cdr entry))
-				(pair (and pval
-					   (not (string-empty-p pval))
-					   (cond
-					    ((equal pname "ID")
-					     (list :id pval))
-					    ((equal pname "URL")
-					     (list :url pval))
-					    ((equal pname "TYPE")
-					     (list :board-type pval))
-					    ((equal pname "NAME")
-					     (list :name pval))
-					    ((equal pname "LIMIT")
-					     (list :limit (string-to-number pval)))
-					    ((equal pname "JQL")
-					     (list :jql pval))
-					    (t nil)))))
-			   (if pair  (append pair acc)  acc)))
-		      (org-entry-properties) :initial-value  ()))))))))
+       (progn
+         (goto-char pos)
+         (apply 'org-jira-sdk-board
+            (reduce
+             #'(lambda (acc entry)
+             (let* ((pname   (car entry))
+                (pval (cdr entry))
+                (pair (and pval
+                       (not (string-empty-p pval))
+                       (cond
+                        ((equal pname "ID")
+                         (list :id pval))
+                        ((equal pname "URL")
+                         (list :url pval))
+                        ((equal pname "TYPE")
+                         (list :board-type pval))
+                        ((equal pname "NAME")
+                         (list :name pval))
+                        ((equal pname "LIMIT")
+                         (list :limit (string-to-number pval)))
+                        ((equal pname "JQL")
+                         (list :jql pval))
+                        (t nil)))))
+               (if pair  (append pair acc)  acc)))
+              (org-entry-properties) :initial-value  ()))))))))
 
 (defun org-jira-get-org-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."
