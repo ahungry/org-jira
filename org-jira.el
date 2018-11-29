@@ -220,10 +220,6 @@ variables.
   "Use the JIRA status as the TODO tag value."
   :group 'org-jira)
 
-(defcustom org-jira-coding-system nil
-  "Use custom coding system on org-jira buffers."
-  :group 'org-jira)
-
 (defcustom org-jira-deadline-duedate-sync-p t
   "Keep org deadline and jira duedate fields synced.
 You may wish to set this to nil if you track org deadlines in
@@ -589,11 +585,8 @@ to change the property names this sets."
 
 It must receive a coercion to string, as not every time will it
 be populated."
-  (let ((coding-system (or org-jira-coding-system
-                           (when (boundp 'buffer-file-coding-system)
-                             buffer-file-coding-system 'utf-8))))
-    (decode-coding-string
-     (cl-coerce data 'string) coding-system)))
+  (decode-coding-string
+   (cl-coerce data 'string) jiralib-coding-system))
 
 (defun org-jira-insert (&rest args)
   "Set coding to text provide by `ARGS' when insert in buffer."
