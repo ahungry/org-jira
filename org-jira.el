@@ -330,8 +330,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (save-restriction
        (widen)
@@ -344,8 +344,8 @@ See `org-default-priority' for more info."
 
 (defmacro org-jira-with-callback (&rest body)
   "Simpler way to write the data callbacks."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(lambda (&rest request-response)
      (declare (ignore cb-data))
      (let ((cb-data (cl-getf request-response :data)))
@@ -353,8 +353,8 @@ See `org-default-priority' for more info."
 
 (defmacro org-jira-freeze-ui (&rest body)
   "Freeze the UI layout for the user as much as possible."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (save-restriction
        (widen)
@@ -364,24 +364,24 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 1))
   `(let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
           (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
           (project-buffer (or (find-buffer-visiting project-file)
                               (find-file project-file))))
      (with-current-buffer project-buffer
        (org-jira-freeze-ui
-        (let ((p (org-find-entry-with-id ,issue-id)))
-          (unless p (error "Issue %s not found!" ,issue-id))
-          (goto-char p)
-          (org-narrow-to-subtree)
-          ,@body)))))
+         (let ((p (org-find-entry-with-id ,issue-id)))
+           (unless p (error "Issue %s not found!" ,issue-id))
+           (goto-char p)
+           (org-narrow-to-subtree)
+           ,@body)))))
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (save-restriction
        (let ((continue t)
@@ -398,8 +398,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-comment (&rest body)
   "Make sure we are on a comment heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
@@ -411,8 +411,8 @@ See `org-default-priority' for more info."
 
 (defmacro ensure-on-worklog (&rest body)
   "Make sure we are on a worklog heading, before executing BODY."
-  (declare (debug t))
-  (declare (indent 'defun))
+  (declare (debug t)
+           (indent 0))
   `(save-excursion
      (org-back-to-heading)
      (forward-thing 'whitespace)
@@ -695,30 +695,27 @@ Re-create it with CLOCKS.  This is used for worklogs."
   (interactive)
   (let ((existing-logbook-p nil))
     ;; See if the LOGBOOK already exists or not.
-    (ensure-on-issue-id
-     issue-id
-     (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
-       (when (search-forward (format ":%s:" drawer-name) nil 1 1)
-         (setq existing-logbook-p t))))
-    (ensure-on-issue-id
-     issue-id
-     (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
-       (if existing-logbook-p
-           (progn ;; If we had a logbook, drop it and re-create in a bit.
-             (search-forward (format ":%s:" drawer-name) nil 1 1)
-             (org-beginning-of-line)
-             (delete-region (point) (search-forward ":END:" nil 1 1))
-             )
-         (progn ;; Otherwise, create a new one at the end of properties list
-           (search-forward ":END:" nil 1 1)
-           (forward-line)))
-       (org-insert-drawer nil (format "%s" drawer-name)) ;; Doc says non-nil, but this requires nil
-       (mapc #'org-jira-insert-clock clocks)
-       ;; Clean up leftover newlines (we left 2 behind)
-       (dotimes (n 2)
-         (search-forward-regexp "^$" nil 1 1)
-         (delete-region (point) (min (point-max) (1+ (point)))))
-       ))))
+    (ensure-on-issue-id issue-id
+      (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
+        (when (search-forward (format ":%s:" drawer-name) nil 1 1)
+          (setq existing-logbook-p t))))
+    (ensure-on-issue-id issue-id
+      (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
+        (if existing-logbook-p
+            (progn ;; If we had a logbook, drop it and re-create in a bit.
+              (search-forward (format ":%s:" drawer-name) nil 1 1)
+              (org-beginning-of-line)
+              (delete-region (point) (search-forward ":END:" nil 1 1))
+              )
+          (progn ;; Otherwise, create a new one at the end of properties list
+            (search-forward ":END:" nil 1 1)
+            (forward-line)))
+        (org-insert-drawer nil (format "%s" drawer-name)) ;; Doc says non-nil, but this requires nil
+        (mapc #'org-jira-insert-clock clocks)
+        ;; Clean up leftover newlines (we left 2 behind)
+        (dotimes (n 2)
+          (search-forward-regexp "^$" nil 1 1)
+          (delete-region (point) (min (point-max) (1+ (point)))))))))
 
 (defun org-jira-get-worklog-val (key WORKLOG)
   "Return the value associated with KEY of WORKLOG."
@@ -905,89 +902,88 @@ See`org-jira-get-issue-list'"
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
-         (org-jira-mode t)
-         (goto-char (point-min))
-         (unless (looking-at (format "^* %s-Tickets" proj-key))
-           (insert (format "* %s-Tickets\n" proj-key)))
-         (setq p (org-find-entry-with-id issue-id))
-         (save-restriction
-           (if (and p (>= p (point-min))
-                    (<= p (point-max)))
-               (progn
-                 (goto-char p)
-                 (forward-thing 'whitespace)
-                 (org-jira-kill-line))
-             (goto-char (point-max))
-             (unless (looking-at "^")
-               (insert "\n"))
-             (insert "** "))
-           (let ((status (org-jira-decode status)))
-             (org-jira-insert
-              (concat (org-jira-get-org-keyword-from-status status)
-                      " "
-                      (org-jira-get-org-priority-cookie-from-issue priority)
-                      headline)))
-           (save-excursion
-             (unless (search-forward "\n" (point-max) 1)
-               (insert "\n")))
-           (org-narrow-to-subtree)
-           (save-excursion
-             (org-back-to-heading t)
-             (org-set-tags-to (replace-regexp-in-string "-" "_" issue-id)))
-           (mapc (lambda (entry)
-                   (let ((val (slot-value Issue entry)))
-                     (when (or (and val (not (string= val "")))
-                               (eq entry 'assignee)) ;; Always show assignee
-                       (org-jira-entry-put (point) (symbol-name entry) val))))
-                 '(assignee reporter type priority resolution status components created updated))
+          (org-jira-mode t)
+          (goto-char (point-min))
+          (unless (looking-at (format "^* %s-Tickets" proj-key))
+            (insert (format "* %s-Tickets\n" proj-key)))
+          (setq p (org-find-entry-with-id issue-id))
+          (save-restriction
+            (if (and p (>= p (point-min))
+                     (<= p (point-max)))
+                (progn
+                  (goto-char p)
+                  (forward-thing 'whitespace)
+                  (org-jira-kill-line))
+              (goto-char (point-max))
+              (unless (looking-at "^")
+                (insert "\n"))
+              (insert "** "))
+            (let ((status (org-jira-decode status)))
+              (org-jira-insert
+               (concat (org-jira-get-org-keyword-from-status status)
+                       " "
+                       (org-jira-get-org-priority-cookie-from-issue priority)
+                       headline)))
+            (save-excursion
+              (unless (search-forward "\n" (point-max) 1)
+                (insert "\n")))
+            (org-narrow-to-subtree)
+            (save-excursion
+              (org-back-to-heading t)
+              (org-set-tags-to (replace-regexp-in-string "-" "_" issue-id)))
+            (mapc (lambda (entry)
+                    (let ((val (slot-value Issue entry)))
+                      (when (or (and val (not (string= val "")))
+                                (eq entry 'assignee)) ;; Always show assignee
+                        (org-jira-entry-put (point) (symbol-name entry) val))))
+                  '(assignee reporter type priority resolution status components created updated))
 
-           (org-jira-entry-put (point) "ID" issue-id)
-           (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
+            (org-jira-entry-put (point) "ID" issue-id)
+            (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
 
-           ;; Insert the duedate as a deadline if it exists
-           (when org-jira-deadline-duedate-sync-p
-             (let ((duedate (oref Issue duedate)))
-               (when (> (length duedate) 0)
-                 (org-deadline nil duedate))))
+            ;; Insert the duedate as a deadline if it exists
+            (when org-jira-deadline-duedate-sync-p
+              (let ((duedate (oref Issue duedate)))
+                (when (> (length duedate) 0)
+                  (org-deadline nil duedate))))
 
-           (mapc
-            (lambda (heading-entry)
-              (ensure-on-issue-id
-               issue-id
-               (let* ((entry-heading
-                       (concat (symbol-name heading-entry)
-                               (format ": [[%s][%s]]"
-                                       (concat jiralib-url "/browse/" issue-id) issue-id))))
-                 (setq p (org-find-exact-headline-in-buffer entry-heading))
-                 (if (and p (>= p (point-min))
-                          (<= p (point-max)))
-                     (progn
-                       (goto-char p)
-                       (org-narrow-to-subtree)
-                       (goto-char (point-min))
-                       (forward-line 1)
-                       (delete-region (point) (point-max)))
-                   (if (org-goto-first-child)
-                       (org-insert-heading)
-                     (goto-char (point-max))
-                     (org-insert-subheading t))
-                   (org-jira-insert entry-heading "\n"))
+            (mapc
+             (lambda (heading-entry)
+               (ensure-on-issue-id issue-id
+                 (let* ((entry-heading
+                         (concat (symbol-name heading-entry)
+                                 (format ": [[%s][%s]]"
+                                         (concat jiralib-url "/browse/" issue-id) issue-id))))
+                   (setq p (org-find-exact-headline-in-buffer entry-heading))
+                   (if (and p (>= p (point-min))
+                            (<= p (point-max)))
+                       (progn
+                         (goto-char p)
+                         (org-narrow-to-subtree)
+                         (goto-char (point-min))
+                         (forward-line 1)
+                         (delete-region (point) (point-max)))
+                     (if (org-goto-first-child)
+                         (org-insert-heading)
+                       (goto-char (point-max))
+                       (org-insert-subheading t))
+                     (org-jira-insert entry-heading "\n"))
 
-                 ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                 (org-jira-insert
-                  (replace-regexp-in-string
-                   "^" "  "
-                   (format "%s" (slot-value Issue heading-entry)))))))
-            '(description))
+                   ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+                   (org-jira-insert
+                    (replace-regexp-in-string
+                     "^" "  "
+                     (format "%s" (slot-value Issue heading-entry)))))))
+             '(description))
 
-           (org-jira-update-comments-for-issue issue-id)
+            (org-jira-update-comments-for-issue issue-id)
 
-           ;; FIXME: Re-enable when attachments are not erroring.
-           ;;(org-jira-update-attachments-for-current-issue)
+            ;; FIXME: Re-enable when attachments are not erroring.
+            ;;(org-jira-update-attachments-for-current-issue)
 
-           ;; only sync worklog clocks when the user sets it to be so.
-           (when org-jira-worklog-sync-p
-             (org-jira-update-worklogs-for-issue issue-id))))))))
+            ;; only sync worklog clocks when the user sets it to be so.
+            (when org-jira-worklog-sync-p
+              (org-jira-update-worklogs-for-issue issue-id))))))))
 
 (defun org-jira--render-issues-from-issue-list (Issues)
   "Add the issues from ISSUES list into the org file(s).
@@ -1034,14 +1030,13 @@ ISSUES is a list of `org-jira-sdk-issue' records."
           (comment (read-string (format  "Comment (%s): " issue-id))))
      (list issue-id comment)))
   (lexical-let ((issue-id issue-id))
-    (ensure-on-issue-id
-     issue-id
-     (goto-char (point-max))
-     (jiralib-add-comment
-      issue-id comment
-      (cl-function
-       (lambda (&key data &allow-other-keys)
-         (ensure-on-issue-id issue-id (org-jira-update-comments-for-current-issue))))))))
+    (ensure-on-issue-id issue-id
+      (goto-char (point-max))
+      (jiralib-add-comment
+       issue-id comment
+       (cl-function
+        (lambda (&key data &allow-other-keys)
+          (ensure-on-issue-id issue-id (org-jira-update-comments-for-current-issue))))))))
 
 (defun org-jira-org-clock-to-date (org-time)
   "Convert ORG-TIME formatted date into a plain date string."
@@ -1084,53 +1079,52 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
   "Update or add a worklog based on the org clocks."
   (interactive)
   (let ((issue-id (org-jira-get-from-org 'issue 'key)))
-    (ensure-on-issue-id
-     issue-id
-     (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
-     (org-beginning-of-line)
-     ;; (org-cycle 1)
-     (while (search-forward "CLOCK: " nil 1 1)
-       (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
-         (forward-line)
-         ;; See where the stuff ends (what point)
-         (let (next-clock-point)
-           (save-excursion
-             (search-forward-regexp "\\(CLOCK\\|:END\\):" nil 1 1)
-             (setq next-clock-point (point)))
-           (let ((clock-content
-                  (buffer-substring-no-properties (point) next-clock-point)))
+    (ensure-on-issue-id issue-id
+      (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
+      (org-beginning-of-line)
+      ;; (org-cycle 1)
+      (while (search-forward "CLOCK: " nil 1 1)
+        (let ((org-time (buffer-substring-no-properties (point) (point-at-eol))))
+          (forward-line)
+          ;; See where the stuff ends (what point)
+          (let (next-clock-point)
+            (save-excursion
+              (search-forward-regexp "\\(CLOCK\\|:END\\):" nil 1 1)
+              (setq next-clock-point (point)))
+            (let ((clock-content
+                   (buffer-substring-no-properties (point) next-clock-point)))
 
-             ;; @todo :optim: This is inefficient, calling the resync on each update/insert event,
-             ;; ideally we would track and only insert/update changed entries, as well
-             ;; only call a resync once (when the entire list is processed, which will
-             ;; basically require a dry run to see how many items we should be updating.
+              ;; @todo :optim: This is inefficient, calling the resync on each update/insert event,
+              ;; ideally we would track and only insert/update changed entries, as well
+              ;; only call a resync once (when the entire list is processed, which will
+              ;; basically require a dry run to see how many items we should be updating.
 
-             ;; Update via jiralib call
-             (let* ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content))
-                    (comment-text (cdr (assoc 'comment worklog)))
-                    (comment-text (if (string= (org-trim comment-text) "") nil comment-text)))
-               (if (cdr (assoc 'worklog-id worklog))
-                   (jiralib-update-worklog
-                    issue-id
-                    (cdr (assoc 'worklog-id worklog))
-                    (cdr (assoc 'started worklog))
-                    (cdr (assoc 'time-spent-seconds worklog))
-                    comment-text
-                    (cl-function
-                     (lambda (&key data &allow-other-keys)
-                       (org-jira-update-worklogs-for-issue issue-id))))
-                 ;; else
-                 (jiralib-add-worklog
-                  issue-id
-                  (cdr (assoc 'started worklog))
-                  (cdr (assoc 'time-spent-seconds worklog))
-                  comment-text
-                  (cl-function
-                   (lambda (&key data &allow-other-keys)
-                     (org-jira-update-worklogs-for-issue issue-id))))
-                 )
-               )))))
-     )))
+              ;; Update via jiralib call
+              (let* ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content))
+                     (comment-text (cdr (assoc 'comment worklog)))
+                     (comment-text (if (string= (org-trim comment-text) "") nil comment-text)))
+                (if (cdr (assoc 'worklog-id worklog))
+                    (jiralib-update-worklog
+                     issue-id
+                     (cdr (assoc 'worklog-id worklog))
+                     (cdr (assoc 'started worklog))
+                     (cdr (assoc 'time-spent-seconds worklog))
+                     comment-text
+                     (cl-function
+                      (lambda (&key data &allow-other-keys)
+                        (org-jira-update-worklogs-for-issue issue-id))))
+                  ;; else
+                  (jiralib-add-worklog
+                   issue-id
+                   (cdr (assoc 'started worklog))
+                   (cdr (assoc 'time-spent-seconds worklog))
+                   comment-text
+                   (cl-function
+                    (lambda (&key data &allow-other-keys)
+                      (org-jira-update-worklogs-for-issue issue-id))))
+                  )
+                )))))
+      )))
 
 (defun org-jira-update-worklog ()
   "Update a worklog for the current issue."
@@ -1201,38 +1195,37 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 
 (defun org-jira--render-comment (issue-id Comment)
   (with-slots (comment-id author headline created updated body) Comment
-    (ensure-on-issue-id
-     issue-id
-     (setq p (org-find-entry-with-id comment-id))
-     (when (and p (>= p (point-min))
-                (<= p (point-max)))
-       (goto-char p)
-       (org-narrow-to-subtree)
-       (delete-region (point-min) (point-max)))
-     (goto-char (point-max))
-     (unless (looking-at "^")
-       (insert "\n"))
-     (insert "*** ")
-     (org-jira-insert headline "\n")
-     (org-narrow-to-subtree)
-     (org-jira-entry-put (point) "ID" comment-id)
-     (org-jira-entry-put (point) "created" created)
-     (unless (string= created updated)
-       (org-jira-entry-put (point) "updated" updated))
-     (goto-char (point-max))
-     ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-     (org-jira-insert (replace-regexp-in-string "^" "  " (or body ""))))))
+    (ensure-on-issue-id issue-id
+      (setq p (org-find-entry-with-id comment-id))
+      (when (and p (>= p (point-min))
+                 (<= p (point-max)))
+        (goto-char p)
+        (org-narrow-to-subtree)
+        (delete-region (point-min) (point-max)))
+      (goto-char (point-max))
+      (unless (looking-at "^")
+        (insert "\n"))
+      (insert "*** ")
+      (org-jira-insert headline "\n")
+      (org-narrow-to-subtree)
+      (org-jira-entry-put (point) "ID" comment-id)
+      (org-jira-entry-put (point) "created" created)
+      (unless (string= created updated)
+        (org-jira-entry-put (point) "updated" updated))
+      (goto-char (point-max))
+      ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+      (org-jira-insert (replace-regexp-in-string "^" "  " (or body ""))))))
 
 (defun org-jira-update-comments-for-issue (issue-id)
   "Update the comments for the specified ISSUE-ID issue."
   (jiralib-get-comments
    issue-id
    (org-jira-with-callback
-    (org-jira-log "In the callback for org-jira-update-comments-for-issue.")
-    (-->
-     (org-jira-find-value cb-data 'comments)
-     (org-jira-extract-comments-from-data it)
-     (mapc (lambda (Comment) (org-jira--render-comment issue-id Comment)) it)))))
+     (org-jira-log "In the callback for org-jira-update-comments-for-issue.")
+     (-->
+      (org-jira-find-value cb-data 'comments)
+      (org-jira-extract-comments-from-data it)
+      (mapc (lambda (Comment) (org-jira--render-comment issue-id Comment)) it)))))
 
 (defun org-jira-update-comments-for-current-issue ()
   "Update comments for the current issue."
@@ -1282,44 +1275,44 @@ purpose of wiping an old subtree."
               (with-current-buffer project-buffer
                 ;; delete old attachment node
                 (ensure-on-issue
-                 (if (org-goto-first-child)
-                     (while (org-goto-sibling)
-                       (forward-thing 'whitespace)
-                       (when (looking-at "Attachments:")
-                         (org-jira-delete-subtree)))))
+                  (if (org-goto-first-child)
+                      (while (org-goto-sibling)
+                        (forward-thing 'whitespace)
+                        (when (looking-at "Attachments:")
+                          (org-jira-delete-subtree)))))
                 (let ((attachments (org-jira-find-value data 'fields 'attachment)))
                   (when (not (zerop (length attachments)))
                     (ensure-on-issue
-                     (if (org-goto-first-child)
-                         (progn
-                           (while (org-goto-sibling))
-                           (org-insert-heading-after-current))
-                       (org-insert-subheading nil))
+                      (if (org-goto-first-child)
+                          (progn
+                            (while (org-goto-sibling))
+                            (org-insert-heading-after-current))
+                        (org-insert-subheading nil))
 
-                     (insert "Attachments:")
-                     (mapc
-                      (lambda (attachment)
-                        (let ((attachment-id (org-jira-get-comment-id attachment))
-                              (author (org-jira-get-comment-author attachment))
-                              (created (org-jira-transform-time-format
-                                        (org-jira-find-value attachment 'created)))
-                              (size (org-jira-find-value attachment 'size))
-                              (mimeType (org-jira-find-value attachment 'mimeType))
-                              (content (org-jira-find-value attachment 'content))
-                              (filename (org-jira-find-value attachment 'filename)))
-                          (if (looking-back "Attachments:")
-                              (org-insert-subheading nil)
-                            (org-insert-heading-respect-content))
-                          (insert "[[" content "][" filename "]]")
-                          (org-narrow-to-subtree)
-                          (org-jira-entry-put (point) "ID" attachment-id)
-                          (org-jira-entry-put (point) "Author" author)
-                          (org-jira-entry-put (point) "Name" filename)
-                          (org-jira-entry-put (point) "Created" created)
-                          (org-jira-entry-put (point) "Size" (ls-lisp-format-file-size size t))
-                          (org-jira-entry-put (point) "Content" content)
-                          (widen)))
-                      attachments)))))))))))))
+                      (insert "Attachments:")
+                      (mapc
+                       (lambda (attachment)
+                         (let ((attachment-id (org-jira-get-comment-id attachment))
+                               (author (org-jira-get-comment-author attachment))
+                               (created (org-jira-transform-time-format
+                                         (org-jira-find-value attachment 'created)))
+                               (size (org-jira-find-value attachment 'size))
+                               (mimeType (org-jira-find-value attachment 'mimeType))
+                               (content (org-jira-find-value attachment 'content))
+                               (filename (org-jira-find-value attachment 'filename)))
+                           (if (looking-back "Attachments:")
+                               (org-insert-subheading nil)
+                             (org-insert-heading-respect-content))
+                           (insert "[[" content "][" filename "]]")
+                           (org-narrow-to-subtree)
+                           (org-jira-entry-put (point) "ID" attachment-id)
+                           (org-jira-entry-put (point) "Author" author)
+                           (org-jira-entry-put (point) "Name" filename)
+                           (org-jira-entry-put (point) "Created" created)
+                           (org-jira-entry-put (point) "Size" (ls-lisp-format-file-size size t))
+                           (org-jira-entry-put (point) "Content" content)
+                           (widen)))
+                       attachments)))))))))))))
 
 (defun org-jira-sort-org-clocks (clocks)
   "Given a CLOCKS list, sort it by start date descending."
@@ -1343,13 +1336,12 @@ purpose of wiping an old subtree."
   (jiralib-get-worklogs
    issue-id
    (org-jira-with-callback
-    (ensure-on-issue-id
-     issue-id
-     (let ((worklogs (org-jira-find-value cb-data 'worklogs)))
-       (org-jira-logbook-reset
-        issue-id
-        (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
-                           (jiralib-worklog-import--filter-apply worklogs)))))))))
+     (ensure-on-issue-id issue-id
+       (let ((worklogs (org-jira-find-value cb-data 'worklogs)))
+         (org-jira-logbook-reset
+          issue-id
+          (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
+                                     (jiralib-worklog-import--filter-apply worklogs)))))))))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
@@ -1392,7 +1384,7 @@ purpose of wiping an old subtree."
   "Get subtasks for the current issue."
   (interactive)
   (ensure-on-issue
-   (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
+    (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
 
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-boards-read-history nil)
@@ -1549,41 +1541,41 @@ that should be bound to an issue."
 (defun org-jira-get-issue-val-from-org (key)
   "Return the requested value by KEY from the current issue."
   (ensure-on-issue
-   (cond ((eq key 'description)
-          (org-goto-first-child)
-          (forward-thing 'whitespace)
-          (if (looking-at "description: ")
-              (org-jira-strip-string (org-get-entry))
-            (error "Can not find description field for this issue")))
+    (cond ((eq key 'description)
+           (org-goto-first-child)
+           (forward-thing 'whitespace)
+           (if (looking-at "description: ")
+               (org-jira-strip-string (org-get-entry))
+             (error "Can not find description field for this issue")))
 
-         ((eq key 'summary)
-          (ensure-on-issue
-           (org-get-heading t t)))
+          ((eq key 'summary)
+           (ensure-on-issue
+             (org-get-heading t t)))
 
-         ;; org returns a time tuple, we need to convert it
-         ((eq key 'deadline)
-          (let ((encoded-time (org-get-deadline-time (point))))
-            (when encoded-time
-              (cl-reduce (lambda (carry segment)
-                           (format "%s-%s" carry segment))
-                         (reverse (cl-subseq (decode-time encoded-time) 3 6))))))
+          ;; org returns a time tuple, we need to convert it
+          ((eq key 'deadline)
+           (let ((encoded-time (org-get-deadline-time (point))))
+             (when encoded-time
+               (cl-reduce (lambda (carry segment)
+                            (format "%s-%s" carry segment))
+                          (reverse (cl-subseq (decode-time encoded-time) 3 6))))))
 
-         ;; default case, just grab the value in the properties block
-         (t
-          (when (symbolp key)
-            (setq key (symbol-name key)))
-          (setq key (or (assoc-default key org-jira-property-overrides)
-                        key))
-          (when (string= key "key")
-            (setq key "ID"))
-          ;; The variable `org-special-properties' will mess this up
-          ;; if our search, such as 'priority' is within there, so
-          ;; don't bother with it for this (since we only ever care
-          ;; about the local properties, not any hierarchal or special
-          ;; ones).
-          (let ((org-special-properties nil))
-            (or (org-entry-get (point) key)
-                ""))))))
+          ;; default case, just grab the value in the properties block
+          (t
+           (when (symbolp key)
+             (setq key (symbol-name key)))
+           (setq key (or (assoc-default key org-jira-property-overrides)
+                         key))
+           (when (string= key "key")
+             (setq key "ID"))
+           ;; The variable `org-special-properties' will mess this up
+           ;; if our search, such as 'priority' is within there, so
+           ;; don't bother with it for this (since we only ever care
+           ;; about the local properties, not any hierarchal or special
+           ;; ones).
+           (let ((org-special-properties nil))
+             (or (org-entry-get (point) key)
+                 ""))))))
 
 (defvar org-jira-actions-history nil)
 (defun org-jira-read-action (actions)
@@ -1667,21 +1659,20 @@ Where issue-id will be something such as \"EX-22\"."
   "Refresh current issue from jira to org."
   (interactive)
   (ensure-on-issue
-   (org-jira--refresh-issue (org-jira-id))))
+    (org-jira--refresh-issue (org-jira-id))))
 
 (defun org-jira--refresh-issue (issue-id)
   "Refresh issue from jira to org using ISSUE-ID."
   (jiralib-get-issue
    issue-id
    (org-jira-with-callback
-    (org-jira-log (format "Received refresh issue data for id: %s" issue-id))
-    (-> cb-data list org-jira-sdk-create-issues-from-data-list org-jira--render-issues-from-issue-list))))
+     (org-jira-log (format "Received refresh issue data for id: %s" issue-id))
+     (-> cb-data list org-jira-sdk-create-issues-from-data-list org-jira--render-issues-from-issue-list))))
 
 (defun org-jira--refresh-issue-by-id (issue-id)
   "Refresh issue from jira to org using ISSUE-ID."
-  (ensure-on-issue-id
-   issue-id
-   (org-jira--refresh-issue issue-id)))
+  (ensure-on-issue-id issue-id
+    (org-jira--refresh-issue issue-id)))
 
 (defvar org-jira-fields-values-history nil)
 ;;;###autoload
@@ -1689,58 +1680,58 @@ Where issue-id will be something such as \"EX-22\"."
   "Progress issue workflow."
   (interactive)
   (ensure-on-issue
-   (let* ((issue-id (org-jira-id))
-          (actions (jiralib-get-available-actions
-                    issue-id
-                    (org-jira-get-issue-val-from-org 'status)))
-          (action (org-jira-read-action actions))
-          (fields (jiralib-get-fields-for-action issue-id action))
-          (org-jira-rest-fields fields)
-          (field-key)
-          (custom-fields-collector nil)
-          (custom-fields
-           (progn
-             ;; delete those elements in fields, which have
-             ;; already been set in custom-fields-collector
-             (while fields
-               (setq fields
-                     (cl-remove-if
-                      (lambda (strstr)
-                        (cl-member-if (lambda (symstr)
-                                        (string= (car strstr)  (symbol-name (car symstr))))
-                                      custom-fields-collector))
-                      fields))
-               (setq field-key (org-jira-read-field fields))
-               (if (not field-key)
-                   (setq fields nil)
-                 (setq custom-fields-collector
-                       (cons
-                        (funcall (if jiralib-use-restapi
-                                     #'list
-                                   #'cons)
-                                 field-key
-                                 (if (eq field-key 'resolution)
-                                     (org-jira-read-resolution)
-                                   (let ((field-value (completing-read
-                                                       (format "Please enter %s's value: "
-                                                               (cdr (assoc (symbol-name field-key) fields)))
-                                                       org-jira-fields-values-history
-                                                       nil
-                                                       nil
-                                                       nil
-                                                       'org-jira-fields-values-history)))
-                                     (if jiralib-use-restapi
-                                         (cons 'name field-value)
-                                       field-value))))
-                        custom-fields-collector))))
-             custom-fields-collector)))
-     (jiralib-progress-workflow-action
-      issue-id
-      action
-      custom-fields
-      (cl-function
-       (lambda (&key data &allow-other-keys)
-         (org-jira-refresh-issue)))))))
+    (let* ((issue-id (org-jira-id))
+           (actions (jiralib-get-available-actions
+                     issue-id
+                     (org-jira-get-issue-val-from-org 'status)))
+           (action (org-jira-read-action actions))
+           (fields (jiralib-get-fields-for-action issue-id action))
+           (org-jira-rest-fields fields)
+           (field-key)
+           (custom-fields-collector nil)
+           (custom-fields
+            (progn
+              ;; delete those elements in fields, which have
+              ;; already been set in custom-fields-collector
+              (while fields
+                (setq fields
+                      (cl-remove-if
+                       (lambda (strstr)
+                         (cl-member-if (lambda (symstr)
+                                         (string= (car strstr)  (symbol-name (car symstr))))
+                                       custom-fields-collector))
+                       fields))
+                (setq field-key (org-jira-read-field fields))
+                (if (not field-key)
+                    (setq fields nil)
+                  (setq custom-fields-collector
+                        (cons
+                         (funcall (if jiralib-use-restapi
+                                      #'list
+                                    #'cons)
+                                  field-key
+                                  (if (eq field-key 'resolution)
+                                      (org-jira-read-resolution)
+                                    (let ((field-value (completing-read
+                                                        (format "Please enter %s's value: "
+                                                                (cdr (assoc (symbol-name field-key) fields)))
+                                                        org-jira-fields-values-history
+                                                        nil
+                                                        nil
+                                                        nil
+                                                        'org-jira-fields-values-history)))
+                                      (if jiralib-use-restapi
+                                          (cons 'name field-value)
+                                        field-value))))
+                         custom-fields-collector))))
+              custom-fields-collector)))
+      (jiralib-progress-workflow-action
+       issue-id
+       action
+       custom-fields
+       (cl-function
+        (lambda (&key data &allow-other-keys)
+          (org-jira-refresh-issue)))))))
 
 (defun org-jira-progress-next-action (actions current-status)
   "Grab the user defined 'next' action from ACTIONS, given CURRENT-STATUS."
@@ -1755,59 +1746,59 @@ Where issue-id will be something such as \"EX-22\"."
   "Progress issue workflow."
   (interactive)
   (ensure-on-issue
-   (let* ((issue-id (org-jira-id))
-          (actions (jiralib-get-available-actions
-                    issue-id
-                    (org-jira-get-issue-val-from-org 'status)))
-          (action (org-jira-progress-next-action actions (org-jira-get-issue-val-from-org 'status)))
-          (fields (jiralib-get-fields-for-action issue-id action))
-          (org-jira-rest-fields fields)
-          (field-key)
-          (custom-fields-collector nil)
-          (custom-fields
-           (progn
-             ;; delete those elements in fields, which have
-             ;; already been set in custom-fields-collector
-             (while fields
-               (setq fields
-                     (cl-remove-if
-                      (lambda (strstr)
-                        (cl-member-if (lambda (symstr)
-                                        (string= (car strstr)  (symbol-name (car symstr))))
-                                      custom-fields-collector))
-                      fields))
-               (setq field-key (org-jira-read-field fields))
-               (if (not field-key)
-                   (setq fields nil)
-                 (setq custom-fields-collector
-                       (cons
-                        (funcall (if jiralib-use-restapi
-                                     #'list
-                                   #'cons)
-                                 field-key
-                                 (if (eq field-key 'resolution)
-                                     (org-jira-read-resolution)
-                                   (let ((field-value (completing-read
-                                                       (format "Please enter %s's value: "
-                                                               (cdr (assoc (symbol-name field-key) fields)))
-                                                       org-jira-fields-values-history
-                                                       nil
-                                                       nil
-                                                       nil
-                                                       'org-jira-fields-values-history)))
-                                     (if jiralib-use-restapi
-                                         (cons 'name field-value)
-                                       field-value))))
-                        custom-fields-collector))))
-             custom-fields-collector)))
-     (if action
-         (jiralib-progress-workflow-action
-          issue-id
-          action
-          custom-fields
-          (org-jira-with-callback
-           (ensure-on-issue-id issue-id (org-jira-refresh-issue))))
-       (error "No action defined for that step!")))))
+    (let* ((issue-id (org-jira-id))
+           (actions (jiralib-get-available-actions
+                     issue-id
+                     (org-jira-get-issue-val-from-org 'status)))
+           (action (org-jira-progress-next-action actions (org-jira-get-issue-val-from-org 'status)))
+           (fields (jiralib-get-fields-for-action issue-id action))
+           (org-jira-rest-fields fields)
+           (field-key)
+           (custom-fields-collector nil)
+           (custom-fields
+            (progn
+              ;; delete those elements in fields, which have
+              ;; already been set in custom-fields-collector
+              (while fields
+                (setq fields
+                      (cl-remove-if
+                       (lambda (strstr)
+                         (cl-member-if (lambda (symstr)
+                                         (string= (car strstr)  (symbol-name (car symstr))))
+                                       custom-fields-collector))
+                       fields))
+                (setq field-key (org-jira-read-field fields))
+                (if (not field-key)
+                    (setq fields nil)
+                  (setq custom-fields-collector
+                        (cons
+                         (funcall (if jiralib-use-restapi
+                                      #'list
+                                    #'cons)
+                                  field-key
+                                  (if (eq field-key 'resolution)
+                                      (org-jira-read-resolution)
+                                    (let ((field-value (completing-read
+                                                        (format "Please enter %s's value: "
+                                                                (cdr (assoc (symbol-name field-key) fields)))
+                                                        org-jira-fields-values-history
+                                                        nil
+                                                        nil
+                                                        nil
+                                                        'org-jira-fields-values-history)))
+                                      (if jiralib-use-restapi
+                                          (cons 'name field-value)
+                                        field-value))))
+                         custom-fields-collector))))
+              custom-fields-collector)))
+      (if action
+          (jiralib-progress-workflow-action
+           issue-id
+           action
+           custom-fields
+           (org-jira-with-callback
+             (ensure-on-issue-id issue-id (org-jira-refresh-issue))))
+        (error "No action defined for that step!")))))
 
 (defun org-jira-get-id-name-alist (name ids-to-names)
   "Find the id corresponding to NAME in IDS-TO-NAMES and return an alist with id and name as keys."
@@ -1847,61 +1838,60 @@ otherwise it should return:
 
 (defun org-jira-update-issue-details (issue-id &rest rest)
   "Update the details of issue ISSUE-ID.  REST will contain optional input."
-  (ensure-on-issue-id
-   issue-id
-   ;; Set up a bunch of values from the org content
-   (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
-          (org-issue-description (s-trim (org-jira-get-issue-val-from-org 'description)))
-          (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
-          (org-issue-type (org-jira-get-issue-val-from-org 'type))
-          (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
-          (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
-          (project-components (jiralib-get-components project)))
+  (ensure-on-issue-id issue-id
+    ;; Set up a bunch of values from the org content
+    (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
+           (org-issue-description (s-trim (org-jira-get-issue-val-from-org 'description)))
+           (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
+           (org-issue-type (org-jira-get-issue-val-from-org 'type))
+           (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
+           (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
+           (project-components (jiralib-get-components project)))
 
-     ;; Lets fire off a worklog update async with the main issue
-     ;; update, why not?  This is better to fire first, because it
-     ;; doesn't auto-refresh any areas, while the end of the main
-     ;; update does a callback that reloads the worklog entries (so,
-     ;; we hope that wont occur until after this successfully syncs
-     ;; up).  Only do this sync if the user defcustom defines it as such.
-     (when org-jira-worklog-sync-p
-       (org-jira-update-worklogs-from-org-clocks))
+      ;; Lets fire off a worklog update async with the main issue
+      ;; update, why not?  This is better to fire first, because it
+      ;; doesn't auto-refresh any areas, while the end of the main
+      ;; update does a callback that reloads the worklog entries (so,
+      ;; we hope that wont occur until after this successfully syncs
+      ;; up).  Only do this sync if the user defcustom defines it as such.
+      (when org-jira-worklog-sync-p
+        (org-jira-update-worklogs-from-org-clocks))
 
-     ;; Send the update to jira
-     (let ((update-fields
-            (list (cons
-                   'components
-                   (or (org-jira-build-components-list
-                        project-components
-                        org-issue-components) []))
-                  (cons 'priority (org-jira-get-id-name-alist org-issue-priority
-                                                              (jiralib-get-priorities)))
-                  (cons 'description org-issue-description)
-                  (cons 'assignee (jiralib-get-user org-issue-assignee))
-                  (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
-                  (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
-                                                               (jiralib-get-issue-types))))))
+      ;; Send the update to jira
+      (let ((update-fields
+             (list (cons
+                    'components
+                    (or (org-jira-build-components-list
+                         project-components
+                         org-issue-components) []))
+                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
+                                                               (jiralib-get-priorities)))
+                   (cons 'description org-issue-description)
+                   (cons 'assignee (jiralib-get-user org-issue-assignee))
+                   (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
+                   (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
+                                                                (jiralib-get-issue-types))))))
 
-       ;; If we enable duedate sync and we have a deadline present
-       (when (and org-jira-deadline-duedate-sync-p
-                  (org-jira-get-issue-val-from-org 'deadline))
-         (setq update-fields
-               (append update-fields
-                       (list (cons 'duedate (org-jira-get-issue-val-from-org 'deadline))))))
+        ;; If we enable duedate sync and we have a deadline present
+        (when (and org-jira-deadline-duedate-sync-p
+                   (org-jira-get-issue-val-from-org 'deadline))
+          (setq update-fields
+                (append update-fields
+                        (list (cons 'duedate (org-jira-get-issue-val-from-org 'deadline))))))
 
-       (jiralib-update-issue
-        issue-id
-        update-fields
-        ;; This callback occurs on success
-        (org-jira-with-callback
-         (message (format "Issue '%s' updated!" issue-id))
-         (jiralib-get-issue
-          issue-id
-          (org-jira-with-callback
-           (org-jira-log "Update get issue for refresh callback hit.")
-           (-> cb-data list org-jira-get-issues))))
-        ))
-     )))
+        (jiralib-update-issue
+         issue-id
+         update-fields
+         ;; This callback occurs on success
+         (org-jira-with-callback
+           (message (format "Issue '%s' updated!" issue-id))
+           (jiralib-get-issue
+            issue-id
+            (org-jira-with-callback
+              (org-jira-log "Update get issue for refresh callback hit.")
+              (-> cb-data list org-jira-get-issues))))
+         ))
+      )))
 
 (defun org-jira-parse-issue-id ()
   "Get issue id from org text."
@@ -1982,7 +1972,7 @@ it is a symbol, it will be converted to string."
   "Open the current issue in external browser."
   (interactive)
   (ensure-on-issue
-   (browse-url (concat (replace-regexp-in-string "/*$" "" jiralib-url) "/browse/" (org-jira-id)))))
+    (browse-url (concat (replace-regexp-in-string "/*$" "" jiralib-url) "/browse/" (org-jira-id)))))
 
 (defun org-jira-url-copy-file (url newname)
   "Similar to url-copy-file but async."
@@ -2058,23 +2048,23 @@ See `org-jira-get-issues-from-filter'."
   (let* ((board (org-jira-read-board))
          (board-id (cdr board)))
     (jiralib-get-board-issues board-id
-			      :callback org-jira-get-issue-list-callback
-			      :limit (org-jira-get-board-limit board-id)
-			      :query-params (org-jira--make-jql-queryparams board-id))))
+                              :callback org-jira-get-issue-list-callback
+                              :limit (org-jira-get-board-limit board-id)
+                              :query-params (org-jira--make-jql-queryparams board-id))))
 
 (defun org-jira-get-board-limit (id)
   "Get limit for number of retrieved issues for a board
 id - integer board id"
   (let ((board (org-jira--get-board-from-buffer id)))
     (if (and board (slot-boundp board 'limit))
-	(oref board limit)
+        (oref board limit)
       org-jira-boards-default-limit)))
 
 (defun org-jira--make-jql-queryparams (board-id)
   "make GET query parameters for jql, returns nil if JQL query is not set"
   (let* ((board (org-jira--get-board-from-buffer board-id))
-	(jql (if (and board (slot-boundp board 'jql))
-		 (oref board jql))))
+         (jql (if (and board (slot-boundp board 'jql))
+                  (oref board jql))))
     (if (and jql (not (string-blank-p jql))) `((jql ,jql)))))
 
 ;;;###autoload
@@ -2085,8 +2075,8 @@ id - integer board id"
          (board-id (cdr board)))
     (org-jira-get-issues-headonly
      (jiralib-get-board-issues board-id
-			       :limit (org-jira-get-board-limit board-id)
-			       :query-params (org-jira--make-jql-queryparams board-id)))))
+                               :limit (org-jira-get-board-limit board-id)
+                               :query-params (org-jira--make-jql-queryparams board-id)))))
 
 
 (defun org-jira--render-boards-from-list (boards)
@@ -2103,38 +2093,38 @@ boards -  list of `org-jira-sdk-board' records."
     (with-current-buffer (org-jira--get-boards-buffer)
       (org-jira-mode t)
       (org-jira-freeze-ui
-       (org-save-outline-visibility t
-         (save-restriction
-           (outline-show-all)
-           (widen)
-           (goto-char (point-min))
-           (let* ((board-headline
-                   (format "Board: [[%s][%s]]" url name))
-                  (headline-pos
-                   (org-find-exact-headline-in-buffer board-headline (current-buffer) t))
-                  (entry-exists (and headline-pos (>= headline-pos (point-min)) (<= headline-pos (point-max))))
-                  (limit-value  (if (slot-boundp board 'limit) (int-to-string  limit) nil))
-                  (jql-value    (if (slot-boundp board 'jql) jql nil)))
-             (if entry-exists
-                 (progn
-                   (goto-char headline-pos)
-                   (org-narrow-to-subtree)
-                   (end-of-line))
-               (goto-char (point-max))
-               (unless (looking-at "^")
-                 (insert "\n"))
-               (insert "* ")
-               (org-jira-insert board-headline)
-               (org-narrow-to-subtree))
-             (org-jira-entry-put (point) "name" name)
-             (org-jira-entry-put (point) "type" board-type)
-             (org-jira-entry-put (point) "url"  url)
-	     ;; do not overwrite existing user properties with empty values
-             (if (or (not entry-exists) limit-value)
-                 (org-jira-entry-put (point) "limit" limit-value))
-             (if (or (not entry-exists) jql-value)
-                 (org-jira-entry-put (point) "JQL" jql-value ))
-             (org-jira-entry-put (point) "ID"   id))))))))
+        (org-save-outline-visibility t
+          (save-restriction
+            (outline-show-all)
+            (widen)
+            (goto-char (point-min))
+            (let* ((board-headline
+                    (format "Board: [[%s][%s]]" url name))
+                   (headline-pos
+                    (org-find-exact-headline-in-buffer board-headline (current-buffer) t))
+                   (entry-exists (and headline-pos (>= headline-pos (point-min)) (<= headline-pos (point-max))))
+                   (limit-value  (if (slot-boundp board 'limit) (int-to-string  limit) nil))
+                   (jql-value    (if (slot-boundp board 'jql) jql nil)))
+              (if entry-exists
+                  (progn
+                    (goto-char headline-pos)
+                    (org-narrow-to-subtree)
+                    (end-of-line))
+                (goto-char (point-max))
+                (unless (looking-at "^")
+                  (insert "\n"))
+                (insert "* ")
+                (org-jira-insert board-headline)
+                (org-narrow-to-subtree))
+              (org-jira-entry-put (point) "name" name)
+              (org-jira-entry-put (point) "type" board-type)
+              (org-jira-entry-put (point) "url"  url)
+              ;; do not overwrite existing user properties with empty values
+              (if (or (not entry-exists) limit-value)
+                  (org-jira-entry-put (point) "limit" limit-value))
+              (if (or (not entry-exists) jql-value)
+                  (org-jira-entry-put (point) "JQL" jql-value ))
+              (org-jira-entry-put (point) "ID"   id))))))))
 
 (defun org-jira--get-boards-file ()
   (expand-file-name "boards-list.org" org-jira-working-dir))
@@ -2142,7 +2132,7 @@ boards -  list of `org-jira-sdk-board' records."
 (defun org-jira--get-boards-buffer ()
   "Return buffer for list of agile boards. Create one if it does not exist."
   (let* ((boards-file  (org-jira--get-boards-file))
-	 (existing-buffer (find-buffer-visiting boards-file)))
+         (existing-buffer (find-buffer-visiting boards-file)))
     (if existing-buffer
         existing-buffer
       (find-file-noselect boards-file))))
@@ -2152,41 +2142,41 @@ boards -  list of `org-jira-sdk-board' records."
   "Get list of boards and their properies."
   (interactive)
   (let* ((datalist (jiralib-get-boards))
-	 (boards (org-jira-sdk-create-boards-from-data-list datalist)))
+         (boards (org-jira-sdk-create-boards-from-data-list datalist)))
     (org-jira--render-boards-from-list boards))
-    (switch-to-buffer (org-jira--get-boards-buffer)))
+  (switch-to-buffer (org-jira--get-boards-buffer)))
 
 (defun org-jira--get-board-from-buffer (id)
   "Parse board record from org file."
   (with-current-buffer (org-jira--get-boards-buffer)
     (org-jira-freeze-ui
-     (let ((pos (org-find-property "ID" (int-to-string  id))))
-       (if pos
-	   (progn
-	     (goto-char pos)
-	     (apply 'org-jira-sdk-board
-		    (reduce
-		     #'(lambda (acc entry)
-			 (let* ((pname   (car entry))
-				(pval (cdr entry))
-				(pair (and pval
-					   (not (string-empty-p pval))
-					   (cond
-					    ((equal pname "ID")
-					     (list :id pval))
-					    ((equal pname "URL")
-					     (list :url pval))
-					    ((equal pname "TYPE")
-					     (list :board-type pval))
-					    ((equal pname "NAME")
-					     (list :name pval))
-					    ((equal pname "LIMIT")
-					     (list :limit (string-to-number pval)))
-					    ((equal pname "JQL")
-					     (list :jql pval))
-					    (t nil)))))
-			   (if pair  (append pair acc)  acc)))
-		      (org-entry-properties) :initial-value  ()))))))))
+      (let ((pos (org-find-property "ID" (int-to-string  id))))
+        (if pos
+            (progn
+              (goto-char pos)
+              (apply 'org-jira-sdk-board
+                     (reduce
+                      #'(lambda (acc entry)
+                          (let* ((pname   (car entry))
+                                 (pval (cdr entry))
+                                 (pair (and pval
+                                            (not (string-empty-p pval))
+                                            (cond
+                                             ((equal pname "ID")
+                                              (list :id pval))
+                                             ((equal pname "URL")
+                                              (list :url pval))
+                                             ((equal pname "TYPE")
+                                              (list :board-type pval))
+                                             ((equal pname "NAME")
+                                              (list :name pval))
+                                             ((equal pname "LIMIT")
+                                              (list :limit (string-to-number pval)))
+                                             ((equal pname "JQL")
+                                              (list :jql pval))
+                                             (t nil)))))
+                            (if pair  (append pair acc)  acc)))
+                      (org-entry-properties) :initial-value  ()))))))))
 
 (defun org-jira-get-org-keyword-from-status (status)
   "Gets an 'org-mode' keyword corresponding to a given jira STATUS."
