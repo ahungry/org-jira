@@ -127,7 +127,7 @@ into the jiralib-token variable):
 
 ```lisp
 (defconst jiralib-token
-  `("Cookie" . ,(format "__atl_path=...; studio.crowd.tokenkey=...")))
+   (cons "Cookie" . "eyJ<your giant long cookie copied from browser"))
 ```
 
 ### Optimizations
