@@ -1344,6 +1344,13 @@ purpose of wiping an old subtree."
                                      (jiralib-worklog-import--filter-apply worklogs)))))))))
 
 ;;;###autoload
+(defun org-jira-unassign-issue ()
+  "Update an issue to be unassigned."
+  (interactive)
+  (let ((issue-id (org-jira-parse-issue-id)))
+    (org-jira-update-issue-details issue-id :assignee nil)))
+
+;;;###autoload
 (defun org-jira-assign-issue ()
   "Update an issue with interactive re-assignment."
   (interactive)
@@ -1351,8 +1358,15 @@ purpose of wiping an old subtree."
     (if issue-id
         (let* ((project (replace-regexp-in-string "-[0-9]+" "" issue-id))
                (jira-users (org-jira-get-assignable-users project))
-               (user (completing-read "Assignee: " (mapcar 'car jira-users)))
-               (assignee (cdr (assoc user jira-users))))
+               (user (completing-read
+                      "Assignee: "
+                      (append (mapcar 'car jira-users)
+                              (mapcar 'cdr jira-users))))
+               (assignee (or
+                          (cdr (assoc user jira-users))
+                          (cdr (rassoc user jira-users)))))
+          (when (null assignee)
+            (error "No assignee found, use org-jira-unassign-issue to make the issue unassigned"))
           (org-jira-update-issue-details issue-id :assignee assignee))
       (error "Not on an issue"))))
 
