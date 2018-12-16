@@ -105,6 +105,10 @@
   :type 'boolean
   :initialize 'custom-initialize-set)
 
+(defcustom jiralib-coding-system 'utf-8
+  "Use custom coding system for Jiralib."
+  :group 'jiralib)
+
 (defcustom jiralib-host ""
   "User customizable host name of the Jiralib server.
 
@@ -422,20 +426,32 @@ Pass ARGS to jiralib-call."
         (jiralib-use-restapi nil))
     (apply #'jiralib-call args)))
 
+(defun jiralib--json-read ()
+  "Read with json, force utf-8"
+  (decode-coding-region (point) (point-max) jiralib-coding-system)
+  (json-read))
+
 (defun jiralib--rest-call-it (api &rest args)
   "Invoke the corresponding jira rest method API.
 Invoking COMPLETE-CALLBACK when the
 JIRALIB-COMPLETE-CALLBACK is non-nil, request finishes, and
 passing ARGS to REQUEST."
+  (setq args
+        (mapcar
+         (lambda (arg)
+           (if (stringp arg)
+               (encode-coding-string arg jiralib-coding-system)
+             arg))
+         args))
   (append (request-response-data
            (apply #'request (if (string-match "^http[s]*://" api) api ;; If an absolute path, use it
                               (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
                                       (replace-regexp-in-string "^/*" "" api)))
                   :sync (not jiralib-complete-callback)
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
-                  :parser 'json-read
+                  :parser 'jiralib--json-read
                   :complete jiralib-complete-callback
-             args))
+                  args))
           nil))
 
 (defun jiralib--call-it (method &rest params)

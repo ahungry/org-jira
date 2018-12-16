@@ -220,10 +220,6 @@ variables.
   "Use the JIRA status as the TODO tag value."
   :group 'org-jira)
 
-(defcustom org-jira-coding-system nil
-  "Use custom coding system on org-jira buffers."
-  :group 'org-jira)
-
 (defcustom org-jira-deadline-duedate-sync-p t
   "Keep org deadline and jira duedate fields synced.
 You may wish to set this to nil if you track org deadlines in
@@ -589,11 +585,8 @@ to change the property names this sets."
 
 It must receive a coercion to string, as not every time will it
 be populated."
-  (let ((coding-system (or org-jira-coding-system
-                           (when (boundp 'buffer-file-coding-system)
-                             buffer-file-coding-system 'utf-8))))
-    (decode-coding-string
-     (string-make-unibyte (cl-coerce data 'string)) coding-system)))
+  (decode-coding-string
+   (cl-coerce data 'string) jiralib-coding-system))
 
 (defun org-jira-insert (&rest args)
   "Set coding to text provide by `ARGS' when insert in buffer."
@@ -918,12 +911,11 @@ See`org-jira-get-issue-list'"
               (unless (looking-at "^")
                 (insert "\n"))
               (insert "** "))
-            (let ((status (org-jira-decode status)))
-              (org-jira-insert
-               (concat (org-jira-get-org-keyword-from-status status)
-                       " "
-                       (org-jira-get-org-priority-cookie-from-issue priority)
-                       headline)))
+            (org-jira-insert
+             (concat (org-jira-get-org-keyword-from-status status)
+                     " "
+                     (org-jira-get-org-priority-cookie-from-issue priority)
+                     headline))
             (save-excursion
               (unless (search-forward "\n" (point-max) 1)
                 (insert "\n")))
@@ -1344,6 +1336,13 @@ purpose of wiping an old subtree."
                                      (jiralib-worklog-import--filter-apply worklogs)))))))))
 
 ;;;###autoload
+(defun org-jira-unassign-issue ()
+  "Update an issue to be unassigned."
+  (interactive)
+  (let ((issue-id (org-jira-parse-issue-id)))
+    (org-jira-update-issue-details issue-id :assignee nil)))
+
+;;;###autoload
 (defun org-jira-assign-issue ()
   "Update an issue with interactive re-assignment."
   (interactive)
@@ -1351,8 +1350,15 @@ purpose of wiping an old subtree."
     (if issue-id
         (let* ((project (replace-regexp-in-string "-[0-9]+" "" issue-id))
                (jira-users (org-jira-get-assignable-users project))
-               (user (completing-read "Assignee: " (mapcar 'car jira-users)))
-               (assignee (cdr (assoc user jira-users))))
+               (user (completing-read
+                      "Assignee: "
+                      (append (mapcar 'car jira-users)
+                              (mapcar 'cdr jira-users))))
+               (assignee (or
+                          (cdr (assoc user jira-users))
+                          (cdr (rassoc user jira-users)))))
+          (when (null assignee)
+            (error "No assignee found, use org-jira-unassign-issue to make the issue unassigned"))
           (org-jira-update-issue-details issue-id :assignee assignee))
       (error "Not on an issue"))))
 
