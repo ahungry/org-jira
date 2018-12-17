@@ -1583,7 +1583,6 @@ that should be bound to an issue."
              (or (org-entry-get (point) key)
                  ""))))))
 
-(defvar org-jira-actions-history nil)
 (defun org-jira-read-action (actions)
   "Read issue workflow progress ACTIONS."
   (let ((action (completing-read
@@ -1591,10 +1590,10 @@ that should be bound to an issue."
                  (mapcar 'cdr actions)
                  nil
                  t
-                 nil
-                 'org-jira-actions-history
-                 (car org-jira-actions-history))))
-    (car (rassoc action actions))))
+                 nil)))
+    (or
+     (car (rassoc action actions))
+     (user-error "You specified an empty action, the valid actions are: %s" (mapcar 'cdr actions)))))
 
 (defvar org-jira-fields-history nil)
 (defun org-jira-read-field (fields)
