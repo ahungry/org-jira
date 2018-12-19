@@ -248,7 +248,7 @@ After a successful login, store the authentication token in
                    sec)))
          (list user secret)))))
   (if jiralib-use-restapi
-      (setq jiralib-token `("Authorization" . , (format "Basic %s" (base64-encode-string (concat username ":" password)))))
+      (setq jiralib-token `("Authorization" . , (format "Basic %s" (base64-encode-string (concat username ":" password) t))))
     (unless jiralib-wsdl
       (jiralib-load-wsdl))
     (setq jiralib-token
