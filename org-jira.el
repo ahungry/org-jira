@@ -358,18 +358,20 @@ See `org-default-priority' for more info."
          (outline-show-all)
          ,@body))))
 
+(defvar org-jira-proj-key-override nil
+  "String.  An override for the proj-key.  Set to nil to restore old behavior.")
+
 ;; We want some hooking system to override default-jql + this.
 (defun org-jira--get-proj-key (issue-id)
   "Get the proper proj-key.  Typically derived from ISSUE-ID."
-  ;; (replace-regexp-in-string "-.*" "" issue-id)
-  "FAKE-JQL"
-  )
+  (if org-jira-proj-key-override org-jira-proj-key-override
+    (replace-regexp-in-string "-.*" "" issue-id)))
 
 (defun org-jira--get-proj-key-from-issue (Issue)
   "Get the proper proj-key from an ISSUE instance."
-  ;; (with-slots (proj-key) Issue
-  ;;   proj-key)
-  "FAKE-JQL")
+  (if org-jira-proj-key-override org-jira-proj-key-override
+    (with-slots (proj-key) Issue
+      proj-key)))
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
@@ -892,7 +894,23 @@ See`org-jira-get-issue-list'"
    (org-jira-get-issue-list org-jira-get-issue-list-callback))
   (org-jira-log "Fetching issues...")
   (when (> (length issues) 0)
-    (org-jira--render-issues-from-issue-list issues)))
+    (org-jira--render-issues-from-issue-list issues)
+    ;; Undo the settings for custom JQL lookups.
+    (setq org-jira-proj-key-override nil)))
+
+;;;###autoload
+(defun org-jira-get-issues-from-custom-jql (jql proj-key)
+  "Get list of issues from a custom JQL and PROJ-KEY.
+
+The PROJ-KEY will act as the file name, while the JQL will be any
+valid JQL to populate a file to store PROJ-KEY results in.
+
+Please note that this is *not* concurrent or race condition
+proof.  If you try to run multiple calls to this function, it
+will mangle things badly, as they rely on globals DEFAULT-JQL and
+ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
+  (setq org-jira-proj-key-override proj-key)
+  (org-jira-get-issue-list org-jira-get-issue-list-callback))
 
 (defun org-jira--get-project-buffer (Issue)
   (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
@@ -902,8 +920,8 @@ See`org-jira-get-issue-list'"
 
 (defun org-jira--render-issue (Issue)
   "Render single ISSUE."
-  (org-jira-log "Rendering issue from issue list")
-  (org-jira-log (org-jira-sdk-dump Issue))
+  ;; (org-jira-log "Rendering issue from issue list")
+  ;; (org-jira-log (org-jira-sdk-dump Issue))
   (with-slots (proj-key issue-id summary status priority headline id) Issue
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
