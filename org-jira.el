@@ -358,11 +358,15 @@ See `org-default-priority' for more info."
          (outline-show-all)
          ,@body))))
 
+(defun get-proj-key (issue-id)
+  "Get the proper proj-key.  Typically derived from ISSUE-ID."
+  (replace-regexp-in-string "-.*" "" issue-id))
+
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
   (declare (debug t)
            (indent 1))
-  `(let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
+  `(let* ((proj-key (get-proj-key issue-id))
           (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
           (project-buffer (or (find-buffer-visiting project-file)
                               (find-file project-file))))
