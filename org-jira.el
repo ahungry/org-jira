@@ -359,13 +359,13 @@ See `org-default-priority' for more info."
          ,@body))))
 
 ;; We want some hooking system to override default-jql + this.
-(defun get-proj-key (issue-id)
+(defun org-jira--get-proj-key (issue-id)
   "Get the proper proj-key.  Typically derived from ISSUE-ID."
   ;; (replace-regexp-in-string "-.*" "" issue-id)
   "FAKE-JQL"
   )
 
-(defun get-proj-key-from-issue (Issue)
+(defun org-jira--get-proj-key-from-issue (Issue)
   "Get the proper proj-key from an ISSUE instance."
   ;; (with-slots (proj-key) Issue
   ;;   proj-key)
@@ -375,7 +375,7 @@ See `org-default-priority' for more info."
   "Just do some work on ISSUE-ID, execute BODY."
   (declare (debug t)
            (indent 1))
-  `(let* ((proj-key (get-proj-key issue-id))
+  `(let* ((proj-key (org-jira--get-proj-key issue-id))
           (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
           (project-buffer (or (find-buffer-visiting project-file)
                               (find-file project-file))))
@@ -895,7 +895,7 @@ See`org-jira-get-issue-list'"
     (org-jira--render-issues-from-issue-list issues)))
 
 (defun org-jira--get-project-buffer (Issue)
-  (let* ((proj-key (get-proj-key-from-issue Issue))
+  (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
          (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
          (project-buffer (find-file-noselect project-file)))
     project-buffer))
