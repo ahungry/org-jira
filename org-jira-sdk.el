@@ -101,7 +101,7 @@
    (id :type string :initarg :id)       ; TODO: Probably remove me
    (issue-id :type string :initarg :issue-id :documentation "The common ID/key, such as EX-1.")
    (issue-id-int :type string :initarg :issue-id-int :documentation "The internal Jira ID, such as 12345.")
-   (priority :type string :initarg :priority)
+   (priority :type (or null string) :initarg :priority)
    (proj-key :type string :initarg :proj-key)
    (reporter :type (or null string) :initarg :reporter)
    (resolution :type (or null string) :initarg :resolution)
