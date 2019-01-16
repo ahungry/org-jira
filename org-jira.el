@@ -291,7 +291,7 @@ See `org-default-priority' for more info."
     )
   "A list of plists with :jql and :filename keys to run arbitrary user JQL."
   :group 'org-jira
-  :type 'list)
+  :type '(alist :value-type plist))
 
 ;; TODO: Remove me
 (setq org-jira-custom-jqls
