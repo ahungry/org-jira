@@ -276,18 +276,26 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type 'integer)
 
+;; FIXME: Issue with using this - issues are grouped under a headline incorrectly.
 (defcustom org-jira-custom-jqls
   '(
-    (:jql "project = EX and status IN ('To Do', 'In Development') and createdDate >= '2019-01-01' "
-          :filename "ex-2019-todos")
-    (:jql "project = EX and status IN ('To Do', 'In Development') and createdDate <= '2019-01-01' "
-          :filename "ex-old-news-todos")
-    (:jql " project = EX and order by created DESC LIMIT 10 "
-          :filename "newest-10-tickets")
+    (:jql " project IN (EX, AHU) and createdDate < '2019-01-01' order by created DESC "
+          :filename "last-years-work")
+    (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
+          :filename "this-years-work")
     )
   "A list of plists with :jql and :filename keys to run arbitrary user JQL."
   :group 'org-jira
   :type 'list)
+
+;; TODO: Remove me
+(setq org-jira-custom-jqls
+  '(
+    (:jql " project IN (EX, AHU) and createdDate < '2019-01-01' order by created DESC "
+          :filename "last-years-work")
+    (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
+          :filename "this-years-work")
+    ))
 
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
@@ -943,6 +951,8 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   (let* ((uno (car org-jira-custom-jqls))
          (proj-key (cl-getf uno :filename))
          (jql (cl-getf uno :jql)))
+    (message proj-key)
+    (message jql)
     (setq org-jira-proj-key-override proj-key)
     (setq org-jira-default-jql jql)
     (org-jira-get-issue-list org-jira-get-issues-from-custom-jql-callback)))
