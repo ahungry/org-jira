@@ -280,8 +280,10 @@ See `org-default-priority' for more info."
 (defcustom org-jira-custom-jqls
   '(
     (:jql " project IN (EX, AHU) and createdDate < '2019-01-01' order by created DESC "
+          :limit 10
           :filename "last-years-work")
     (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
+          :limit 10
           :filename "this-years-work")
     )
   "A list of plists with :jql and :filename keys to run arbitrary user JQL."
@@ -292,8 +294,10 @@ See `org-default-priority' for more info."
 (setq org-jira-custom-jqls
   '(
     (:jql " project IN (EX, AHU) and createdDate < '2019-01-01' order by created DESC "
+          :limit 10
           :filename "last-years-work")
     (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
+          :limit 10
           :filename "this-years-work")
     ))
 
@@ -919,7 +923,8 @@ See`org-jira-get-issue-list'"
 
 (defvar org-jira-original-default-jql nil)
 
-(defvar org-jira-get-issues-from-custom-jql-callback
+(defun org-jira-get-issues-from-custom-jql-callback (list)
+  "Generate a function that we can iterate over LIST with when callback finishes."
   (cl-function
    (lambda (&key data &allow-other-keys)
      "Callback for async, DATA is the response from the request call.
@@ -932,11 +937,14 @@ Will send a list of org-jira-sdk-issue objects to the list printer."
           org-jira-sdk-create-issues-from-data-list
           org-jira-get-issues)
      (setq org-jira-proj-key-override nil)
-     (setq org-jira-default-jql org-jira-original-default-jql))))
+     (setq org-jira-default-jql org-jira-original-default-jql)
+     (let ((next (rest list)))
+       (when next
+         (org-jira-get-issues-from-custom-jql next))))))
 
 ;;;###autoload
-(defun org-jira-get-issues-from-custom-jql ()
-  "Get list of issues from a custom JQL and PROJ-KEY.
+(defun org-jira-get-issues-from-custom-jql (&optional jql-list)
+  "Get JQL-LIST list of issues from a custom JQL and PROJ-KEY.
 
 The PROJ-KEY will act as the file name, while the JQL will be any
 valid JQL to populate a file to store PROJ-KEY results in.
@@ -946,16 +954,13 @@ proof.  If you try to run multiple calls to this function, it
 will mangle things badly, as they rely on globals DEFAULT-JQL and
 ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   (interactive)
-  (setq org-jira-original-default-jql org-jira-default-jql)
-  ;; For now, just get the first one in list.
-  (let* ((uno (car org-jira-custom-jqls))
+  (let* ((jl (or jql-list org-jira-custom-jqls))
+         (uno (car jl))
          (proj-key (cl-getf uno :filename))
+         (limit (cl-getf uno :limit))
          (jql (cl-getf uno :jql)))
-    (message proj-key)
-    (message jql)
     (setq org-jira-proj-key-override proj-key)
-    (setq org-jira-default-jql jql)
-    (org-jira-get-issue-list org-jira-get-issues-from-custom-jql-callback)))
+    (jiralib-do-jql-search jql limit (org-jira-get-issues-from-custom-jql-callback jl))))
 
 (defun org-jira--get-project-buffer (Issue)
   (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
