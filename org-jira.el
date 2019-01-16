@@ -285,6 +285,9 @@ See `org-default-priority' for more info."
     (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
           :limit 10
           :filename "this-years-work")
+    (:jql " project IN (EX, AHU) and status IN ('To Do', 'In Development') AND (labels = EMPTY or labels NOT IN ('FutureUpdate')) order by priority, created DESC "
+          :limit 20
+          :filename "ex-ahu-priority-items")
     )
   "A list of plists with :jql and :filename keys to run arbitrary user JQL."
   :group 'org-jira
