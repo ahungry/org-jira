@@ -963,6 +963,20 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
          (project-buffer (find-file-noselect project-file)))
     project-buffer))
 
+(defun org-jira--maybe-render-top-heading (proj-key)
+  ;; We should seek a match vs just looking at top and inserting if not.
+  (goto-char (point-min))
+  (let ((top-heading (format "* %s-Tickets" proj-key))
+        (th-found? nil))
+    (while (and (not (eobp))
+                (not th-found?))
+      (beginning-of-line)
+      (when (looking-at top-heading) (setq th-found? t))
+      (search-forward top-heading nil 1 1))
+    (beginning-of-line)
+    (unless (looking-at top-heading)
+      (insert (format "\n* %s-Tickets\n" proj-key)))))
+
 (defun org-jira--render-issue (Issue)
   "Render single ISSUE."
   ;; (org-jira-log "Rendering issue from issue list")
@@ -972,14 +986,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
           (org-jira-mode t)
-          ;; We should seek a match vs just looking at top and inserting if not.
-          (goto-char (point-min))
-          (let ((top-heading (format "^* %s-Tickets" proj-key)))
-            (while (and (not (eobp))
-                        (not (looking-at top-heading)))
-              (search-forward top-heading nil 1 1))
-            (unless (looking-at top-heading)
-              (insert (format "* %s-Tickets\n" proj-key))))
+          (org-jira--maybe-render-top-heading proj-key)
           (setq p (org-find-entry-with-id issue-id))
           (save-restriction
             (if (and p (>= p (point-min))
