@@ -276,6 +276,19 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type 'integer)
 
+(defcustom org-jira-custom-jqls
+  '(
+    (:jql "project = EX and status IN ('To Do', 'In Development') and createdDate >= '2019-01-01' "
+          :filename "ex-2019-todos")
+    (:jql "project = EX and status IN ('To Do', 'In Development') and createdDate <= '2019-01-01' "
+          :filename "ex-old-news-todos")
+    (:jql " project = EX and order by created DESC LIMIT 10 "
+          :filename "newest-10-tickets")
+    )
+  "A list of plists with :jql and :filename keys to run arbitrary user JQL."
+  :group 'org-jira
+  :type 'list)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -894,12 +907,27 @@ See`org-jira-get-issue-list'"
    (org-jira-get-issue-list org-jira-get-issue-list-callback))
   (org-jira-log "Fetching issues...")
   (when (> (length issues) 0)
-    (org-jira--render-issues-from-issue-list issues)
-    ;; Undo the settings for custom JQL lookups.
-    (setq org-jira-proj-key-override nil)))
+    (org-jira--render-issues-from-issue-list issues)))
+
+(defvar org-jira-original-default-jql nil)
+
+(defvar org-jira-get-issues-from-custom-jql-callback
+  (cl-function
+   (lambda (&key data &allow-other-keys)
+     "Callback for async, DATA is the response from the request call.
+
+Will send a list of org-jira-sdk-issue objects to the list printer."
+     (org-jira-log "Received data for org-jira-get-issue-list-callback.")
+     (--> data
+          (org-jira-sdk-path it '(issues))
+          (append it nil)     ; convert the conses into a proper list.
+          org-jira-sdk-create-issues-from-data-list
+          org-jira-get-issues)
+     (setq org-jira-proj-key-override nil)
+     (setq org-jira-default-jql org-jira-original-default-jql))))
 
 ;;;###autoload
-(defun org-jira-get-issues-from-custom-jql (jql proj-key)
+(defun org-jira-get-issues-from-custom-jql ()
   "Get list of issues from a custom JQL and PROJ-KEY.
 
 The PROJ-KEY will act as the file name, while the JQL will be any
@@ -909,8 +937,15 @@ Please note that this is *not* concurrent or race condition
 proof.  If you try to run multiple calls to this function, it
 will mangle things badly, as they rely on globals DEFAULT-JQL and
 ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
-  (setq org-jira-proj-key-override proj-key)
-  (org-jira-get-issue-list org-jira-get-issue-list-callback))
+  (interactive)
+  (setq org-jira-original-default-jql org-jira-default-jql)
+  ;; For now, just get the first one in list.
+  (let* ((uno (car org-jira-custom-jqls))
+         (proj-key (cl-getf uno :filename))
+         (jql (cl-getf uno :jql)))
+    (setq org-jira-proj-key-override proj-key)
+    (setq org-jira-default-jql jql)
+    (org-jira-get-issue-list org-jira-get-issues-from-custom-jql-callback)))
 
 (defun org-jira--get-project-buffer (Issue)
   (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
