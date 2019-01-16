@@ -972,9 +972,14 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
           (org-jira-mode t)
+          ;; We should seek a match vs just looking at top and inserting if not.
           (goto-char (point-min))
-          (unless (looking-at (format "^* %s-Tickets" proj-key))
-            (insert (format "* %s-Tickets\n" proj-key)))
+          (let ((top-heading (format "^* %s-Tickets" proj-key)))
+            (while (and (not (eobp))
+                        (not (looking-at top-heading)))
+              (search-forward top-heading nil 1 1))
+            (unless (looking-at top-heading)
+              (insert (format "* %s-Tickets\n" proj-key))))
           (setq p (org-find-entry-with-id issue-id))
           (save-restriction
             (if (and p (>= p (point-min))
