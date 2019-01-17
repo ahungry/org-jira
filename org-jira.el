@@ -428,19 +428,19 @@ order by priority, created DESC "
            (org-narrow-to-subtree)
            ,@body)))))
 
-(defmacro ensure-on-issue (Issue &rest body)
+(defmacro ensure-on-issue-Issue (Issue &rest body)
   "Just do some work on ISSUE, execute BODY."
   (declare (debug t)
            (indent 1))
-  `(with-slots (issue-id) Issue
-     (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
+  `(with-slots (issue-id) ,Issue
+     (let* ((proj-key (org-jira--get-proj-key-from-issue ,Issue))
             (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
             (project-buffer (or (find-buffer-visiting project-file)
                                 (find-file project-file))))
        (with-current-buffer project-buffer
          (org-jira-freeze-ui
-           (let ((p (org-find-entry-with-id ,issue-id)))
-             (unless p (error "Issue %s not found!" ,issue-id))
+           (let ((p (org-find-entry-with-id issue-id)))
+             (unless p (error "Issue %s not found!" issue-id))
              (goto-char p)
              (org-narrow-to-subtree)
              ,@body))))))
@@ -1312,7 +1312,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira--render-comment (Issue Comment)
   (with-slots (issue-id) Issue
     (with-slots (comment-id author headline created updated body) Comment
-      (ensure-on-issue Issue
+      (ensure-on-issue-Issue Issue
         (setq p (org-find-entry-with-id comment-id))
         (when (and p (>= p (point-min))
                    (<= p (point-max)))
