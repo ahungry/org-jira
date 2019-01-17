@@ -74,6 +74,7 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c pg") 'org-jira-get-projects)
 (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
 (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
+(define-key org-jira-map (kbd "C-c ij") 'org-jira-get-issues-from-custom-jql)
 (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
 (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
 (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
@@ -93,6 +94,42 @@ Some of the important keybindings:
 ```
 
 ### Customization
+
+#### Get Issues from Custom JQL
+
+You can define one or more custom JQL queries to run and have your
+results inserted into, as such:
+
+```
+(setq org-jira-custom-jqls
+  '(
+    (:jql " project IN (EX, AHU) and createdDate < '2019-01-01' order by created DESC "
+          :limit 10
+          :filename "last-years-work")
+    (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
+          :limit 10
+          :filename "this-years-work")
+    (:jql "
+project IN (EX, AHU)
+and status IN ('To Do', 'In Development')
+AND (labels = EMPTY or labels NOT IN ('FutureUpdate'))
+order by priority, created DESC "
+          :limit 20
+          :filename "ex-ahu-priority-items")
+    ))
+```
+
+Please note this feature still requires some testing - things that may
+work in the existing proj-key named buffers (EX.org etc.) may behave
+unexpectedly in the custom named buffers.
+
+One thing you may notice is if you create an issue in this type of
+buffer, the auto-refresh of the issue will appear in the PROJ-KEY.org
+specific buffer (you will then need to refresh this JQL buffer by
+re-running the command `C-c ij`).
+
+#### Streamlined transition flow
+
 You can define your own streamlined issue progress flow as such:
 
 ```lisp

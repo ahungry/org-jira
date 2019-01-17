@@ -285,7 +285,11 @@ See `org-default-priority' for more info."
     (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
           :limit 10
           :filename "this-years-work")
-    (:jql " project IN (EX, AHU) and status IN ('To Do', 'In Development') AND (labels = EMPTY or labels NOT IN ('FutureUpdate')) order by priority, created DESC "
+    (:jql "
+project IN (EX, AHU)
+and status IN ('To Do', 'In Development')
+AND (labels = EMPTY or labels NOT IN ('FutureUpdate'))
+order by priority, created DESC "
           :limit 20
           :filename "ex-ahu-priority-items")
     )
@@ -302,6 +306,13 @@ See `org-default-priority' for more info."
     (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
           :limit 10
           :filename "this-years-work")
+    (:jql "
+project IN (EX, AHU)
+and status IN ('To Do', 'In Development')
+AND (labels = EMPTY or labels NOT IN ('FutureUpdate'))
+order by priority, created DESC "
+          :limit 20
+          :filename "ex-ahu-priority-items")
     ))
 
 (defvar org-jira-serv nil
@@ -468,6 +479,7 @@ See `org-default-priority' for more info."
     (define-key org-jira-map (kbd "C-c iv") 'org-jira-get-issues-by-board)
     (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
     (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
+    (define-key org-jira-map (kbd "C-c ij") 'org-jira-get-issues-from-custom-jql)
     (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
     ;;(define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
     ;;(define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
@@ -961,7 +973,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
          (uno (car jl))
          (proj-key (cl-getf uno :filename))
          (limit (cl-getf uno :limit))
-         (jql (cl-getf uno :jql)))
+         (jql (replace-regexp-in-string "[\n]" " " (cl-getf uno :jql))))
     (setq org-jira-proj-key-override proj-key)
     (jiralib-do-jql-search jql limit (org-jira-get-issues-from-custom-jql-callback jl))))
 
