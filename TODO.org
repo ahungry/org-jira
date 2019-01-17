@@ -1,0 +1,11 @@
+* TODO New feature for Custom JQLs
+Allows pulling results of custom JQL queries into custom buffer names.
+** TODO Need to ensure mutations apply to the proper buffer (or at all)
+Currently doing this will cause PROJ-KEY.org buffer to update, not the
+custom JQL target.
+
+This is also a problem because some chained functionality (pulling
+worklog / comments) is derived from the proj-key and attempts are made
+to switch to that active buffer (which is not active).
+
+Everything running async doesn't help much either.
