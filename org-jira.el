@@ -426,6 +426,22 @@ order by priority, created DESC "
            (org-narrow-to-subtree)
            ,@body)))))
 
+(defmacro ensure-on-issue-id-with-filename (issue-id filename &rest body)
+  "Just do some work on ISSUE-ID, execute BODY."
+  (declare (debug t)
+           (indent 1))
+  `(let* ((proj-key ,filename)
+          (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+          (project-buffer (or (find-buffer-visiting project-file)
+                              (find-file project-file))))
+     (with-current-buffer project-buffer
+       (org-jira-freeze-ui
+         (let ((p (org-find-entry-with-id ,issue-id)))
+           (unless p (error "Issue %s not found!" ,issue-id))
+           (goto-char p)
+           (org-narrow-to-subtree)
+           ,@body)))))
+
 (defmacro ensure-on-issue-Issue (Issue &rest body)
   "Just do some work on ISSUE, execute BODY."
   (declare (debug t)
@@ -1014,8 +1030,8 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 
 (defun org-jira--render-issue (Issue)
   "Render single ISSUE."
-  ;; (org-jira-log "Rendering issue from issue list")
-  ;; (org-jira-log (org-jira-sdk-dump Issue))
+  (org-jira-log "Rendering issue from issue list")
+  (org-jira-log (org-jira-sdk-dump Issue))
   (with-slots (proj-key issue-id summary status priority headline id) Issue
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
@@ -1051,7 +1067,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                       (when (or (and val (not (string= val "")))
                                 (eq entry 'assignee)) ;; Always show assignee
                         (org-jira-entry-put (point) (symbol-name entry) val))))
-                  '(assignee reporter type priority resolution status components created updated))
+                  '(assignee filename reporter type priority resolution status components created updated))
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
@@ -1115,7 +1131,9 @@ ISSUES is a list of `org-jira-sdk-issue' records."
 
   ;; If we have any left, we map over them.
   (mapc 'org-jira--render-issue Issues)
-  (switch-to-buffer (org-jira--get-project-buffer (-last-item Issues))))
+  ;; Oh, are you the culprit?
+  ;; (switch-to-buffer (org-jira--get-project-buffer (-last-item Issues)))
+  )
 
 ;;;###autoload
 (defun org-jira-update-comment ()
@@ -1138,20 +1156,22 @@ ISSUES is a list of `org-jira-sdk-issue' records."
         (jiralib-edit-comment issue-id comment-id comment callback-edit)
       (jiralib-add-comment issue-id comment callback-add))))
 
-(defun org-jira-add-comment (issue-id comment)
-  "For ISSUE-ID, add a new COMMENT string to the issue region."
+(defun org-jira-add-comment (issue-id filename comment)
+  "For ISSUE-ID in FILENAME, add a new COMMENT string to the issue region."
   (interactive
    (let* ((issue-id (org-jira-id))
+          (filename (org-jira-filename))
           (comment (read-string (format  "Comment (%s): " issue-id))))
-     (list issue-id comment)))
+     (list issue-id filename comment)))
   (lexical-let ((issue-id issue-id))
-    (ensure-on-issue-id issue-id
+    (ensure-on-issue-id-with-filename issue-id filename
       (goto-char (point-max))
       (jiralib-add-comment
        issue-id comment
        (cl-function
         (lambda (&key data &allow-other-keys)
-          (ensure-on-issue-id issue-id (org-jira-update-comments-for-current-issue))))))))
+          (ensure-on-issue-id-with-filename issue-id filename
+            (org-jira-update-comments-for-current-issue))))))))
 
 (defun org-jira-org-clock-to-date (org-time)
   "Convert ORG-TIME formatted date into a plain date string."
@@ -1348,7 +1368,10 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira-update-comments-for-current-issue ()
   "Update comments for the current issue."
   (org-jira-log "About to update comments for current issue.")
-  (->  (org-jira-get-from-org 'issue 'key) org-jira-update-comments-for-issue))
+  (let ((Issue (make-instance 'org-jira-sdk-issue
+                              :issue-id (org-jira-get-from-org 'issue 'key)
+                              :filename (org-jira-filename))))
+    (-> Issue org-jira-update-comments-for-issue)))
 
 (defun org-jira-delete-subtree ()
   "Derived from org-cut-subtree.
@@ -1492,9 +1515,10 @@ purpose of wiping an old subtree."
 (defun org-jira-update-issue ()
   "Update an issue."
   (interactive)
-  (let ((issue-id (org-jira-parse-issue-id)))
+  (let ((issue-id (org-jira-parse-issue-id))
+        (filename (org-jira-parse-issue-filename)))
     (if issue-id
-        (org-jira-update-issue-details issue-id)
+        (org-jira-update-issue-details issue-id filename)
       (error "Not on an issue"))))
 
 ;;;###autoload
@@ -1790,15 +1814,18 @@ Where issue-id will be something such as \"EX-22\"."
   "Refresh current issue from jira to org."
   (interactive)
   (ensure-on-issue
-    (org-jira--refresh-issue (org-jira-id))))
+    (org-jira--refresh-issue (org-jira-id) (org-jira-filename))))
 
-(defun org-jira--refresh-issue (issue-id)
+(defun org-jira--refresh-issue (issue-id &optional filename)
   "Refresh issue from jira to org using ISSUE-ID."
   (jiralib-get-issue
    issue-id
    (org-jira-with-callback
-     (org-jira-log (format "Received refresh issue data for id: %s" issue-id))
-     (-> cb-data list org-jira-sdk-create-issues-from-data-list org-jira--render-issues-from-issue-list))))
+     (org-jira-log (format "Received refresh issue data for id: %s in file: %s" issue-id filename))
+     (--> cb-data
+          list
+          (org-jira-sdk-create-issues-from-data-list-with-filename filename it)
+          org-jira--render-issues-from-issue-list))))
 
 (defun org-jira--refresh-issue-by-id (issue-id)
   "Refresh issue from jira to org using ISSUE-ID."
@@ -1967,9 +1994,9 @@ otherwise it should return:
 (defun org-jira-strip-priority-tags (s)
   (->> s (replace-regexp-in-string "\\[#.*?\\]" "") s-trim))
 
-(defun org-jira-update-issue-details (issue-id &rest rest)
+(defun org-jira-update-issue-details (issue-id filename &rest rest)
   "Update the details of issue ISSUE-ID.  REST will contain optional input."
-  (ensure-on-issue-id issue-id
+  (ensure-on-issue-id-with-filename issue-id filename
     ;; Set up a bunch of values from the org content
     (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
            (org-issue-description (s-trim (org-jira-get-issue-val-from-org 'description)))
@@ -2038,6 +2065,18 @@ otherwise it should return:
           (setq continue nil)))
       issue-id)))
 
+(defun org-jira-parse-issue-filename ()
+  "Get filename from org text."
+  (save-excursion
+    (let ((continue t)
+          filename)
+      (while continue
+        (when (setq filename (org-entry-get (point) "filename"))
+          (setq continue nil))
+        (unless (and continue (org-up-heading-safe))
+          (setq continue nil)))
+      filename)))
+
 (defun org-jira-get-from-org (type entry)
   "Get an org property from the current item.
 
@@ -2097,6 +2136,10 @@ it is a symbol, it will be converted to string."
 (defun org-jira-id ()
   "Get the ID entry for the current heading."
   (org-entry-get (point) "ID"))
+
+(defun org-jira-filename ()
+  "Get the ID entry for the current heading."
+  (org-entry-get (point) "filename"))
 
 ;;;###autoload
 (defun org-jira-browse-issue ()
