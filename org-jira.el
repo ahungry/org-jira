@@ -409,8 +409,8 @@ order by priority, created DESC "
 (defun org-jira--get-proj-key-from-issue (Issue)
   "Get the proper proj-key from an ISSUE instance."
   (if org-jira-proj-key-override org-jira-proj-key-override
-    (with-slots (proj-key) Issue
-      proj-key)))
+    (with-slots (filename proj-key) Issue
+      (or filename proj-key))))
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
@@ -427,6 +427,23 @@ order by priority, created DESC "
            (goto-char p)
            (org-narrow-to-subtree)
            ,@body)))))
+
+(defmacro ensure-on-issue (Issue &rest body)
+  "Just do some work on ISSUE, execute BODY."
+  (declare (debug t)
+           (indent 1))
+  `(with-slots (issue-id) Issue
+     (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
+            (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+            (project-buffer (or (find-buffer-visiting project-file)
+                                (find-file project-file))))
+       (with-current-buffer project-buffer
+         (org-jira-freeze-ui
+           (let ((p (org-find-entry-with-id ,issue-id)))
+             (unless p (error "Issue %s not found!" ,issue-id))
+             (goto-char p)
+             (org-narrow-to-subtree)
+             ,@body))))))
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."
@@ -938,21 +955,20 @@ See`org-jira-get-issue-list'"
 
 (defvar org-jira-original-default-jql nil)
 
-(defun org-jira-get-issues-from-custom-jql-callback (list)
-  "Generate a function that we can iterate over LIST with when callback finishes."
+(defun org-jira-get-issues-from-custom-jql-callback (filename list)
+  "Generate a function that we can iterate over FILENAME and LIST with when callback finishes."
   (cl-function
    (lambda (&key data &allow-other-keys)
      "Callback for async, DATA is the response from the request call.
 
 Will send a list of org-jira-sdk-issue objects to the list printer."
-     (org-jira-log "Received data for org-jira-get-issue-list-callback.")
+     (org-jira-log "Received data for org-jira-get-issues-from-custom-jql-callback.")
      (--> data
           (org-jira-sdk-path it '(issues))
           (append it nil)     ; convert the conses into a proper list.
-          org-jira-sdk-create-issues-from-data-list
+          (org-jira-sdk-create-issues-from-data-list-with-filename filename it)
           org-jira-get-issues)
      (setq org-jira-proj-key-override nil)
-     (setq org-jira-default-jql org-jira-original-default-jql)
      (let ((next (rest list)))
        (when next
          (org-jira-get-issues-from-custom-jql next))))))
@@ -971,11 +987,11 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   (interactive)
   (let* ((jl (or jql-list org-jira-custom-jqls))
          (uno (car jl))
-         (proj-key (cl-getf uno :filename))
+         (filename (cl-getf uno :filename))
          (limit (cl-getf uno :limit))
          (jql (replace-regexp-in-string "[\n]" " " (cl-getf uno :jql))))
-    (setq org-jira-proj-key-override proj-key)
-    (jiralib-do-jql-search jql limit (org-jira-get-issues-from-custom-jql-callback jl))))
+    (setq org-jira-proj-key-override filename)
+    (jiralib-do-jql-search jql limit (org-jira-get-issues-from-custom-jql-callback filename jl))))
 
 (defun org-jira--get-project-buffer (Issue)
   (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
@@ -1076,7 +1092,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                      (format "%s" (slot-value Issue heading-entry)))))))
              '(description))
 
-            (org-jira-update-comments-for-issue issue-id)
+            (org-jira-update-comments-for-issue Issue)
 
             ;; FIXME: Re-enable when attachments are not erroring.
             ;;(org-jira-update-attachments-for-current-issue)
@@ -1293,39 +1309,41 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
        org-jira-maybe-reverse-comments
        (cl-remove-if #'org-jira-isa-ignored-comment?)))
 
-(defun org-jira--render-comment (issue-id Comment)
-  (with-slots (comment-id author headline created updated body) Comment
-    (ensure-on-issue-id issue-id
-      (setq p (org-find-entry-with-id comment-id))
-      (when (and p (>= p (point-min))
-                 (<= p (point-max)))
-        (goto-char p)
+(defun org-jira--render-comment (Issue Comment)
+  (with-slots (issue-id) Issue
+    (with-slots (comment-id author headline created updated body) Comment
+      (ensure-on-issue Issue
+        (setq p (org-find-entry-with-id comment-id))
+        (when (and p (>= p (point-min))
+                   (<= p (point-max)))
+          (goto-char p)
+          (org-narrow-to-subtree)
+          (delete-region (point-min) (point-max)))
+        (goto-char (point-max))
+        (unless (looking-at "^")
+          (insert "\n"))
+        (insert "*** ")
+        (org-jira-insert headline "\n")
         (org-narrow-to-subtree)
-        (delete-region (point-min) (point-max)))
-      (goto-char (point-max))
-      (unless (looking-at "^")
-        (insert "\n"))
-      (insert "*** ")
-      (org-jira-insert headline "\n")
-      (org-narrow-to-subtree)
-      (org-jira-entry-put (point) "ID" comment-id)
-      (org-jira-entry-put (point) "created" created)
-      (unless (string= created updated)
-        (org-jira-entry-put (point) "updated" updated))
-      (goto-char (point-max))
-      ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-      (org-jira-insert (replace-regexp-in-string "^" "  " (or body ""))))))
+        (org-jira-entry-put (point) "ID" comment-id)
+        (org-jira-entry-put (point) "created" created)
+        (unless (string= created updated)
+          (org-jira-entry-put (point) "updated" updated))
+        (goto-char (point-max))
+        ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+        (org-jira-insert (replace-regexp-in-string "^" "  " (or body "")))))))
 
-(defun org-jira-update-comments-for-issue (issue-id)
-  "Update the comments for the specified ISSUE-ID issue."
-  (jiralib-get-comments
-   issue-id
-   (org-jira-with-callback
-     (org-jira-log "In the callback for org-jira-update-comments-for-issue.")
-     (-->
-      (org-jira-find-value cb-data 'comments)
-      (org-jira-extract-comments-from-data it)
-      (mapc (lambda (Comment) (org-jira--render-comment issue-id Comment)) it)))))
+(defun org-jira-update-comments-for-issue (Issue)
+  "Update the comments for the specified ISSUE issue."
+  (with-slots (issue-id) Issue
+    (jiralib-get-comments
+     issue-id
+     (org-jira-with-callback
+       (org-jira-log "In the callback for org-jira-update-comments-for-issue.")
+       (-->
+        (org-jira-find-value cb-data 'comments)
+        (org-jira-extract-comments-from-data it)
+        (mapc (lambda (Comment) (org-jira--render-comment Issue Comment)) it))))))
 
 (defun org-jira-update-comments-for-current-issue ()
   "Update comments for the current issue."

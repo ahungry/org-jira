@@ -101,6 +101,7 @@
    (id :type string :initarg :id)       ; TODO: Probably remove me
    (issue-id :type string :initarg :issue-id :documentation "The common ID/key, such as EX-1.")
    (issue-id-int :type string :initarg :issue-id-int :documentation "The internal Jira ID, such as 12345.")
+   (filename :type (or null string) :initarg :filename :documentation "The filename to write issue to.")
    (priority :type (or null string) :initarg :priority)
    (proj-key :type string :initarg :proj-key)
    (reporter :type (or null string) :initarg :reporter)
@@ -148,6 +149,7 @@
      :created (path '(fields created))     ; confirm
      :description (or (path '(fields description)) "")
      :duedate (path '(fields duedate))         ; confirm
+     :filename (path '(fields project key))
      :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
      :id (path '(key))
      :issue-id (path '(key))
@@ -192,6 +194,17 @@
 ;; Issue
 (defun org-jira-sdk-create-issue-from-data (d) (org-jira-sdk-create-from-data :issue d))
 (defun org-jira-sdk-create-issues-from-data-list (ds) (mapcar #'org-jira-sdk-create-issue-from-data ds))
+
+;; Issue with custom filename setting
+(defun org-jira-sdk-create-issue-from-data-with-filename (filename)
+  (lambda (d)
+    (let ((Issue (org-jira-sdk-create-from-data :issue d)))
+      (setf (oref Issue filename) filename)
+      Issue)))
+
+(defun org-jira-sdk-create-issues-from-data-list-with-filename (filename ds)
+  (let ((fn (org-jira-sdk-create-issue-from-data-with-filename filename)))
+    (mapcar fn ds)))
 
 ;; Comment
 (defun org-jira-sdk-create-comment-from-data (d) (org-jira-sdk-create-from-data :comment d))
