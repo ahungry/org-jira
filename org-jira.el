@@ -1032,7 +1032,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   "Render single ISSUE."
   (org-jira-log "Rendering issue from issue list")
   (org-jira-log (org-jira-sdk-dump Issue))
-  (with-slots (proj-key issue-id summary status priority headline id) Issue
+  (with-slots (filename proj-key issue-id summary status priority headline id) Issue
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
@@ -1080,7 +1080,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 
             (mapc
              (lambda (heading-entry)
-               (ensure-on-issue-id issue-id
+               (ensure-on-issue-id-with-filename issue-id filename
                  (let* ((entry-heading
                          (concat (symbol-name heading-entry)
                                  (format ": [[%s][%s]]"
