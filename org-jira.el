@@ -408,9 +408,7 @@ order by priority, created DESC "
 
 (defun org-jira--get-proj-key-from-issue (Issue)
   "Get the proper proj-key from an ISSUE instance."
-  (if org-jira-proj-key-override org-jira-proj-key-override
-    (with-slots (filename proj-key) Issue
-      (or filename proj-key))))
+  (oref Issue filename))
 
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
@@ -433,6 +431,7 @@ order by priority, created DESC "
   (declare (debug t)
            (indent 1))
   `(with-slots (issue-id) ,Issue
+     (org-jira-log (format "EOII Issue id: %s" issue-id))
      (let* ((proj-key (org-jira--get-proj-key-from-issue ,Issue))
             (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
             (project-buffer (or (find-buffer-visiting project-file)
@@ -1312,6 +1311,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira--render-comment (Issue Comment)
   (with-slots (issue-id) Issue
     (with-slots (comment-id author headline created updated body) Comment
+      (org-jira-log (format "Rendering a comment: %s" body))
       (ensure-on-issue-Issue Issue
         (setq p (org-find-entry-with-id comment-id))
         (when (and p (>= p (point-min))
