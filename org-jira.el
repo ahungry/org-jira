@@ -130,6 +130,19 @@
   :group 'org-jira
   :type 'directory)
 
+(defcustom org-jira-project-filename-alist nil
+  "Alist translating project keys to filenames.
+
+Each element has a structure
+
+  (PROJECT-KEY . NEW-FILE-NAME)
+
+where both are strings.  NEW-FILE-NAME is relative to
+`org-jira-working-dir'."
+  :group 'org-jira
+  :type '(alist :key-type (string :tag "Project key")
+                :value-type (string :tag "File name for this project")))
+
 (defcustom org-jira-default-jql
   "assignee = currentUser() and resolution = unresolved ORDER BY
   priority DESC, created ASC"
@@ -367,7 +380,7 @@ See `org-default-priority' for more info."
   (let ((issue-id-var (make-symbol "issue-id")))
     `(let* ((,issue-id-var ,issue-id)
             (proj-key (replace-regexp-in-string "-.*" "" ,issue-id-var))
-            (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+            (project-file (org-jira--get-project-file-name proj-key))
             (project-buffer (or (find-buffer-visiting project-file)
                                 (find-file project-file))))
        (with-current-buffer project-buffer
@@ -489,6 +502,12 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
           (setq l (cdr (assoc key l)))
         (setq l (or (cdr (assoc key l)) l))))
     l))
+
+(defun org-jira--get-project-file-name (project-key)
+  "Translate PROJECT-KEY into filename"
+  (-if-let (translation (cdr (assoc project-key org-jira-project-filename-alist)))
+      (expand-file-name translation org-jira-working-dir)
+    (expand-file-name (concat project-key ".org") org-jira-working-dir)))
 
 (defun org-jira-get-project-lead (proj)
   (org-jira-find-value proj 'lead 'name))
@@ -887,7 +906,7 @@ See`org-jira-get-issue-list'"
 
 (defun org-jira--get-project-buffer (Issue)
   (with-slots (proj-key) Issue
-    (let* ((project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+    (let* ((project-file (org-jira--get-project-file-name proj-key))
            (project-buffer (find-file-noselect project-file)))
       project-buffer)))
 
@@ -1265,7 +1284,7 @@ purpose of wiping an old subtree."
           (lambda (&key data &allow-other-keys)
             ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
             (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
-                   (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+                   (project-file (org-jira--get-project-file-name proj-key))
                    (project-buffer (or (find-buffer-visiting project-file)
                                        (find-file project-file))))
               (with-current-buffer project-buffer
