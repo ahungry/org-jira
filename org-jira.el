@@ -125,8 +125,10 @@
   :tag "Org JIRA"
   :group 'org)
 
-(defvar org-jira-working-dir "~/.org-jira"
-  "Folder under which to store org-jira working files.")
+(defcustom org-jira-working-dir "~/.org-jira"
+  "Folder under which to store org-jira working files."
+  :group 'org-jira
+  :type 'directory)
 
 (defcustom org-jira-default-jql
   "assignee = currentUser() and resolution = unresolved ORDER BY
