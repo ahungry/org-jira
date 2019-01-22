@@ -1818,6 +1818,7 @@ Where issue-id will be something such as \"EX-22\"."
 
 (defun org-jira--refresh-issue (issue-id &optional filename)
   "Refresh issue from jira to org using ISSUE-ID."
+  (unless filename (setq filename (replace-regexp-in-string "-[0-9]+" "" issue-id)))
   (jiralib-get-issue
    issue-id
    (org-jira-with-callback
