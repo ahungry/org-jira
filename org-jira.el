@@ -1488,14 +1488,16 @@ purpose of wiping an old subtree."
 (defun org-jira-unassign-issue ()
   "Update an issue to be unassigned."
   (interactive)
-  (let ((issue-id (org-jira-parse-issue-id)))
-    (org-jira-update-issue-details issue-id :assignee nil)))
+  (let ((issue-id (org-jira-parse-issue-id))
+        (filename (org-jira-parse-issue-filename)))
+    (org-jira-update-issue-details issue-id filename :assignee nil)))
 
 ;;;###autoload
 (defun org-jira-assign-issue ()
   "Update an issue with interactive re-assignment."
   (interactive)
-  (let ((issue-id (org-jira-parse-issue-id)))
+  (let ((issue-id (org-jira-parse-issue-id))
+        (filename (org-jira-parse-issue-filename)))
     (if issue-id
         (let* ((project (replace-regexp-in-string "-[0-9]+" "" issue-id))
                (jira-users (org-jira-get-assignable-users project))
@@ -1508,7 +1510,7 @@ purpose of wiping an old subtree."
                           (cdr (rassoc user jira-users)))))
           (when (null assignee)
             (error "No assignee found, use org-jira-unassign-issue to make the issue unassigned"))
-          (org-jira-update-issue-details issue-id :assignee assignee))
+          (org-jira-update-issue-details issue-id filename :assignee assignee))
       (error "Not on an issue"))))
 
 ;;;###autoload
