@@ -378,7 +378,7 @@ order by priority, created DESC "
        ,@body)))
 
 (defmacro org-jira-with-callback (&rest body)
-  "Simpler way to write the data callbacks."
+  "Simpler way to write the data BODY callbacks."
   (declare (debug t)
            (indent 0))
   `(lambda (&rest request-response)
@@ -1995,10 +1995,11 @@ otherwise it should return:
             (split-string org-issue-components ",\\s *")))))
 
 (defun org-jira-strip-priority-tags (s)
+  "Given string S, remove any priority tags in the brackets."
   (->> s (replace-regexp-in-string "\\[#.*?\\]" "") s-trim))
 
 (defun org-jira-update-issue-details (issue-id filename &rest rest)
-  "Update the details of issue ISSUE-ID.  REST will contain optional input."
+  "Update the details of issue ISSUE-ID in FILENAME.  REST will contain optional input."
   (ensure-on-issue-id-with-filename issue-id filename
     ;; Set up a bunch of values from the org content
     (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
@@ -2026,12 +2027,12 @@ otherwise it should return:
                          project-components
                          org-issue-components) []))
                    (cons 'priority (org-jira-get-id-name-alist org-issue-priority
-                                                               (jiralib-get-priorities)))
+                                                       (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
                    (cons 'assignee (jiralib-get-user org-issue-assignee))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                    (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
-                                                                (jiralib-get-issue-types))))))
+                                                        (jiralib-get-issue-types))))))
 
         ;; If we enable duedate sync and we have a deadline present
         (when (and org-jira-deadline-duedate-sync-p
@@ -2040,6 +2041,8 @@ otherwise it should return:
                 (append update-fields
                         (list (cons 'duedate (org-jira-get-issue-val-from-org 'deadline))))))
 
+        ;; TODO: We need some way to handle things like assignee setting
+        ;; and refreshing the proper issue in the proper buffer/filename.
         (jiralib-update-issue
          issue-id
          update-fields
