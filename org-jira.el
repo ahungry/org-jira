@@ -447,7 +447,7 @@ order by priority, created DESC "
   (declare (debug t)
            (indent 1))
   `(with-slots (issue-id) ,Issue
-     (org-jira-log (format "EOII Issue id: %s" issue-id))
+     ;; (org-jira-log (format "EOII Issue id: %s" issue-id))
      (let* ((proj-key (org-jira--get-proj-key-from-issue ,Issue))
             (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
             (project-buffer (or (find-buffer-visiting project-file)
