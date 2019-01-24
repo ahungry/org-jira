@@ -910,6 +910,20 @@ See`org-jira-get-issue-list'"
            (project-buffer (find-file-noselect project-file)))
       project-buffer)))
 
+(defun org-jira--ensure-top-headline (proj-key)
+  "Ensure that there is a headline for PROJ-KEY at the top of the file."
+  (goto-char (point-min))
+  (let ((ok nil))
+    (save-excursion
+      (when (re-search-forward org-heading-regexp nil t)
+        (let ((elem (org-element-at-point)))
+          (when (and (eq 'headline (car elem))
+                     (equal (format "%s-Tickets" proj-key)
+                            (plist-get (cadr elem) :title))
+                     (= 1 (plist-get (cadr elem) :level)))
+            (setq ok t)))))
+    (unless ok (insert (format "* %s-Tickets\n" proj-key)))))
+
 (defun org-jira--render-issue (Issue)
   "Render single ISSUE."
   (org-jira-log "Rendering issue from issue list")
@@ -919,9 +933,7 @@ See`org-jira-get-issue-list'"
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
           (org-jira-mode t)
-          (goto-char (point-min))
-          (unless (looking-at (format "^* %s-Tickets" proj-key))
-            (insert (format "* %s-Tickets\n" proj-key)))
+          (org-jira--ensure-top-headline proj-key)
           (setq p (org-find-entry-with-id issue-id))
           (save-restriction
             (if (and p (>= p (point-min))
