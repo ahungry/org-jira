@@ -297,41 +297,16 @@ See `org-default-priority' for more info."
 ;; FIXME: Issue with using this - issues are grouped under a headline incorrectly.
 (defcustom org-jira-custom-jqls
   '(
-    (:jql " project IN (EX, AHU) and createdDate < '2019-01-01' order by created DESC "
-          :limit 10
+    (:jql " assignee = currentUser() and createdDate < '2019-01-01' order by created DESC "
+          :limit 100
           :filename "last-years-work")
-    (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
-          :limit 10
+    (:jql " assignee = currentUser() and createdDate >= '2019-01-01' order by created DESC "
+          :limit 100
           :filename "this-years-work")
-    (:jql "
-project IN (EX, AHU)
-and status IN ('To Do', 'In Development')
-AND (labels = EMPTY or labels NOT IN ('FutureUpdate'))
-order by priority, created DESC "
-          :limit 20
-          :filename "ex-ahu-priority-items")
     )
   "A list of plists with :jql and :filename keys to run arbitrary user JQL."
   :group 'org-jira
   :type '(alist :value-type plist))
-
-;; TODO: Remove me
-(setq org-jira-custom-jqls
-  '(
-    (:jql " project IN (EX, AHU) and createdDate < '2019-01-01' order by created DESC "
-          :limit 10
-          :filename "last-years-work")
-    (:jql " project IN (EX, AHU) and createdDate >= '2019-01-01' order by created DESC "
-          :limit 10
-          :filename "this-years-work")
-    (:jql "
-project IN (EX, AHU)
-and status IN ('To Do', 'In Development')
-AND (labels = EMPTY or labels NOT IN ('FutureUpdate'))
-order by priority, created DESC "
-          :limit 20
-          :filename "ex-ahu-priority-items")
-    ))
 
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
