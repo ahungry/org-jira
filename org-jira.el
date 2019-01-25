@@ -1034,7 +1034,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
       (re-search-forward top-heading nil 1 1))
     (beginning-of-line)
     (unless (looking-at top-heading)
-      (insert (format "\n* TODO %s-Tickets\n" proj-key)))))
+      (insert (format "\n* %s-Tickets\n" proj-key)))))
 
 (defun org-jira--ensure-top-headline (proj-key)
   "Ensure that there is a headline for PROJ-KEY at the top of the file."
