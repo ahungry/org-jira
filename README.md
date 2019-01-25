@@ -19,6 +19,8 @@ Use Jira in Emacs org-mode.
         - [Getting Started](#getting-started)
         - [Keybinds](#keybinds)
         - [Customization](#customization)
+            - [Get Issues from Custom JQL](#get-issues-from-custom-jql)
+            - [Streamlined transition flow](#streamlined-transition-flow)
             - [Authorization workaround (NOT secure)](#authorization-workaround-not-secure)
         - [Optimizations](#optimizations)
             - [Optimizing available actions for status changes](#optimizing-available-actions-for-status-changes)
