@@ -1,6 +1,6 @@
 ;;; org-jira.el --- Syncing between Jira and Org-mode. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2016-2018 Matthew Carter <m@ahungry.com>
+;; Copyright (C) 2016-2019 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
 ;;
 ;; Authors:
@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 4.0.0
+;; Version: 4.1.0
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (s "0.0.0") (dash "2.14.1"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes in 4.1.0:
+;; - Allow custom-jql to be specified and render in special files (see: README.md).
 
 ;;;; Changes in 4.0.0:
 ;; - Introduce SDK type for handling records vs random alist structures.
@@ -117,7 +120,7 @@
 (require 'jiralib)
 (require 'org-jira-sdk)
 
-(defconst org-jira-version "3.0.0"
+(defconst org-jira-version "4.0.0"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
