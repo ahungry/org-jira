@@ -1947,6 +1947,7 @@ Where issue-id will be something such as \"EX-22\"."
   (interactive)
   (ensure-on-issue
     (let* ((issue-id (org-jira-id))
+           (filename (org-jira-filename))
            (actions (jiralib-get-available-actions
                      issue-id
                      (org-jira-get-issue-val-from-org 'status)))
@@ -1997,7 +1998,8 @@ Where issue-id will be something such as \"EX-22\"."
            action
            custom-fields
            (org-jira-with-callback
-             (ensure-on-issue-id issue-id (org-jira-refresh-issue))))
+             (ensure-on-issue-id-with-filename issue-id filename
+               (org-jira-refresh-issue))))
         (error "No action defined for that step!")))))
 
 (defun org-jira-get-id-name-alist (name ids-to-names)
