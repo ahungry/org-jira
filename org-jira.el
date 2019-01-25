@@ -1021,19 +1021,34 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
          (project-buffer (find-file-noselect project-file)))
     project-buffer))
 
+;; TODO: Remove me
 (defun org-jira--maybe-render-top-heading (proj-key)
-  ;; We should seek a match vs just looking at top and inserting if not.
+  "Ensure that there is a headline for PROJ-KEY at the top of the file."
   (goto-char (point-min))
-  (let ((top-heading (format "* %s-Tickets" proj-key))
+  (let ((top-heading (format ".*%s-Tickets" proj-key))
         (th-found? nil))
     (while (and (not (eobp))
                 (not th-found?))
       (beginning-of-line)
       (when (looking-at top-heading) (setq th-found? t))
-      (search-forward top-heading nil 1 1))
+      (re-search-forward top-heading nil 1 1))
     (beginning-of-line)
     (unless (looking-at top-heading)
-      (insert (format "\n* %s-Tickets\n" proj-key)))))
+      (insert (format "\n* TODO %s-Tickets\n" proj-key)))))
+
+(defun org-jira--ensure-top-headline (proj-key)
+  "Ensure that there is a headline for PROJ-KEY at the top of the file."
+  (goto-char (point-min))
+  (let ((ok nil))
+    (save-excursion
+      (when (re-search-forward org-heading-regexp nil t)
+        (let ((elem (org-element-at-point)))
+          (when (and (eq 'headline (car elem))
+                     (equal (format "%s-Tickets" proj-key)
+                            (plist-get (cadr elem) :title))
+                     (= 1 (plist-get (cadr elem) :level)))
+            (setq ok t)))))
+    (unless ok (insert (format "* %s-Tickets\n" proj-key)))))
 
 (defun org-jira--render-issue (Issue)
   "Render single ISSUE."
