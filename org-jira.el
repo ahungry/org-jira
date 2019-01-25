@@ -425,6 +425,7 @@ order by priority, created DESC "
   "Get the proper proj-key from an ISSUE instance."
   (oref Issue filename))
 
+;; TODO: Merge these 3 ensure macros (or, scrap all but ones that work on Issue)
 (defmacro ensure-on-issue-id (issue-id &rest body)
   "Just do some work on ISSUE-ID, execute BODY."
   (declare (debug t)
@@ -432,7 +433,6 @@ order by priority, created DESC "
   (let ((issue-id-var (make-symbol "issue-id")))
     `(let* ((,issue-id-var ,issue-id)
             (proj-key (org-jira--get-proj-key ,issue-id-var))
-            ;; (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
             (project-file (org-jira--get-project-file-name proj-key))
             (project-buffer (or (find-buffer-visiting project-file)
                                 (find-file project-file))))
@@ -448,37 +448,40 @@ order by priority, created DESC "
   "Just do some work on ISSUE-ID, execute BODY."
   (declare (debug t)
            (indent 1))
-  `(let* ((proj-key ,filename)
-          ;; (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
-          (project-file (org-jira--get-project-file-name proj-key))
-          (project-buffer (or (find-buffer-visiting project-file)
-                              (find-file project-file))))
-     (with-current-buffer project-buffer
-       (org-jira-freeze-ui
-         (let ((p (org-find-entry-with-id ,issue-id)))
-           (unless p (error "Issue %s not found!" ,issue-id))
-           (goto-char p)
-           (org-narrow-to-subtree)
-           ,@body)))))
-
-(defmacro ensure-on-issue-Issue (Issue &rest body)
-  "Just do some work on ISSUE, execute BODY."
-  (declare (debug t)
-           (indent 1))
-  `(with-slots (issue-id) ,Issue
-     ;; (org-jira-log (format "EOII Issue id: %s" issue-id))
-     (let* ((proj-key (org-jira--get-proj-key-from-issue ,Issue))
-            ;; (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+  (let ((issue-id-var (make-symbol "issue-id"))
+        (filename-var (make-symbol "filename")))
+    `(let* ((,issue-id-var ,issue-id)
+            (,filename-var ,filename)
+            (proj-key ,filename-var)
             (project-file (org-jira--get-project-file-name proj-key))
             (project-buffer (or (find-buffer-visiting project-file)
                                 (find-file project-file))))
        (with-current-buffer project-buffer
          (org-jira-freeze-ui
-           (let ((p (org-find-entry-with-id issue-id)))
-             (unless p (error "Issue %s not found!" issue-id))
+           (let ((p (org-find-entry-with-id ,issue-id-var)))
+             (unless p (error "Issue %s not found!" ,issue-id-var))
              (goto-char p)
              (org-narrow-to-subtree)
              ,@body))))))
+
+(defmacro ensure-on-issue-Issue (Issue &rest body)
+  "Just do some work on ISSUE, execute BODY."
+  (declare (debug t)
+           (indent 1))
+  (let ((Issue-var (make-symbol "Issue")))
+    `(let ((,Issue-var ,Issue))
+         (with-slots (issue-id) ,Issue-var
+           (let* ((proj-key (org-jira--get-proj-key-from-issue ,Issue-var))
+                  (project-file (org-jira--get-project-file-name proj-key))
+                  (project-buffer (or (find-buffer-visiting project-file)
+                                      (find-file project-file))))
+             (with-current-buffer project-buffer
+               (org-jira-freeze-ui
+                 (let ((p (org-find-entry-with-id issue-id)))
+                   (unless p (error "Issue %s not found!" issue-id))
+                   (goto-char p)
+                   (org-narrow-to-subtree)
+                   ,@body))))))))
 
 (defmacro ensure-on-todo (&rest body)
   "Make sure we are on an todo heading, before executing BODY."
