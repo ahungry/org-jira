@@ -1168,22 +1168,31 @@ ISSUES is a list of `org-jira-sdk-issue' records."
 (defun org-jira-update-comment ()
   "Update a comment for the current issue."
   (interactive)
-  (let* ((issue-id (org-jira-get-from-org 'issue 'key))
+  (let* ((issue-id (org-jira-get-from-org 'issue 'key)) ; Really the key
+         (filename (org-jira-filename))
          (comment-id (org-jira-get-from-org 'comment 'id))
-         (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id)))
-         (callback-edit
-          (cl-function
-           (lambda (&key data &allow-other-keys)
-             (org-jira-update-comments-for-current-issue))))
-         (callback-add
-          (cl-function
-           (lambda (&key data &allow-other-keys)
-             ;; @todo :optim: Has to be a better way to do this than delete region (like update the unmarked one)
-             (org-jira-delete-current-comment)
-             (org-jira-update-comments-for-current-issue)))))
-    (if comment-id
-        (jiralib-edit-comment issue-id comment-id comment callback-edit)
-      (jiralib-add-comment issue-id comment callback-add))))
+         (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id))))
+    (lexical-let ((issue-id issue-id)
+                  (filename filename))
+      (let ((callback-edit
+             (cl-function
+              (lambda (&key _data &allow-other-keys)
+                (ensure-on-issue-id-with-filename
+                    issue-id filename
+                    (org-jira-update-comments-for-current-issue)))))
+            (callback-add
+             (cl-function
+              (lambda (&key _data &allow-other-keys)
+                (ensure-on-issue-id-with-filename
+                    issue-id filename
+                    ;; @todo :optim: Has to be a better way to do this
+                    ;; than delete region (like update the unmarked
+                    ;; one)
+                    (org-jira-delete-current-comment)
+                    (org-jira-update-comments-for-current-issue))))))
+        (if comment-id
+            (jiralib-edit-comment issue-id comment-id comment callback-edit)
+          (jiralib-add-comment issue-id comment callback-add))))))
 
 (defun org-jira-add-comment (issue-id filename comment)
   "For ISSUE-ID in FILENAME, add a new COMMENT string to the issue region."
@@ -1192,13 +1201,14 @@ ISSUES is a list of `org-jira-sdk-issue' records."
           (filename (org-jira-filename))
           (comment (read-string (format  "Comment (%s): " issue-id))))
      (list issue-id filename comment)))
-  (lexical-let ((issue-id issue-id))
+  (lexical-let ((issue-id issue-id)
+                (filename filename))
     (ensure-on-issue-id-with-filename issue-id filename
       (goto-char (point-max))
       (jiralib-add-comment
        issue-id comment
        (cl-function
-        (lambda (&key data &allow-other-keys)
+        (lambda (&key _data &allow-other-keys)
           (ensure-on-issue-id-with-filename issue-id filename
             (org-jira-update-comments-for-current-issue))))))))
 
