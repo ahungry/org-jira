@@ -769,7 +769,7 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
 This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (insert (org-jira-format-clock clock-entry))
   (org-beginning-of-line)
-  (org-ctrl-c-ctrl-c) ;; @todo Maybe not call directly?  does it matter? - used to resync the clock estimate
+  (org-ctrl-c-ctrl-c) ;; @TODO Maybe not call directly?  does it matter? - used to resync the clock estimate
   (org-end-of-line)
   (insert "\n")
   (insert (format "  :id: %s\n" (cadddr clock-entry)))
@@ -1171,7 +1171,7 @@ ISSUES is a list of `org-jira-sdk-issue' records."
               (lambda (&key _data &allow-other-keys)
                 (ensure-on-issue-id-with-filename
                     issue-id filename
-                    ;; @todo :optim: Has to be a better way to do this
+                    ;; @TODO :optim: Has to be a better way to do this
                     ;; than delete region (like update the unmarked
                     ;; one)
                     (org-jira-delete-current-comment)
@@ -1254,7 +1254,7 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
             (let ((clock-content
                    (buffer-substring-no-properties (point) next-clock-point)))
 
-              ;; @todo :optim: This is inefficient, calling the resync on each update/insert event,
+              ;; @TODO :optim: This is inefficient, calling the resync on each update/insert event,
               ;; ideally we would track and only insert/update changed entries, as well
               ;; only call a resync once (when the entire list is processed, which will
               ;; basically require a dry run to see how many items we should be updating.
