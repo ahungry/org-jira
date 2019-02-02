@@ -1017,7 +1017,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 
 (defun org-jira--get-project-buffer (Issue)
   (let* ((proj-key (org-jira--get-proj-key-from-issue Issue))
-         (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+         (project-file (org-jira--get-project-file-name proj-key))
          (project-buffer (find-file-noselect project-file)))
     project-buffer))
 
@@ -1435,7 +1435,7 @@ purpose of wiping an old subtree."
           (lambda (&key data &allow-other-keys)
             ;; First, make sure we're in the proper buffer (logic copied from org-jira-get-issues.
             (let* ((proj-key (replace-regexp-in-string "-.*" "" issue-id))
-                   (project-file (expand-file-name (concat proj-key ".org") org-jira-working-dir))
+                   (project-file (org-jira--get-project-file-name proj-key))
                    (project-buffer (or (find-buffer-visiting project-file)
                                        (find-file project-file))))
               (with-current-buffer project-buffer
