@@ -95,6 +95,14 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-by-fixversion)
 ```
 
+Use instead var `org-jira-entry-mode-map` to bind keymap gloabaly, e.g. with `use-package`
+
+```lisp
+(use-package org-jira
+  :ensure t
+  :bind-keymap ("s-j" . org-jira-entry-mode-map))
+```
+
 ### Customization
 
 #### Get Issues from Custom JQL
