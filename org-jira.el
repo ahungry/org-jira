@@ -520,7 +520,7 @@ See `org-default-priority' for more info."
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
     (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
-    ;(define-key org-jira-map (kbd "C-c io") 'org-jira-report-issue)
+    ;(define-key org-jira-map (kbd "C-c isr") 'org-jira-set-issue-reporter)
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
     (define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
     (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
@@ -1528,7 +1528,7 @@ purpose of wiping an old subtree."
     (org-jira-update-issue-details issue-id filename :assignee nil)))
 
 ;;;###autoload
-(defun org-jira-report-issue ()
+(defun org-jira-set-issue-reporter ()
   "Update an issue's reporter interactively."
   (interactive)
   (let ((issue-id (org-jira-parse-issue-id))
