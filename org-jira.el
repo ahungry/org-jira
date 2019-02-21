@@ -520,6 +520,7 @@ See `org-default-priority' for more info."
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
     (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
+    ;(define-key org-jira-map (kbd "C-c isr") 'org-jira-set-issue-reporter)
     (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
     (define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
     (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
@@ -587,6 +588,15 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   "Get the list of assignable users for PROJECT-KEY, adding user set jira-users first."
   (append
    '(("Unassigned" . ""))
+   org-jira-users
+   (mapcar (lambda (user)
+             (cons (org-jira-decode (cdr (assoc 'displayName user)))
+                   (org-jira-decode (cdr (assoc 'name user)))))
+           (jiralib-get-users project-key))))
+
+(defun org-jira-get-reporter-candidates (project-key)
+  "Get the list of assignable users for PROJECT-KEY, adding user set jira-users first."
+  (append
    org-jira-users
    (mapcar (lambda (user)
              (cons (org-jira-decode (cdr (assoc 'displayName user)))
@@ -1518,6 +1528,27 @@ purpose of wiping an old subtree."
     (org-jira-update-issue-details issue-id filename :assignee nil)))
 
 ;;;###autoload
+(defun org-jira-set-issue-reporter ()
+  "Update an issue's reporter interactively."
+  (interactive)
+  (let ((issue-id (org-jira-parse-issue-id))
+        (filename (org-jira-parse-issue-filename)))
+    (if issue-id
+        (let* ((project (replace-regexp-in-string "-[0-9]+" "" issue-id))
+               (jira-users (org-jira-get-reporter-candidates project)) ;; TODO, probably a better option than org-jira-get-assignable-users here
+               (user (completing-read
+                      "Reporter: "
+                      (append (mapcar 'car jira-users)
+                              (mapcar 'cdr jira-users))))
+               (reporter (or
+                          (cdr (assoc user jira-users))
+                          (cdr (rassoc user jira-users)))))
+          (when (null reporter)
+            (error "No reporter found, this should probably never happen."))
+          (org-jira-update-issue-details issue-id filename :reporter reporter))
+      (error "Not on an issue"))))
+
+;;;###autoload
 (defun org-jira-assign-issue ()
   "Update an issue with interactive re-assignment."
   (interactive)
@@ -2034,6 +2065,7 @@ otherwise it should return:
            (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
            (org-issue-type (org-jira-get-issue-val-from-org 'type))
            (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
+           (org-issue-reporter (cl-getf rest :reporter (org-jira-get-issue-val-from-org 'reporter)))
            (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
            (project-components (jiralib-get-components project)))
 
@@ -2057,6 +2089,7 @@ otherwise it should return:
                                                        (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
                    (cons 'assignee (jiralib-get-user org-issue-assignee))
+                   (cons 'reporter (jiralib-get-user org-issue-reporter))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                    (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
                                                         (jiralib-get-issue-types))))))
