@@ -687,6 +687,10 @@ to change the property names this sets."
      (org-jira-find-value comp 'name))
    (org-jira-find-value issue 'fields 'components) ", "))
 
+(defun org-jira-get-issue-labels (issue)
+  "Return the labels the ISSUE belongs to."
+  (org-jira-find-value issue 'fields 'labels))
+
 (defun org-jira-decode (data)
   "Decode text DATA.
 
@@ -832,6 +836,8 @@ Re-create it with CLOCKS.  This is used for worklogs."
       (setq tmp ""))
     (cond ((eq key 'components)
            (org-jira-get-issue-components issue))
+          ((eq key 'labels)
+           (org-jira-get-issue-labels issue))
           ((member key '(created updated startDate))
            (org-jira-transform-time-format tmp))
           ((eq key 'status)
@@ -1095,7 +1101,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                       (when (or (and val (not (string= val "")))
                                 (eq entry 'assignee)) ;; Always show assignee
                         (org-jira-entry-put (point) (symbol-name entry) val))))
-                  '(assignee filename reporter type priority resolution status components created updated))
+                  '(assignee filename reporter type priority labels resolution status components created updated))
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)

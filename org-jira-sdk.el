@@ -94,6 +94,7 @@
 (defclass org-jira-sdk-issue (org-jira-sdk-record)
   ((assignee :type (or null string) :initarg :assignee)
    (components :type string :initarg :components)
+   (labels :type string :initarg :labels)
    (created :type string :initarg :created)
    (description :type (or null string) :initarg :description)
    (duedate :type (or null string) :initarg :duedate)
@@ -146,6 +147,7 @@
     (org-jira-sdk-issue
      :assignee (path '(fields assignee name))
      :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
+     :labels (mapconcat (lambda (c) (format "%s" c)) (map 'list #'identity (path '(fields labels))) ", ")
      :created (path '(fields created))     ; confirm
      :description (or (path '(fields description)) "")
      :duedate (path '(fields duedate))         ; confirm
