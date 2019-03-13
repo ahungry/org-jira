@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 4.3.0
+;; Version: 4.3.1
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (s "0.0.0") (dash "2.14.1"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes in 4.3.1:
+;; - Fix to make custom-jql results sync worklogs properly.
 
 ;;;; Changes in 4.3.0:
 ;; - Allow org-jira-set-issue-reporter call to dynamically set this value.
@@ -123,7 +126,7 @@
 (require 'jiralib)
 (require 'org-jira-sdk)
 
-(defconst org-jira-version "4.3.0"
+(defconst org-jira-version "4.3.1"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
@@ -789,17 +792,17 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (when (caddr clock-entry) (insert (format "  %s\n" (org-jira-decode (caddr clock-entry))))) ;; No comment is nil, so don't print it
   )
 
-(defun org-jira-logbook-reset (issue-id &optional clocks)
-  "Find logbook for ISSUE-ID, delete it.
+(defun org-jira-logbook-reset (issue-id filename &optional clocks)
+  "Find logbook for ISSUE-ID in FILENAME, delete it.
 Re-create it with CLOCKS.  This is used for worklogs."
   (interactive)
   (let ((existing-logbook-p nil))
     ;; See if the LOGBOOK already exists or not.
-    (ensure-on-issue-id issue-id
+    (ensure-on-issue-id-with-filename issue-id filename
       (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
         (when (search-forward (format ":%s:" drawer-name) nil 1 1)
           (setq existing-logbook-p t))))
-    (ensure-on-issue-id issue-id
+    (ensure-on-issue-id-with-filename issue-id filename
       (let ((drawer-name (or (org-clock-drawer-name) "LOGBOOK")))
         (if existing-logbook-p
             (progn ;; If we had a logbook, drop it and re-create in a bit.
@@ -1142,7 +1145,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 
             ;; only sync worklog clocks when the user sets it to be so.
             (when org-jira-worklog-sync-p
-              (org-jira-update-worklogs-for-issue issue-id))))))))
+              (org-jira-update-worklogs-for-issue issue-id filename))))))))
 
 (defun org-jira--render-issues-from-issue-list (Issues)
   "Add the issues from ISSUES list into the org file(s).
@@ -1251,8 +1254,11 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
 (defun org-jira-update-worklogs-from-org-clocks ()
   "Update or add a worklog based on the org clocks."
   (interactive)
-  (let ((issue-id (org-jira-get-from-org 'issue 'key)))
-    (ensure-on-issue-id issue-id
+  (let ((issue-id (org-jira-get-from-org 'issue 'key))
+        (filename (org-jira-filename)))
+    (org-jira-log (format "About to sync worklog for issue: %s in file: %s"
+                  issue-id filename))
+    (ensure-on-issue-id-with-filename issue-id filename
       (search-forward (format ":%s:" (or (org-clock-drawer-name) "LOGBOOK"))  nil 1 1)
       (org-beginning-of-line)
       ;; (org-cycle 1)
@@ -1285,7 +1291,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                      comment-text
                      (cl-function
                       (lambda (&key data &allow-other-keys)
-                        (org-jira-update-worklogs-for-issue issue-id))))
+                        (org-jira-log (format "Updating worklog from org-jira-update-worklogs-from-org-clocks call"))
+                        (org-jira-update-worklogs-for-issue issue-id filename))))
                   ;; else
                   (jiralib-add-worklog
                    issue-id
@@ -1294,7 +1301,8 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                    comment-text
                    (cl-function
                     (lambda (&key data &allow-other-keys)
-                      (org-jira-update-worklogs-for-issue issue-id))))
+                      (org-jira-log (format "Adding worklog from org-jira-update-worklogs-from-org-clocks call"))
+                      (org-jira-update-worklogs-for-issue issue-id filename))))
                   )
                 )))))
       )))
@@ -1506,19 +1514,23 @@ purpose of wiping an old subtree."
 
 (defun org-jira-update-worklogs-for-current-issue ()
   "Update the worklogs for the current issue."
-  (-> (org-jira-get-from-org 'issue 'key)
-      org-jira-update-worklogs-for-issue))
+  (let ((issue-id (org-jira-get-from-org 'issue 'key))
+        (filename (org-jira-filename)))
+    (org-jira-update-worklogs-for-issue issue-id filename)))
 
-(defun org-jira-update-worklogs-for-issue (issue-id)
-  "Update the worklogs for the current issue."
+(defun org-jira-update-worklogs-for-issue (issue-id filename)
+  "Update the worklogs for the current ISSUE-ID located in FILENAME."
+  (org-jira-log (format "org-jira-update-worklogs-for-issue id: %s filename: %s"
+                issue-id filename))
   ;; Run the call
   (jiralib-get-worklogs
    issue-id
    (org-jira-with-callback
-     (ensure-on-issue-id issue-id
+     (ensure-on-issue-id-with-filename issue-id filename
        (let ((worklogs (org-jira-find-value cb-data 'worklogs)))
-         (org-jira-logbook-reset
-          issue-id
+         (org-jira-log (format "org-jira-update-worklogs-for-issue cb id: %s fn: %s"
+                       issue-id filename))
+         (org-jira-logbook-reset issue-id filename
           (org-jira-sort-org-clocks (org-jira-worklogs-to-org-clocks
                                      (jiralib-worklog-import--filter-apply worklogs)))))))))
 
