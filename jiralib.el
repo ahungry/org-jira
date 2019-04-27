@@ -351,8 +351,13 @@ request.el, so if at all possible, it should be avoided."
                         :data (json-encode (first params)))))
          (jiralib--rest-call-it (cdr (assoc 'self response)) :type "GET")
          ))
-      ('createIssueWithParent (jiralib--rest-call-it
-                               ))
+      ('createIssueWithParent
+       (let ((response (jiralib--rest-call-it
+                        "/rest/api/2/issue"
+                        :type "POST"
+                        :data (json-encode (first params)))))
+         (jiralib--rest-call-it (cdr (assoc 'self response)) :type "GET")
+         ))
       ('editComment (jiralib--rest-call-it
                      (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params))
                      :data (json-encode `((body . ,(third params))))
