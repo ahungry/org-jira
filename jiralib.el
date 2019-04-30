@@ -313,6 +313,7 @@ request.el, so if at all possible, it should be avoided."
     (case (intern method)
       ('getStatuses (jiralib--rest-call-it "/rest/api/2/status"))
       ('getIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
+      ('getSubTaskIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
       ('getIssueTypesByProject
        (let ((response (jiralib--rest-call-it (format "/rest/api/2/project/%s" (first params)))))
          (cl-coerce (cdr (assoc 'issueTypes response)) 'list)))
