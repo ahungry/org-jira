@@ -892,12 +892,11 @@ Return nil if the field is not found"
 ISSUE is a Hashtable object."
   (jiralib-call "createIssue" nil issue))
 
-(defun jiralib-create-subtask (subtask parent-issue-id)
+(defun jiralib-create-subtask (subtask)
   "Create SUBTASK for issue with PARENT-ISSUE-ID.
 
 SUBTASK is a Hashtable object."
-  (jiralib-call "createIssueWithParent" nil subtask parent-issue-id))
-
+  (jiralib-call "createIssueWithParent" nil subtask))
 
 (defvar jiralib-subtask-types-cache nil)
 
