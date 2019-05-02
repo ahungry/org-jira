@@ -1712,7 +1712,7 @@ that should be bound to an issue."
    'org-jira-type-read-history
    (car org-jira-type-read-history)))
 
-(defun org-jira-get-issue-struct (project type summary description)
+(defun org-jira-get-issue-struct (project type summary description &optional parent-id)
   "Create an issue struct for PROJECT, of TYPE, with SUMMARY and DESCRIPTION."
   (if (or (equal project "")
           (equal type "")
@@ -1725,6 +1725,7 @@ that should be bound to an issue."
          (ticket-struct
           `((fields
              (project (key . ,project))
+             (parent (key . ,parent-id))
              (issuetype (id . ,(car (rassoc type (if (and (boundp 'parent-id) parent-id)
                                                      (jiralib-get-subtask-types)
                                                    (jiralib-get-issue-types))))))
@@ -1766,8 +1767,8 @@ that should be bound to an issue."
           (equal summary ""))
       (error "Must provide all information!"))
   (let* ((parent-id (org-jira-parse-issue-id))
-         (ticket-struct (org-jira-get-issue-struct project type summary description)))
-    (org-jira-get-issues (list (jiralib-create-subtask ticket-struct parent-id)))))
+         (ticket-struct (org-jira-get-issue-struct project type summary description parent-id)))
+    (org-jira-get-issues (list (jiralib-create-subtask ticket-struct)))))
 
 (defun org-jira-strip-string (str)
   "Remove the beginning and ending white space for a string STR."
