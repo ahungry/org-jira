@@ -37,7 +37,6 @@
 
 (require 'jiralib)
 (require 'cl-lib)
-(require 's)
 (require 'eieio)
 (require 'dash)
 (require 'cl-generic)
