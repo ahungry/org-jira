@@ -50,6 +50,8 @@ In your ~/.emacs, you should set the variable as such:
 (setq jiralib-url "https://your-site.atlassian.net")
 ```
 
+The first time you try and connect to jira you will be asked for your username and password. Make sure to enter your username and not your email if they are different. If you use two-step verification you will need to create an [API token](https://confluence.atlassian.com/cloud/api-tokens-938839638.html) and use that instead of your password.
+
 If you don't want to enter your credentials (login/password) each time
 you go to connect, you can add to your ~/.authinfo.gpg or ~/.authinfo
 file, in a format similar to:
@@ -158,15 +160,16 @@ standard `C-c iw` options/usage):
     ("Done" . "Reopen")))
 ```
 
-#### Authorization workaround (NOT secure)
-If your Jira instance has disabled basic auth, you can still get in
-by copying your web browser's cookie (open up developer console, and
-right click and 'Copy request as cURL', then copy/paste the cookie
-into the jiralib-token variable):
+#### Authorization workaround (NOT secure) If your Jira instance has
+disabled basic auth, you can still get in by copying your web
+browser's cookie. Open up developer console an in the Network tab
+right click the request for the JIRA page and select 'Copy request as
+cURL'. Paste it into a file so you can copy out the value for the
+cookie "cloud.session.token". Then set jiralib-token like this:
 
 ```lisp
 (defconst jiralib-token
-   (cons "Cookie" . "eyJ<your giant long cookie copied from browser"))
+   '("Cookie" . "cloud.session.token=<YOUR COOKIE VALUE>"))
 ```
 
 ### Optimizations
