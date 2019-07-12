@@ -11,7 +11,7 @@
 ;; URL: https://github.com/ahungry/org-jira
 ;; Version: 4.3.1
 ;; Keywords: ahungry jira org bug tracker
-;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (s "0.0.0") (dash "2.14.1"))
+;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (dash "2.14.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -122,7 +122,6 @@
 (require 'url)
 (require 'ls-lisp)
 (require 'dash)
-(require 's)
 (require 'jiralib)
 (require 'org-jira-sdk)
 
@@ -862,7 +861,7 @@ Re-create it with CLOCKS.  This is used for worklogs."
                (org-jira-find-value issue 'fields 'priority 'name)
              (org-jira-find-value (jiralib-get-priorities) tmp)))
           ((eq key 'description)
-           (org-jira-strip-string tmp))
+           (org-trim tmp))
           (t
            tmp))))
 
@@ -1770,10 +1769,6 @@ that should be bound to an issue."
          (ticket-struct (org-jira-get-issue-struct project type summary description parent-id)))
     (org-jira-get-issues (list (jiralib-create-subtask ticket-struct)))))
 
-(defun org-jira-strip-string (str)
-  "Remove the beginning and ending white space for a string STR."
-  (s-trim str))
-
 (defun org-jira-get-issue-val-from-org (key)
   "Return the requested value by KEY from the current issue."
   (ensure-on-issue
@@ -1781,7 +1776,7 @@ that should be bound to an issue."
            (org-goto-first-child)
            (forward-thing 'whitespace)
            (if (looking-at "description: ")
-               (org-jira-strip-string (org-get-entry))
+               (org-trim (org-get-entry))
              (error "Can not find description field for this issue")))
 
           ((eq key 'summary)
@@ -2076,14 +2071,14 @@ otherwise it should return:
 
 (defun org-jira-strip-priority-tags (s)
   "Given string S, remove any priority tags in the brackets."
-  (->> s (replace-regexp-in-string "\\[#.*?\\]" "") s-trim))
+  (->> s (replace-regexp-in-string "\\[#.*?\\]" "") org-trim))
 
 (defun org-jira-update-issue-details (issue-id filename &rest rest)
   "Update the details of issue ISSUE-ID in FILENAME.  REST will contain optional input."
   (ensure-on-issue-id-with-filename issue-id filename
     ;; Set up a bunch of values from the org content
     (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
-           (org-issue-description (s-trim (org-jira-get-issue-val-from-org 'description)))
+           (org-issue-description (org-trim (org-jira-get-issue-val-from-org 'description)))
            (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
            (org-issue-type (org-jira-get-issue-val-from-org 'type))
            (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
@@ -2209,7 +2204,7 @@ it is a symbol, it will be converted to string."
    (org-jira-entry-put (point) "ID" comment-id)
    (search-forward ":END:" nil 1 1)
    (forward-line)
-   (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
+   (org-trim (buffer-substring-no-properties (point) (point-max)))))
 
 (defun org-jira-get-worklog-comment (&optional worklog-id)
   "Get the worklog comment of the worklog with id WORKLOG-ID."
@@ -2219,7 +2214,7 @@ it is a symbol, it will be converted to string."
    (org-jira-entry-put (point) "ID" worklog-id)
    (search-forward ":END:" nil 1 1)
    (forward-line)
-   (org-jira-strip-string (buffer-substring-no-properties (point) (point-max)))))
+   (org-trim (buffer-substring-no-properties (point) (point-max)))))
 
 (defun org-jira-id ()
   "Get the ID entry for the current heading."
