@@ -160,12 +160,25 @@ standard `C-c iw` options/usage):
     ("Done" . "Reopen")))
 ```
 
-#### Authorization workaround (NOT secure) If your Jira instance has
-disabled basic auth, you can still get in by copying your web
-browser's cookie. Open up developer console an in the Network tab
-right click the request for the JIRA page and select 'Copy request as
-cURL'. Paste it into a file so you can copy out the value for the
-cookie "cloud.session.token". Then set jiralib-token like this:
+#### Basic auth via personal API tokens (secure'ish)
+Use a personal API token from here:
+
+https://id.atlassian.com/manage/api-tokens
+
+and your email address from here:
+
+https://id.atlassian.com/manage-profile/email
+
+and you should be able to work with basic auth, even if you are
+required to auth via Google usually on the browser domain.
+
+#### Authorization workaround (NOT secure)
+However, if all else fails (your Jira instance has disabled basic auth
+entirely), you can still get in by copying your web browser's
+cookie. Open up developer console an in the Network tab right click
+the request for the JIRA page and select 'Copy request as cURL'. Paste
+it into a file so you can copy out the value for the cookie
+"cloud.session.token". Then set jiralib-token like this:
 
 ```lisp
 (defconst jiralib-token
