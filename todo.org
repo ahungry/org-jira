@@ -1,4 +1,0 @@
-* Worklog
-** TODO Sync up Estimate/Remaining Estimate in Worklog or Property
-With the dynamic org clocking, integrate with how org clock tracks
-estimates would be a good idea.
