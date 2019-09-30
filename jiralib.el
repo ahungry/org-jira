@@ -190,9 +190,6 @@ The default value works if JIRA is located at a hostname named
 (defvar jiralib-token nil
   "JIRA token used for authentication.")
 
-(defvar jiralib-rest-auth-head nil
-  "JIRA restapi auth head.")
-
 (defvar jiralib-user-login-name nil
   "The name of the user logged into JIRA.
 This is maintained by `jiralib-login'.")
