@@ -9,3 +9,2255 @@ worklog / comments) is derived from the proj-key and attempts are made
 to switch to that active buffer (which is not active).
 
 Everything running async doesn't help much either.
+* TODO 
+ - context ::
+   - info/notes
+     - srcs
+       - [2019-09-25 Wed]
+	 #+begin_example
+	   https://jira.14west.us/rest/api/1.0/issues/355953/ActionsAndOperations?atl_token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin&_=1569386969563
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-AUSERNAME: ngarber
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:42 GMT
+
+	   X-AREQUESTID: 65x56631277x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/adminquicksearch/latest/links/default?_=1569386969564
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-AUSERNAME: ngarber
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:42 GMT
+
+	   X-AREQUESTID: 65x56631276x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/analytics/1.0/publish/bulk
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Content-Type: application/json
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Content-Length: 66
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   data: [{"name":"jira.dotdialog.show","properties":{},"timeDelta":-1800}]
+
+	   POST: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:44 GMT
+
+	   X-AREQUESTID: 65x56631278x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Content-Length: 0
+
+	   Connection: close
+
+	   https://jira.14west.us/rest/tempo-accounts/1/link/project/13103/default?_=1569386969565
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:47 GMT
+
+	   X-AREQUESTID: 65x56631284x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Content-Length: 0
+
+	   Connection: close
+
+	   https://jira.14west.us/rest/analytics/1.0/publish/bulk
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Content-Type: application/json
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Content-Length: 756
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   data: [{"name":"jira.dotdialog.selection","properties":{"group":"edit-fields","selected":"-1177318867","lang":"en"},"timeDelta":-1839},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-1806},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-1805},{"name":"browser.metrics.navigation","properties":{"apdex":"1","isInitial":"false","journeyId":"f8f53d82-99b0-4a1b-a9f4-f6ec2fa835b2","key":"jira.dialog.open.modal-field-view","readyForUser":"53","threshold":"1000","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0","applicationHash":"b257875918338671d80692a7dc527caa03d480e2","resourceTiming":"{}","userTimingRaw":"{\"marks\":{},\"measures\":{}}","experiments":"[]"},"timeDelta":-1756}]
+
+	   POST: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:49 GMT
+
+	   X-AREQUESTID: 65x56631289x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Content-Length: 0
+
+	   Connection: close
+
+	   https://www.youtube.com/api/stats/watchtime?ns=yt&el=detailpage&cpn=cx-p1a1PSD5Q6TEH&docid=JHCxW6j8hJY&ver=2&referrer=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Ds1ZY6O9IcWI%26list%3DWL%26index%3D5&cmt=101.148&ei=TPWKXa2CCrelhwb5-azQCw&fmt=247&fs=0&rt=102.003&of=F4OZPcpEuIp1bMo8Bym1fw&euri&lact=167920&cl=270169268&osid=MTkxYTcxMzM%3AAOeUNAby6zmyj5is0beyxD6VGdXNE0uEwg&state=playing&vm=CAEQARgEKiBKVmpsYXZfam82THpjaVhZLVFNMHp4LThqeVFGa3NLOA&volume=52&subscribed=1&c=WEB&cver=2.20190920.05.01&cplayer=UNIPLAYER&cbr=Firefox&cbrver=69.0&cos=Macintosh&cosver=10.14&autonav=1&autoplay=1&delay=4&hl=en_US&cr=US&len=426.821&rtn=142&feature=autoplay&list=WL&afmt=251&idpj=-9&ldpj=-9&rti=102&muted=0&st=61.169&et=101.148&vis=3
+
+	   Host: www.youtube.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: image/webp,*/*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Referer: https://www.youtube.com/watch?v=JHCxW6j8hJY&list=WL&index=5
+
+	   Connection: keep-alive
+
+	   Cookie: VISITOR_INFO1_LIVE=tG9wu1EKQIY; PREF=f5=30&f4=4000000&f6=2080&al=en+es-419&f1=50000000; SID=nQdT1Z4o_ainWHHndvOszXArDjulkfjGbbxPRdARKHbv5bOgcnjJSdN93iYGaXCVJXa0HA.; HSID=A8rYQ_72o8ZOwvrE6; SSID=AL5WxuRzuur4X55Ht; APISID=rnqWVS_5FDPUqj1B/AT_7VwN_Ei3tSF4JL; SAPISID=B0Cz9v6NnczykRNJ/A-Doq4RojUS3QHwaq; LOGIN_INFO=AFmmF2swRgIhANyq9OgI9zhs4NxNTYmKFmT0FIEdsVKJDAb443X6x1yaAiEA6u7AgQVdBp4-bmxrr5LD4-Ayk8JdHWKZE_oK5Y6XGng:QUQ3MjNmeWhYSy1EU0lZS19RV3lEZUJwa0lwY3JqLVMzeEhZelRGQzN2REsxYjVNbnRXVkNDZjhrSlhobl85UUR6cWJWS0NaOFV6M2ZNTEtsV1NROUNfNG1oYzBzaTQ1OU1wcW1paHptaHFVenJtajM1VEJfa0xWTEhMc3hHMHJpRmhJcUVLdFVkWm9YQTVORlcxSk1YOXJlWkNKWGgtZ1pWMlFxNGFzWFpyQVRIMnVtRFktQXlZ; SIDCC=AN0-TYvGOGRyiwsSENlsXyZNV8ms00pdum98LlT9V5iTE0de2KOFSPoqUc-VKCDQJiNdq6HRebon; YSC=gw13j_AS-DQ; wide=0
+
+	   GET: HTTP/2.0 204 No Content
+
+	   content-type: text/html; charset=UTF-8
+
+	   date: Wed, 25 Sep 2019 05:05:54 GMT
+
+	   pragma: no-cache
+
+	   expires: Fri, 01 Jan 1990 00:00:00 GMT
+
+	   cache-control: no-cache, must-revalidate
+
+	   x-content-type-options: nosniff
+
+	   server: Video Stats Server
+
+	   content-length: 0
+
+	   x-xss-protection: 0
+
+	   x-frame-options: SAMEORIGIN
+
+	   alt-svc: quic=":443"; ma=2592000; v="46,43,39"
+
+	   X-Firefox-Spdy: h2
+
+	   https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=&limit=15&offset=0
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:53 GMT
+
+	   X-AREQUESTID: 65x56631321x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://r5---sn-p5qs7nes.googlevideo.com/videoplayback?expire=1569409452&ei=TPWKXZT1BaGRhwbG3aHAAQ&ip=69.138.255.31&id=o-AGGOJrQxE4c8g8vpH3RKnPaC589-DyiGA7FiPAXd7XdS&itag=251&source=youtube&requiressl=yes&mm=31%2C29&mn=sn-p5qs7nes%2Csn-p5qlsndk&ms=au%2Crdu&mv=m&mvi=4&pl=18&ctier=A&pfa=5&initcwndbps=2283750&hightc=yes&mime=audio%2Fwebm&gir=yes&clen=5977468&dur=426.821&lmt=1569325315921402&mt=1569387766&fvip=5&keepalive=yes&c=WEB&txp=5531432&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cctier%2Cpfa%2Chightc%2Cmime%2Cgir%2Cclen%2Cdur%2Clmt&sig=ALgxI2wwRQIgX6OnHQMx4cnsMmoNToQzwP_5g0jXnpZnTYTemYNTGyYCIQD3BYgi-qnzvEELIzzEaojXTB4UXgzABIrczYZkbxqo-g%3D%3D&lsparams=mm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AHylml4wRgIhAOZ0SDHj_FvrmLGadndZvd7qiyP5jtL1ox5Q5FhN7OaJAiEAmSfM2dEpn23SDh6zrxt-vglUf7T2EPt9zVDhOwWg7U8%3D&alr=yes&cpn=cx-p1a1PSD5Q6TEH&cver=2.20190920.05.01&range=3053220-3455041&rn=2114&rbuf=116944
+
+	   Host: r5---sn-p5qs7nes.googlevideo.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Referer: https://www.youtube.com/
+
+	   Origin: https://www.youtube.com
+
+	   Connection: keep-alive
+
+	   GET: HTTP/1.1 200 OK
+
+	   Last-Modified: Tue, 24 Sep 2019 11:41:55 GMT
+
+	   Content-Type: audio/webm
+
+	   Date: Wed, 25 Sep 2019 05:05:56 GMT
+
+	   Expires: Wed, 25 Sep 2019 05:05:56 GMT
+
+	   Cache-Control: private, max-age=21196
+
+	   Accept-Ranges: bytes
+
+	   Content-Length: 401822
+
+	   Connection: keep-alive
+
+	   Alt-Svc: quic=":443"; ma=2592000; v="46,43,39"
+
+	   Access-Control-Allow-Origin: https://www.youtube.com
+
+	   Access-Control-Allow-Credentials: true
+
+	   Timing-Allow-Origin: https://www.youtube.com
+
+	   Access-Control-Expose-Headers: Client-Protocol, Content-Length, Content-Type, X-Bandwidth-Est, X-Bandwidth-Est2, X-Bandwidth-Est3, X-Bandwidth-App-Limited, X-Bandwidth-Est-App-Limited, X-Bandwidth-Est-Comp, X-Bandwidth-Avg, X-Head-Time-Millis, X-Head-Time-Sec, X-Head-Seqnum, X-Response-Itag, X-Restrict-Formats-Hint, X-Sequence-Num, X-Segment-Lmt, X-Walltime-Ms
+
+	   X-Content-Type-Options: nosniff
+
+	   Server: gvs 1.0
+
+	   https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=co&limit=15&offset=0
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:55 GMT
+
+	   X-AREQUESTID: 65x56631367x3
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=col&limit=15&offset=0
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:55 GMT
+
+	   X-AREQUESTID: 65x56631369x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=coll&limit=15&offset=0
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:55 GMT
+
+	   X-AREQUESTID: 65x56631372x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=colla&limit=15&offset=0
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:56 GMT
+
+	   X-AREQUESTID: 65x56631374x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/secure/AjaxIssueAction.jspa?decorator=none
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+
+	   X-AUSERNAME: ngarber
+
+	   X-SITEMESH-OFF: true
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Content-Length: 171
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   customfield_11600=212&issueId=355953&atl_token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin&singleFieldEdit=true&fieldsToForcePresent=customfield_11600
+
+	   POST: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:59 GMT
+
+	   X-AREQUESTID: 65x56631391x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   Cache-Control: no-cache, no-store, must-revalidate
+
+	   Pragma: no-cache
+
+	   Expires: Thu, 01 Jan 1970 00:00:00 GMT
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   Upgrade-Insecure-Requests: 1
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:05:59 GMT
+
+	   X-AREQUESTID: 66x56631395x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   P3P: CP="CURa ADMa DEVa CONo HISa OUR IND DSP ALL COR"
+
+	   Content-Type: text/html;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://www.youtube.com/api/stats/qoe?event=streamingstats&fmt=247&afmt=251&cpn=cx-p1a1PSD5Q6TEH&ei=TPWKXa2CCrelhwb5-azQCw&el=detailpage&docid=JHCxW6j8hJY&ns=yt&fexp=23723208%2C23727265%2C23744176%2C23745074%2C23785797%2C23788842%2C23788875%2C23793834%2C23804281%2C23805333%2C23808951%2C23826780%2C23828243%2C23829054%2C23832027%2C23832544%2C23833338%2C23836965%2C23837741%2C23837772%2C23837993%2C23838629%2C23839360%2C23840217%2C23840700%2C23840752%2C23842053%2C23842663%2C23842986%2C23843288%2C23843533%2C23845160%2C24630293%2C9449243%2C9471235%2C9471655%2C9474356&cl=270169268&seq=6&c=WEB&cver=2.20190920.05.01&cplayer=UNIPLAYER&cbr=Firefox&cbrver=69.0&cos=Macintosh&cosver=10.14&vps=110.009:PL&bwm=110.009:2670009:0.423&bwe=110.009:3963195&cmt=110.009:109.169&bh=110.009:120.875
+
+	   Host: www.youtube.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Referer: https://www.youtube.com/watch?v=JHCxW6j8hJY&list=WL&index=5
+
+	   Content-Type: text/plain;charset=UTF-8
+
+	   Content-Length: 0
+
+	   Connection: keep-alive
+
+	   Cookie: VISITOR_INFO1_LIVE=tG9wu1EKQIY; PREF=f5=30&f4=4000000&f6=2080&al=en+es-419&f1=50000000; SID=nQdT1Z4o_ainWHHndvOszXArDjulkfjGbbxPRdARKHbv5bOgcnjJSdN93iYGaXCVJXa0HA.; HSID=A8rYQ_72o8ZOwvrE6; SSID=AL5WxuRzuur4X55Ht; APISID=rnqWVS_5FDPUqj1B/AT_7VwN_Ei3tSF4JL; SAPISID=B0Cz9v6NnczykRNJ/A-Doq4RojUS3QHwaq; LOGIN_INFO=AFmmF2swRgIhANyq9OgI9zhs4NxNTYmKFmT0FIEdsVKJDAb443X6x1yaAiEA6u7AgQVdBp4-bmxrr5LD4-Ayk8JdHWKZE_oK5Y6XGng:QUQ3MjNmeWhYSy1EU0lZS19RV3lEZUJwa0lwY3JqLVMzeEhZelRGQzN2REsxYjVNbnRXVkNDZjhrSlhobl85UUR6cWJWS0NaOFV6M2ZNTEtsV1NROUNfNG1oYzBzaTQ1OU1wcW1paHptaHFVenJtajM1VEJfa0xWTEhMc3hHMHJpRmhJcUVLdFVkWm9YQTVORlcxSk1YOXJlWkNKWGgtZ1pWMlFxNGFzWFpyQVRIMnVtRFktQXlZ; SIDCC=AN0-TYvGOGRyiwsSENlsXyZNV8ms00pdum98LlT9V5iTE0de2KOFSPoqUc-VKCDQJiNdq6HRebon; YSC=gw13j_AS-DQ; wide=0
+
+	   POST: HTTP/2.0 204 No Content
+
+	   content-type: text/html; charset=UTF-8
+
+	   date: Wed, 25 Sep 2019 05:06:02 GMT
+
+	   pragma: no-cache
+
+	   expires: Fri, 01 Jan 1990 00:00:00 GMT
+
+	   cache-control: no-cache, must-revalidate
+
+	   x-content-type-options: nosniff
+
+	   server: Video Stats Server
+
+	   content-length: 0
+
+	   x-xss-protection: 0
+
+	   x-frame-options: SAMEORIGIN
+
+	   alt-svc: quic=":443"; ma=2592000; v="46,43,39"
+
+	   X-Firefox-Spdy: h2
+
+	   https://jira.14west.us/rest/comment-templates/1.0/templates/?issueKey=ITDEVOPS-1069&_=1569386969566
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:06:00 GMT
+
+	   X-AREQUESTID: 66x56631398x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/scriptrunner/1.0/message?_=1569386969567
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 204 
+
+	   Date: Wed, 25 Sep 2019 05:06:00 GMT
+
+	   X-AREQUESTID: 66x56631399x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   https://jira.14west.us/rest/scriptrunner/behaviours/latest/validators.json?issueId=355953&_=1569386969568
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:06:01 GMT
+
+	   X-AREQUESTID: 66x56631400x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Content-Length: 0
+
+	   Connection: close
+
+	   https://jira.14west.us/rest/bamboo/latest/deploy/ITDEVOPS/ITDEVOPS-1069?_=1569386969569
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:06:01 GMT
+
+	   X-AREQUESTID: 66x56631401x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/tempo-time-activities/1/issue/355953/?page=1&size=5&activityType=all&currentUser=true
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, application/vnd-ms-excel
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Content-Type: application/json
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:06:01 GMT
+
+	   X-AREQUESTID: 66x56631403x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/tempo-teams/2/permissionGroups/myPermissions/teams
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, application/vnd-ms-excel
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Content-Type: application/json
+
+	   Content-Length: 68
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   {"permissions":["permissions.plan.view","permissions.worklog.view"]}
+
+	   POST: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:06:01 GMT
+
+	   X-AREQUESTID: 66x56631404x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/rest/tempo-accounts/1/ratetable/currency
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, application/vnd-ms-excel
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Content-Type: application/json
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:06:01 GMT
+
+	   X-AREQUESTID: 66x56631402x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://jira.14west.us/s/-rfwtym/801001/2f4dfe2e84e453b2d73143f5dcf20409/81/_/download/resources/onedrive-jira:js-resources/atlassian-connect-iframe.js
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 04:45:17 GMT
+
+	   X-AREQUESTID: 45x56628411x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   Expires: Thu, 24 Sep 2020 04:45:17 GMT
+
+	   X-Seraph-LoginReason: OK
+
+	   Last-Modified: Thu, 19 Sep 2019 14:22:03 GMT
+
+	   ETag: "1568902923000"
+
+	   Content-Type: application/javascript;charset=UTF-8
+
+	   Cache-Control: max-age=31536000, public
+
+	   https://aui-cdn.atlassian.com/aui-adg/6.0.6/css/aui.min.css
+
+	   Host: aui-cdn.atlassian.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: text/css,*/*;q=0.1
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: __atl_path=172.24.36.106.1481857137722314; optimizelyEndUserId=oeu1481857140660r0.7555740298889014; optimizelySegments=%7B%22172567725%22%3A%22ff%22%2C%22172648779%22%3A%22false%22%2C%22172668220%22%3A%22search%22%2C%221029627244%22%3A%22ff%22%2C%221033959192%22%3A%22false%22%2C%221055842897%22%3A%22search%22%2C%222631660020%22%3A%22none%22%7D; optimizelyBuckets=%7B%7D; _sio=bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b; _ga=GA1.2.1691652693.1481857141; OptanonConsent=landingPath=NotLandingPage&datestamp=Mon+May+06+2019+13%3A58%3A07+GMT-0400+(Eastern+Daylight+Time)&version=4.3.3&AwaitingReconsent=false&EU=false&groups=0_144275%3A1%2C101%3A1%2C1%3A1%2C2%3A1%2C103%3A1%2C0_144389%3A1%2C105%3A1%2C3%3A1%2C0_145087%3A1%2C112%3A1%2C0_145849%3A1%2C4%3A1%2C113%3A1%2C0_146519%3A1%2C125%3A1%2C0_147366%3A1%2C126%3A1%2C0_149658%3A1%2C127%3A1%2C0_150360%3A1%2C128%3A1%2C0_150361%3A1%2C131%3A1%2C0_152586%3A1%2C134%3A1%2C0_177825%3A1%2C0_144574%3A1%2C0_145089%3A1%2C0_147243%3A1%2C0_147316%3A1%2C0_147317%3A1%2C0_147320%3A1%2C0_147327%3A1%2C0_150364%3A1%2C0_150452%3A1%2C0_151725%3A1%2C0_151744%3A1%2C0_151754%3A1%2C0_155093%3A1%2C0_152355%3A1%2C0_147367%3A1%2C0_162785%3A1%2C0_148475%3A1%2C0_154648%3A1%2C0_147315%3A1%2C0_154645%3A1%2C0_155091%3A1%2C0_142671%3A1%2C0_154646%3A1%2C0_155092%3A1%2C0_150368%3A1; atlCohort={"bucketAll":{"bucketedAtUTC":"2019-05-06T17:58:06.625Z","version":"2","index":76,"bucketId":0}}; ajs_anonymous_id=%22bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b%22; ajs_user_id=null; ajs_group_id=null; seg_xid=3881ebd7-341c-4f0a-ad53-8cad60c436af; seg_xid_fd=developer.atlassian.com; seg_xid_ts=1557165487695; __cid=6cf7185a-df69-4175-be58-d9f24c4bcc89-799273c5997ce5c53912735a
+
+	   NS_ERROR_NET_ON_REQUEST_HEADER
+
+	   https://aui-cdn.atlassian.com/aui-adg/6.0.6/css/aui-experimental.min.css
+
+	   Host: aui-cdn.atlassian.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: text/css,*/*;q=0.1
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: __atl_path=172.24.36.106.1481857137722314; optimizelyEndUserId=oeu1481857140660r0.7555740298889014; optimizelySegments=%7B%22172567725%22%3A%22ff%22%2C%22172648779%22%3A%22false%22%2C%22172668220%22%3A%22search%22%2C%221029627244%22%3A%22ff%22%2C%221033959192%22%3A%22false%22%2C%221055842897%22%3A%22search%22%2C%222631660020%22%3A%22none%22%7D; optimizelyBuckets=%7B%7D; _sio=bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b; _ga=GA1.2.1691652693.1481857141; OptanonConsent=landingPath=NotLandingPage&datestamp=Mon+May+06+2019+13%3A58%3A07+GMT-0400+(Eastern+Daylight+Time)&version=4.3.3&AwaitingReconsent=false&EU=false&groups=0_144275%3A1%2C101%3A1%2C1%3A1%2C2%3A1%2C103%3A1%2C0_144389%3A1%2C105%3A1%2C3%3A1%2C0_145087%3A1%2C112%3A1%2C0_145849%3A1%2C4%3A1%2C113%3A1%2C0_146519%3A1%2C125%3A1%2C0_147366%3A1%2C126%3A1%2C0_149658%3A1%2C127%3A1%2C0_150360%3A1%2C128%3A1%2C0_150361%3A1%2C131%3A1%2C0_152586%3A1%2C134%3A1%2C0_177825%3A1%2C0_144574%3A1%2C0_145089%3A1%2C0_147243%3A1%2C0_147316%3A1%2C0_147317%3A1%2C0_147320%3A1%2C0_147327%3A1%2C0_150364%3A1%2C0_150452%3A1%2C0_151725%3A1%2C0_151744%3A1%2C0_151754%3A1%2C0_155093%3A1%2C0_152355%3A1%2C0_147367%3A1%2C0_162785%3A1%2C0_148475%3A1%2C0_154648%3A1%2C0_147315%3A1%2C0_154645%3A1%2C0_155091%3A1%2C0_142671%3A1%2C0_154646%3A1%2C0_155092%3A1%2C0_150368%3A1; atlCohort={"bucketAll":{"bucketedAtUTC":"2019-05-06T17:58:06.625Z","version":"2","index":76,"bucketId":0}}; ajs_anonymous_id=%22bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b%22; ajs_user_id=null; ajs_group_id=null; seg_xid=3881ebd7-341c-4f0a-ad53-8cad60c436af; seg_xid_fd=developer.atlassian.com; seg_xid_ts=1557165487695; __cid=6cf7185a-df69-4175-be58-d9f24c4bcc89-799273c5997ce5c53912735a
+
+	   NS_ERROR_NET_ON_REQUEST_HEADER
+
+	   https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
+
+	   Host: ajax.googleapis.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   GET: HTTP/2.0 200 OK
+
+	   accept-ranges: bytes
+
+	   vary: Accept-Encoding
+
+	   content-encoding: gzip
+
+	   content-type: text/javascript; charset=UTF-8
+
+	   access-control-allow-origin: *
+
+	   timing-allow-origin: *
+
+	   content-length: 33593
+
+	   date: Sat, 24 Aug 2019 22:50:22 GMT
+
+	   expires: Sun, 23 Aug 2020 22:50:22 GMT
+
+	   last-modified: Tue, 20 Dec 2016 18:17:03 GMT
+
+	   x-content-type-options: nosniff
+
+	   server: sffe
+
+	   x-xss-protection: 0
+
+	   cache-control: public, max-age=31536000, stale-while-revalidate=2592000
+
+	   age: 2699697
+
+	   alt-svc: quic=":443"; ma=2592000; v="46,43,39"
+
+	   X-Firefox-Spdy: h2
+
+	   https://aui-cdn.atlassian.com/aui-adg/6.0.6/js/aui.min.js
+
+	   Host: aui-cdn.atlassian.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: __atl_path=172.24.36.106.1481857137722314; optimizelyEndUserId=oeu1481857140660r0.7555740298889014; optimizelySegments=%7B%22172567725%22%3A%22ff%22%2C%22172648779%22%3A%22false%22%2C%22172668220%22%3A%22search%22%2C%221029627244%22%3A%22ff%22%2C%221033959192%22%3A%22false%22%2C%221055842897%22%3A%22search%22%2C%222631660020%22%3A%22none%22%7D; optimizelyBuckets=%7B%7D; _sio=bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b; _ga=GA1.2.1691652693.1481857141; OptanonConsent=landingPath=NotLandingPage&datestamp=Mon+May+06+2019+13%3A58%3A07+GMT-0400+(Eastern+Daylight+Time)&version=4.3.3&AwaitingReconsent=false&EU=false&groups=0_144275%3A1%2C101%3A1%2C1%3A1%2C2%3A1%2C103%3A1%2C0_144389%3A1%2C105%3A1%2C3%3A1%2C0_145087%3A1%2C112%3A1%2C0_145849%3A1%2C4%3A1%2C113%3A1%2C0_146519%3A1%2C125%3A1%2C0_147366%3A1%2C126%3A1%2C0_149658%3A1%2C127%3A1%2C0_150360%3A1%2C128%3A1%2C0_150361%3A1%2C131%3A1%2C0_152586%3A1%2C134%3A1%2C0_177825%3A1%2C0_144574%3A1%2C0_145089%3A1%2C0_147243%3A1%2C0_147316%3A1%2C0_147317%3A1%2C0_147320%3A1%2C0_147327%3A1%2C0_150364%3A1%2C0_150452%3A1%2C0_151725%3A1%2C0_151744%3A1%2C0_151754%3A1%2C0_155093%3A1%2C0_152355%3A1%2C0_147367%3A1%2C0_162785%3A1%2C0_148475%3A1%2C0_154648%3A1%2C0_147315%3A1%2C0_154645%3A1%2C0_155091%3A1%2C0_142671%3A1%2C0_154646%3A1%2C0_155092%3A1%2C0_150368%3A1; atlCohort={"bucketAll":{"bucketedAtUTC":"2019-05-06T17:58:06.625Z","version":"2","index":76,"bucketId":0}}; ajs_anonymous_id=%22bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b%22; ajs_user_id=null; ajs_group_id=null; seg_xid=3881ebd7-341c-4f0a-ad53-8cad60c436af; seg_xid_fd=developer.atlassian.com; seg_xid_ts=1557165487695; __cid=6cf7185a-df69-4175-be58-d9f24c4bcc89-799273c5997ce5c53912735a
+
+	   GET: HTTP/2.0 200 OK
+
+	   content-type: application/javascript
+
+	   date: Fri, 31 May 2019 07:54:16 GMT
+
+	   cache-control: max-age=31536000, s-maxage=31536000
+
+	   last-modified: Wed, 03 Jan 2018 04:36:10 GMT
+
+	   x-amz-version-id: YERXfypw9mep_0jdMUwBf1IQzySR3bBN
+
+	   server: AmazonS3
+
+	   content-encoding: gzip
+
+	   vary: Accept-Encoding
+
+	   x-cache: Hit from cloudfront
+
+	   via: 1.1 f386c6344bfea5bd933784c055350a74.cloudfront.net (CloudFront)
+
+	   x-amz-cf-pop: IAD53
+
+	   x-amz-cf-id: d1EDCqQqv17mlfk54rmTcjYAdobsJutZLc6J7MBxNqYvQxqLtXlBdw==
+
+	   age: 10097463
+
+	   X-Firefox-Spdy: h2
+
+	   https://aui-cdn.atlassian.com/aui-adg/6.0.6/js/aui-experimental.min.js
+
+	   Host: aui-cdn.atlassian.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: __atl_path=172.24.36.106.1481857137722314; optimizelyEndUserId=oeu1481857140660r0.7555740298889014; optimizelySegments=%7B%22172567725%22%3A%22ff%22%2C%22172648779%22%3A%22false%22%2C%22172668220%22%3A%22search%22%2C%221029627244%22%3A%22ff%22%2C%221033959192%22%3A%22false%22%2C%221055842897%22%3A%22search%22%2C%222631660020%22%3A%22none%22%7D; optimizelyBuckets=%7B%7D; _sio=bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b; _ga=GA1.2.1691652693.1481857141; OptanonConsent=landingPath=NotLandingPage&datestamp=Mon+May+06+2019+13%3A58%3A07+GMT-0400+(Eastern+Daylight+Time)&version=4.3.3&AwaitingReconsent=false&EU=false&groups=0_144275%3A1%2C101%3A1%2C1%3A1%2C2%3A1%2C103%3A1%2C0_144389%3A1%2C105%3A1%2C3%3A1%2C0_145087%3A1%2C112%3A1%2C0_145849%3A1%2C4%3A1%2C113%3A1%2C0_146519%3A1%2C125%3A1%2C0_147366%3A1%2C126%3A1%2C0_149658%3A1%2C127%3A1%2C0_150360%3A1%2C128%3A1%2C0_150361%3A1%2C131%3A1%2C0_152586%3A1%2C134%3A1%2C0_177825%3A1%2C0_144574%3A1%2C0_145089%3A1%2C0_147243%3A1%2C0_147316%3A1%2C0_147317%3A1%2C0_147320%3A1%2C0_147327%3A1%2C0_150364%3A1%2C0_150452%3A1%2C0_151725%3A1%2C0_151744%3A1%2C0_151754%3A1%2C0_155093%3A1%2C0_152355%3A1%2C0_147367%3A1%2C0_162785%3A1%2C0_148475%3A1%2C0_154648%3A1%2C0_147315%3A1%2C0_154645%3A1%2C0_155091%3A1%2C0_142671%3A1%2C0_154646%3A1%2C0_155092%3A1%2C0_150368%3A1; atlCohort={"bucketAll":{"bucketedAtUTC":"2019-05-06T17:58:06.625Z","version":"2","index":76,"bucketId":0}}; ajs_anonymous_id=%22bb1118ff-59c1-2635-ccbb-92ea4c4b7f9b%22; ajs_user_id=null; ajs_group_id=null; seg_xid=3881ebd7-341c-4f0a-ad53-8cad60c436af; seg_xid_fd=developer.atlassian.com; seg_xid_ts=1557165487695; __cid=6cf7185a-df69-4175-be58-d9f24c4bcc89-799273c5997ce5c53912735a
+
+	   GET: HTTP/2.0 200 OK
+
+	   content-type: application/javascript
+
+	   date: Thu, 08 Aug 2019 05:55:59 GMT
+
+	   cache-control: max-age=31536000, s-maxage=31536000
+
+	   last-modified: Wed, 03 Jan 2018 04:36:10 GMT
+
+	   x-amz-version-id: Q_.w16MRBeszl3stj.W0Nwl2O_a3to_1
+
+	   server: AmazonS3
+
+	   content-encoding: gzip
+
+	   vary: Accept-Encoding
+
+	   x-cache: Hit from cloudfront
+
+	   via: 1.1 f386c6344bfea5bd933784c055350a74.cloudfront.net (CloudFront)
+
+	   x-amz-cf-pop: IAD53
+
+	   x-amz-cf-id: zGj52kc2rellNX7gKhSHEVP3Na9eYcHGzTsdCxiDY6vl0gYRR6TSaQ==
+
+	   age: 4142960
+
+	   X-Firefox-Spdy: h2
+
+	   https://cdn.ravenjs.com/3.17.0/raven.min.js
+
+	   Host: cdn.ravenjs.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   GET: HTTP/2.0 200 OK
+
+	   last-modified: Thu, 13 Jul 2017 16:58:06 GMT
+
+	   etag: "51d6eff0ea5151f41fa0e2f3310fc7c7"
+
+	   content-encoding: gzip
+
+	   accept-ranges: bytes
+
+	   date: Wed, 25 Sep 2019 04:45:19 GMT
+
+	   age: 77968
+
+	   vary: Accept-Encoding
+
+	   access-control-allow-origin: *
+
+	   server: Fastly
+
+	   timing-allow-origin: *
+
+	   cache-control: public, max-age=31536000
+
+	   content-type: application/javascript; charset=utf-8
+
+	   content-length: 9634
+
+	   X-Firefox-Spdy: h2
+
+	   https://jira.14west.us/s/-rfwtym/801001/2f4dfe2e84e453b2d73143f5dcf20409/81/_/download/resources/onedrive-jira:js-resources/vendor.js
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 04:45:17 GMT
+
+	   X-AREQUESTID: 45x56628413x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   Expires: Thu, 24 Sep 2020 04:45:17 GMT
+
+	   X-Seraph-LoginReason: OK
+
+	   Last-Modified: Thu, 19 Sep 2019 14:22:03 GMT
+
+	   ETag: "1568902923000"
+
+	   Content-Type: application/javascript;charset=UTF-8
+
+	   Cache-Control: max-age=31536000, public
+
+	   https://jira.14west.us/s/-rfwtym/801001/2f4dfe2e84e453b2d73143f5dcf20409/81/_/download/resources/onedrive-jira:js-resources/ap_service.js
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 04:45:17 GMT
+
+	   X-AREQUESTID: 45x56628414x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   Expires: Thu, 24 Sep 2020 04:45:18 GMT
+
+	   X-Seraph-LoginReason: OK
+
+	   Last-Modified: Thu, 19 Sep 2019 14:22:03 GMT
+
+	   ETag: "1568902923000"
+
+	   Content-Type: application/javascript;charset=UTF-8
+
+	   Cache-Control: max-age=31536000, public
+
+	   https://jira.14west.us/s/-rfwtym/801001/2f4dfe2e84e453b2d73143f5dcf20409/81/_/download/resources/onedrive-jira:js-resources/main.js
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"
+
+	   GET: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 04:45:17 GMT
+
+	   X-AREQUESTID: 45x56628415x2
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   Expires: Thu, 24 Sep 2020 04:45:18 GMT
+
+	   X-Seraph-LoginReason: OK
+
+	   Last-Modified: Thu, 19 Sep 2019 14:22:03 GMT
+
+	   ETag: "1568902923000"
+
+	   Content-Type: application/javascript;charset=UTF-8
+
+	   Cache-Control: max-age=31536000, public
+
+	   https://jira.14west.us/rest/api/2/issue/355953/properties/lref
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/plain, */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us//plugins/servlet/lref/onedrive-jira/view?id=jira_ref_list_issue_panel&provider=onedrive&bundle=onedrive-jira&project_id=13103&issue_id=355953
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"; check_cookie=value
+
+	   GET: HTTP/1.1 404 
+
+	   Date: Wed, 25 Sep 2019 05:06:03 GMT
+
+	   X-AREQUESTID: 66x56631406x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Connection: close
+
+	   Transfer-Encoding: chunked
+
+	   https://r5---sn-p5qs7nes.googlevideo.com/videoplayback?expire=1569409452&ei=TPWKXZT1BaGRhwbG3aHAAQ&ip=69.138.255.31&id=o-AGGOJrQxE4c8g8vpH3RKnPaC589-DyiGA7FiPAXd7XdS&itag=247&aitags=133%2C134%2C135%2C136%2C137%2C160%2C242%2C243%2C244%2C247%2C248%2C278&source=youtube&requiressl=yes&mm=31%2C29&mn=sn-p5qs7nes%2Csn-p5qlsndk&ms=au%2Crdu&mv=m&mvi=4&pl=18&ctier=A&pfa=5&initcwndbps=2283750&hightc=yes&mime=video%2Fwebm&gir=yes&clen=19683021&dur=426.793&lmt=1569326979333399&mt=1569387766&fvip=5&keepalive=yes&c=WEB&txp=5535432&sparams=expire%2Cei%2Cip%2Cid%2Caitags%2Csource%2Crequiressl%2Cctier%2Cpfa%2Chightc%2Cmime%2Cgir%2Cclen%2Cdur%2Clmt&sig=ALgxI2wwRQIhAObzgOnqVj_php-unxsphp0md4FkAhCUt7ZqQt0sYYcfAiAQixxKXIFNfAvT__n_2L6Jg_B9bkBHzSdcr2YiPeKFbA%3D%3D&lsparams=mm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AHylml4wRgIhAOZ0SDHj_FvrmLGadndZvd7qiyP5jtL1ox5Q5FhN7OaJAiEAmSfM2dEpn23SDh6zrxt-vglUf7T2EPt9zVDhOwWg7U8%3D&alr=yes&cpn=cx-p1a1PSD5Q6TEH&cver=2.20190920.05.01&range=11063369-13046253&rn=2115&rbuf=119538
+
+	   Host: r5---sn-p5qs7nes.googlevideo.com
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: */*
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Referer: https://www.youtube.com/
+
+	   Origin: https://www.youtube.com
+
+	   Connection: keep-alive
+
+	   GET: HTTP/1.1 200 OK
+
+	   Last-Modified: Tue, 24 Sep 2019 12:09:39 GMT
+
+	   Content-Type: video/webm
+
+	   Date: Wed, 25 Sep 2019 05:06:05 GMT
+
+	   Expires: Wed, 25 Sep 2019 05:06:05 GMT
+
+	   Cache-Control: private, max-age=21187
+
+	   Accept-Ranges: bytes
+
+	   Content-Length: 1982885
+
+	   Connection: keep-alive
+
+	   Alt-Svc: quic=":443"; ma=2592000; v="46,43,39"
+
+	   Access-Control-Allow-Origin: https://www.youtube.com
+
+	   Access-Control-Allow-Credentials: true
+
+	   Timing-Allow-Origin: https://www.youtube.com
+
+	   Access-Control-Expose-Headers: Client-Protocol, Content-Length, Content-Type, X-Bandwidth-Est, X-Bandwidth-Est2, X-Bandwidth-Est3, X-Bandwidth-App-Limited, X-Bandwidth-Est-App-Limited, X-Bandwidth-Est-Comp, X-Bandwidth-Avg, X-Head-Time-Millis, X-Head-Time-Sec, X-Head-Seqnum, X-Response-Itag, X-Restrict-Formats-Hint, X-Sequence-Num, X-Segment-Lmt, X-Walltime-Ms
+
+	   X-Restrict-Formats-Hint: None
+
+	   X-Content-Type-Options: nosniff
+
+	   Server: gvs 1.0
+
+	   https://jira.14west.us/rest/analytics/1.0/publish/bulk
+
+	   Host: jira.14west.us
+
+	   User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0
+
+	   Accept: application/json, text/javascript, */*; q=0.01
+
+	   Accept-Language: en-US,en;q=0.5
+
+	   Accept-Encoding: gzip, deflate, br
+
+	   Content-Type: application/json
+
+	   X-Requested-With: XMLHttpRequest
+
+	   Content-Length: 5431
+
+	   Connection: keep-alive
+
+	   Referer: https://jira.14west.us/browse/ITDEVOPS-1069
+
+	   Cookie: _ga=GA1.2.1901889406.1536538494; fs_uid=fullstory.com`7HMPF`5684207762276352:5750085036015616; _pk_ref.6.ae58=%5B%22%22%2C%22%22%2C1569385271%2C%22https%3A%2F%2Fwiki.14west.us%2Fdisplay%2FPAYDOH%2FMeeting%2Bwith%2BIT%2B8.20%22%5D; _pk_id.6.ae58=af1f5ff74d28a783.1567986633.36.1569387437.1569385271.; seraph.rememberme.cookie=65542%3A0f00df11b56a31cadc0d9ffad38d013f5d3b37df; atlassian.xsrf.token=BSJJ-IXL7-R3QC-85PD_1fbcfe177363867d5fd34033ca3bb1b18ada73fb_lin; mode=undefined; jira.editor.user.mode=source; JSESSIONID=3CBC193431BB881330AD940C3F27E6CB; _pk_ses.6.ae58=1; AJS.conglomerate.cookie="|slack.inapp.links.first.clicked.ngarber=true|slack.inapp.links.ngarber=true"; check_cookie=value
+
+	   data: [{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4794},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4793},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4694},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4693},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4613},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4610},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4466},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4465},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4359},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4353},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4263},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4257},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4182},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4182},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4048},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-4046},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3948},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3947},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3852},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3851},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3754},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3661},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3657},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3532},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3530},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3448},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3448},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3372},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3370},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3299},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3298},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3197},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3197},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3118},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3117},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3033},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-3032},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-2950},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-2950},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-2834},{"name":"js.globals.contextPath.get","properties":{},"timeDelta":-2834},{"name":"jira.wikieditor.initialized","properties":{},"timeDelta":-1906},{"name":"connect.addon.iframe.performance.load","properties":{"addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","iframeLoadMillis":3089,"iframeLoadApdex":0,"iframeIsCacheable":true,"value":31,"version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-1516},{"name":"connect.addon.bridge.invokemethod","properties":{"module":"env","fn":"hideFooter","addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-1515},{"name":"connect.addon.bridge.invokemethod","properties":{"module":"env","fn":"getLocation","addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-1227},{"name":"connect.addon.iframe.is_visible","properties":{"addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-1138},{"name":"connect.addon.bridge.invokemethod","properties":{"module":"env","fn":"resize","addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-793},{"name":"connect.addon.bridge.invokemethod","properties":{"module":"env","fn":"resize","addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-792},{"name":"connect.addon.bridge.invokemethod","properties":{"module":"env","fn":"resize","addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-792},{"name":"connect.addon.bridge.invokemethod","properties":{"module":"env","fn":"resize","addonKey":"onedrive-jira","moduleKey":"onedrive-issue-attachments-panel","version":"5.2.15","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},"timeDelta":-710}]
+
+	   POST: HTTP/1.1 200 
+
+	   Date: Wed, 25 Sep 2019 05:06:04 GMT
+
+	   X-AREQUESTID: 66x56631407x1
+
+	   X-ASESSIONID: k2rc0q
+
+	   X-XSS-Protection: 1; mode=block
+
+	   X-Content-Type-Options: nosniff
+
+	   X-Frame-Options: SAMEORIGIN
+
+	   Content-Security-Policy: frame-ancestors 'self'
+
+	   X-ASEN: SEN-L14167801
+
+	   X-Seraph-LoginReason: OK
+
+	   X-AUSERNAME: ngarber
+
+	   Cache-Control: no-cache, no-store, no-transform
+
+	   Content-Type: application/json;charset=UTF-8
+
+	   Content-Length: 0
+
+	   Connection: close
+
+
+	 #+end_example
+         
+       - [2019-09-26 Thu]
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-accounts/1/link/project/13103/default?_=1569386969565                                                                                     |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, text/javascript, */*; q=0.01                                                                                                                              |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | X-Requested-With        | XMLHttpRequest                                                                                                                                                              |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:05:47 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 65x56631284x1                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Content-Length          | 0                                                                                                                                                                           |
+         | Connection              | close                                                                                                                                                                       |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=&limit=15&offset=0                       |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, text/javascript, */*; q=0.01                                                                                                                              |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | X-Requested-With        | XMLHttpRequest                                                                                                                                                              |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:05:53 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 65x56631321x1                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=co&limit=15&offset=0                     |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, text/javascript, */*; q=0.01                                                                                                                              |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | X-Requested-With        | XMLHttpRequest                                                                                                                                                              |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:05:55 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 65x56631367x3                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=col&limit=15&offset=0                    |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, text/javascript, */*; q=0.01                                                                                                                              |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | X-Requested-With        | XMLHttpRequest                                                                                                                                                              |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:05:55 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 65x56631369x2                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=coll&limit=15&offset=0                   |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, text/javascript, */*; q=0.01                                                                                                                              |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | X-Requested-With        | XMLHttpRequest                                                                                                                                                              |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:05:55 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 65x56631372x1                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-accounts/1/account/search?tqlQuery=status%3DOPEN+AND+(project%3D13103+OR+project%3DGLOBAL)&query=colla&limit=15&offset=0                  |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, text/javascript, */*; q=0.01                                                                                                                              |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | X-Requested-With        | XMLHttpRequest                                                                                                                                                              |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:05:56 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 65x56631374x1                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-time-activities/1/issue/355953/?page=1&size=5&activityType=all&currentUser=true                                                           |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, application/vnd-ms-excel                                                                                                                                  |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | Content-Type            | application/json                                                                                                                                                            |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:06:01 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 66x56631403x2                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-teams/2/permissionGroups/myPermissions/teams                                                                                              |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, application/vnd-ms-excel                                                                                                                                  |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | Content-Type            | application/json                                                                                                                                                            |
+         | Content-Length          | 68                                                                                                                                                                          |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | data                    | {"permissions":["permissions.plan.view","permissions.worklog.view"]}                                                                                                        |
+         | POST                    | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:06:01 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 66x56631404x2                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+         | CALL                    | https://jira.14west.us/rest/tempo-accounts/1/ratetable/currency                                                                                                             |
+         | Host                    | jira.14west.us                                                                                                                                                              |
+         | User-Agent              | Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0                                                                                          |
+         | Accept                  | application/json, application/vnd-ms-excel                                                                                                                                  |
+         | Accept-Language         | en-US,en;q=0.5                                                                                                                                                              |
+         | Accept-Encoding         | gzip, deflate, br                                                                                                                                                           |
+         | Content-Type            | application/json                                                                                                                                                            |
+         | Connection              | keep-alive                                                                                                                                                                  |
+         | Referer                 | https://jira.14west.us/browse/ITDEVOPS-1069                                                                                                                                 |
+         | GET                     | HTTP/1.1 200                                                                                                                                                                |
+         | Date                    | Wed, 25 Sep 2019 05:06:01 GMT                                                                                                                                               |
+         | X-AREQUESTID            | 66x56631402x1                                                                                                                                                               |
+         | X-ASESSIONID            | k2rc0q                                                                                                                                                                      |
+         | X-XSS-Protection        | 1; mode=block                                                                                                                                                               |
+         | X-Content-Type-Options  | nosniff                                                                                                                                                                     |
+         | X-Frame-Options         | SAMEORIGIN                                                                                                                                                                  |
+         | Content-Security-Policy | frame-ancestors 'self'                                                                                                                                                      |
+         | X-ASEN                  | SEN-L14167801                                                                                                                                                               |
+         | X-Seraph-LoginReason    | OK                                                                                                                                                                          |
+         | X-AUSERNAME             | ngarber                                                                                                                                                                     |
+         | Cache-Control           | no-cache, no-store, no-transform                                                                                                                                            |
+         | Content-Type            | application/json;charset=UTF-8                                                                                                                                              |
+         | Connection              | close                                                                                                                                                                       |
+         | Transfer-Encoding       | chunked                                                                                                                                                                     |
+         |-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+       - excerpts, https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+	 - Creating an issue using custom fields
+	   #+begin_example
+	     In the Jira REST API, custom fields are uniquely identified by the field ID, as the display names are not unique within a Jira instance. For example, you could have two fields named "Escalation date", one with an ID of "12221" and one with an ID of "12222".
+
+	     A custom field is actually referenced by customfield\_ + the field ID, rather than just the field ID.
+
+	     For example, the "Story points" custom field with ID = "10000" is referenced as customfield\_10000 for REST calls. You can get this reference identifier by requesting the create metadata for the issue type.
+	   #+end_example
+	 - (ex.) Issue Edit
+	   #+begin_src bash
+	     curl --request PUT \
+	       --url '/rest/api/3/issue/{issueIdOrKey}' \
+	       --user 'email@example.com:<api_token>' \
+	       --header 'Accept: application/json' \
+	       --header 'Content-Type: application/json' \
+	       --data '{
+	       "historyMetadata": {
+		 "actor": {
+		   "avatarUrl": "http://mysystem/avatar/tony.jpg",
+		   "displayName": "Tony",
+		   "id": "tony",
+		   "type": "mysystem-user",
+		   "url": "http://mysystem/users/tony"
+		 },
+		 "extraData": {
+		   "Iteration": "10a",
+		   "Step": "4"
+		 },
+		 "description": "From the order testing process",
+		 "generator": {
+		   "id": "mysystem-1",
+		   "type": "mysystem-application"
+		 },
+		 "cause": {
+		   "id": "myevent",
+		   "type": "mysystem-event"
+		 },
+		 "activityDescription": "Complete order processing",
+		 "type": "myplugin:type"
+	       },
+	       "update": {
+		 "summary": [
+		   {
+		     "set": "Bug in business logic"
+		   }
+		 ],
+		 "components": [
+		   {
+		     "set": ""
+		   }
+		 ],
+		 "timetracking": [
+		   {
+		     "edit": {
+		       "remainingEstimate": "4d",
+		       "originalEstimate": "1w 1d"
+		     }
+		   }
+		 ],
+		 "labels": [
+		   {
+		     "add": "triaged"
+		   },
+		   {
+		     "remove": "blocker"
+		   }
+		 ]
+	       },
+	       "fields": {
+		 "summary": "Completed orders still displaying in pending",
+		 "customfield_10010": 1,
+		 "customfield_10000": {
+		   "type": "doc",
+		   "version": 1,
+		   "content": [
+		     {
+		       "type": "paragraph",
+		       "content": [
+			 {
+			   "text": "Investigation underway",
+			   "type": "text"
+			 }
+		       ]
+		     }
+		   ]
+		 }
+	       },
+	       "properties": [
+		 {
+		   "value": "Order number 10784",
+		   "key": "key1"
+		 },
+		 {
+		   "value": "Order number 10923",
+		   "key": "key2"
+		 }
+	       ]
+	     }'
+
+	   #+end_src
+	 - (ex.) Updating multiple fields in one request
+	   #+begin_example
+	     This example updates the summary, description, and two custom fields.
+
+	     # Request
+
+	     curl \
+		-D- \
+		-u charlie:charlie \
+		-X PUT \
+		--data {see below} \
+		-H "Content-Type: application/json" \
+		http://localhost:8080/rest/api/2/issue/QA-31
+
+	     # Input data
+
+	     {
+		 "fields" : {
+		     "summary": "Summary",
+		     "description": "Description",
+		     "customfield_10200" : "Test 1",
+		     "customfield_10201" : "Value 1"
+		 }
+	     }
+
+	     # Response
+
+	     Status code of "204 No Content".
+	   #+end_example
+	 - snippet, the =updateIssue= action of the =jiralib-call= function
+	   #+begin_src emacs-lisp
+	     ('updateIssue (jiralib--rest-call-it
+			    (format "/rest/api/2/issue/%s" (first params))
+			    :type "PUT"
+			    :data (json-encode `((fields . ,(second params))))))
+
+	   #+end_src
+	 - (ex.) Discovering issue field data
+	   #+begin_src emacs-lisp
+	     ;; Once you have a project and issue type, then you can retrieve the
+	     ;;   information for the issue fields, by supplying the "expand" query
+	     ;;   parameter with the value "projects.issuetypes.fields"
+
+	     ;; Request
+
+	     ;; curl -D- \
+	     ;;     -u fred:fred \
+	     ;;     -X GET \
+	     ;;     -H "Content-Type: application/json" \
+	     ;;     http://kelpie9:8081/rest/api/2/issue/createmeta?projectKeys=QA&issuetypeNames=Bug&expand=projects.issuetypes.fields
+
+	     ;; Response
+
+	     ;; The response consists of a array of projects and each project contains an array of issue types that apply to that project.
+
+	     {
+
+		 "expand": "projects",
+		 "projects": [
+		     {
+			 "expand": "issuetypes",
+			 "self": "http://kelpie9:8081/rest/api/2/project/QA",
+			 "id": "10010",
+			 "key": "QA",
+			 "name": "QA",
+			 "avatarUrls": {
+			     "16x16": "http://kelpie9:8081/secure/projectavatar?size=small&pid=10010&avatarId=10011",
+			     "48x48": "http://kelpie9:8081/secure/projectavatar?pid=10010&avatarId=10011"
+			 },
+			 "issuetypes": [
+			     {
+				 "expand": "fields",
+				 "self": "http://kelpie9:8081/rest/api/2/issuetype/1",
+				 "id": 1,
+				 "name": "Bug",
+				 "iconUrl": "http://kelpie9:8081/images/icons/bug.gif",
+				 "fields": {
+				     "summary": {
+					 "required": true,
+					 "schema": {
+					     "type": "string",
+					     "system": "summary"
+					 },
+					 "operations": [
+					     "set"
+					 ]
+				     },
+				     "timetracking": {
+					 "required": false,
+					 "operations": [ ]
+				     },
+				     "issuetype": {
+					 "required": true,
+					 "schema": {
+					     "type": "issuetype",
+					     "system": "issuetype"
+					 },
+					 "operations": [ ],
+					 "allowedValues": [
+					     {
+						 "id": "1",
+						 "name": "Bug",
+						 "description": "A problem which impairs or prevents the functions of the product.",
+						 "iconUrl": "http://kelpie9:8081/images/icons/bug.gif"
+					     }
+					 ]
+				     },
+				     "customfield_10080": {
+					 "required": false,
+					 "schema": {
+					     "type": "array",
+					     "items": "string",
+					     "custom": "com.atlassian.jira.plugin.system.customfieldtypes:labels",
+					     "customId": 10080
+					 },
+					 "operations": [ ]
+				     },
+	     .
+	     .
+	     .
+	     .
+				     "customfield_10010": {
+					 "required": false,
+					 "schema": {
+					     "type": "array",
+					     "items": "string",
+					     "custom": "com.atlassian.jira.plugin.system.customfieldtypes:labels",
+					     "customId": 10010
+					 },
+					 "operations": [ ]
+				     },
+				     "customfield_10071": {
+					 "required": false,
+					 "schema": {
+					     "type": "array",
+					     "items": "string",
+					     "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+					     "customId": 10071
+					 },
+					 "operations": [ ]
+				     }
+				 }
+			     }
+			 ]
+		     }
+		 ]
+
+	     }
+
+	     ;; If you prefer, by omitting the projectKeys and issuetypeNames parameters you can retrieve all the issue field data at once for all projects and issue types, but this could amount to a very large response and could take some time to build on systems with a large number of projects and issue types.
+	   #+end_src
+       - usage, using =jiralib-call= to get list of fields, (by Project and issueType)
+	 #+begin_src emacs-lisp
+	   (jiralib-call "createMeta" nil '(("projectKeys" . "ITDEVOPS") ("issuetypeNames" . "Incident") ("expand" . "projects.issuetypes.fields")))
+	 #+end_src
+
+     - on Jira Issue's Tempo Account Field
+       - when Tempo is installed it creates a few custom fields that can be exposed/added to screens for use
+       - these fields are: Project Account, Issue Account, and Worklog Account, and in all cases they are registered and using Jira' custom fields system
+       - Custom Fields are referenced by their IDs, since their names are not garunteed to be unique within an instance
+       - We'll need a way to set, (and ideally discover), the correct custom field ID for Tempo Accounts info if we're going to have a shot at manipulating it via Org-Jira
+     - on Significant or Related Program Objects
+       - Org-Jira Functions
+	 | filename    | signature                                                    | description                                                                          |
+	 |-------------+--------------------------------------------------------------+--------------------------------------------------------------------------------------|
+	 | org-jira.el | (org-jira-update-issue-details ISSUE-ID FILENAME &rest REST) | Update the details of issue ISSUE-ID in FILENAME.  REST will contain optional input. |
+	 | org-jira.el | (org-jira-update-issue)                                      | Update an issue.                                                                     |
+	 |             |                                                              |                                                                                      |
+
+
+     - on Tracing Org-Jira's Handling of Custom Fields
+       - Searching for a way to update the Tempo Account =customfield= via the =org-jira-update-issue=
+	 | depth | actor  | action | object                | params | side-effects | returns | description                                                                                        |
+	 |     1 | person | call   | org-jira-update-issue |        |              |         |                                                                                                    |
+	 |     2 |        | call   | jiralib-call          |        |              |         | wraps a giant switch, selected based on the action name passed-in. Here, 'updateIssue' is passed-in.     |
+	 |       |        |        |                       |        |              |         |                                                                                                    |
+	 |       |        |        |                       |        |              |         |                                                                                                    |
+	 |       |        |        |                       |        |              |         |                                                                                                    |
+	 |       |        |        |                       |        |              |         |                                                                                                    |
+
+       - on Auto-Adding Fields from =org-jira-property-overrides= to Org-Jira Property to Field Sync
+         - if property from one of =org-jira-property-overrides='s =cdr= exists in the current issue, take it's value for update against the corresponding =car= field name
+	 - a hash table seems like an appropriate data structure to use, https://www.gnu.org/software/emacs/manual/html_node/elisp/Hash-Access.html#Hash-Access
+	 - perhap this handling should be 
+     - Questions
+       - Q: is the custom field number used by Tempo consistent among disconected instances, or is it different for each instances
+       - Q: is there a way to look-up the custom field ID based on the name
+	 - A: Yes, with effort. See, https://developer.atlassian.com/server/jira/platform/jira-rest-api-example-discovering-meta-data-for-creating-issues-6291669/
+	 - You can locate a custom field's underlying field name, (in it's 'customfield_<int>' form), by requesting the create metadata for the issue type.
+	 - 
+     - log
+       - [2019-09-28 Sat]
+	 - [2019-09-28 Sat 19:10] NGa muses it should be possible to update any Jira Issue fields by passing the field name and value key-value pairs as below
+	   #+begin_src emacs-lisp
+	   (org-jira-update-
+	   #+end_src
+
+       - [2019-09-29 Sun]
+	 - [2019-09-29 Sun 14:44] NGa observes that the org-jira issue
+           update function, (keybinding of =C-c i u=), which adds
+           implicit variables for IssueKey and Filename before calling =org-jira-update-issue-details=.
+
+	 - NGa observes that =org-jira-update-issue-details= only syncs explicitly described properties.
+
+	 - [2019-09-29 Sun 14:47] NGa muses it should be possible to dynamically add a match for properties also found in the =car='s of each element in =org-jira-property-overrides=, (which is structured as an =alist= data-type).
+
+	 - NGa observes that function =org-jira-update-issue-details= lives at [[file:org-jira.el]]
+

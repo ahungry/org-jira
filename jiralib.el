@@ -388,6 +388,8 @@ request.el, so if at all possible, it should be avoided."
                                                               :data (json-encode `((jql . ,(first params))
                                                                                    (maxResults . ,(second params)))))))
                                         nil))
+      ;; context here may be one of: projectKey projectId issueKey issueId
+      ('getPermissionsByContext (jiralib--rest-call-it "/rest/api/2/mypermissions" :params `((,(first params) . ,(second params)))))
       ('getPriorities (jiralib--rest-call-it
                        "/rest/api/2/priority"))
       ('getProjects (jiralib--rest-call-it "rest/api/2/project"))
@@ -417,6 +419,15 @@ request.el, so if at all possible, it should be avoided."
       ('getUsers
        (jiralib--rest-call-it (format "/rest/api/2/user/assignable/search?project=%s&maxResults=10000" (first params))
                               :type "GET"))
+      ('createMeta
+       ;; (ex.) rest/api/2/issue/createmeta?projectKeys=QA&issuetypeNames=Bug&expand=projects.issuetypes.fields
+       (jiralib--rest-call-it ;"/rest/api/2/issue/createmeta"
+			      "rest/api/2/issue/createmeta?projectKeys=ITDEVOPS&issuetypeNames=Incident&expand=projects.issuetypes.fields"
+			      ;; valid key example: projectKeys issuetypeNames expand
+			      ;; data shape example: (list (key . value))
+			      ;:params params
+			      :type "GET"))
+
       ('updateIssue (jiralib--rest-call-it
                      (format "/rest/api/2/issue/%s" (first params))
                      :type "PUT"
@@ -600,6 +611,35 @@ will cache it."
     (setq jiralib-priority-codes-cache
           (jiralib-make-assoc-list (jiralib-call "getPriorities" nil) 'id 'name)))
   jiralib-priority-codes-cache)
+
+(defvar jiralib-permissions-by-issue-cache nil)
+
+(defun jiralib-get-permissions-by-issuekey (&optional issuekey)
+  ""
+  (let
+      (issuekey (if (bound-and-true-p issuekey) 
+  (unless (assoc (upcase issuekey) jiralib-permissions-by-issue-cache)
+    ;; cache-miss
+    (push (cons (upcase issuekey)
+		(cdar (jiralib-call "getPermissionsByContext"
+				    nil "issueKey" issuekey)))
+		jiralib-permissions-by-issue-cache)
+	  (alist-get issuekey jiralib-permissions-by-issue-cache)))
+
+(defun jiralib-has-permission-on-issue-p (&optional issuekey permission)
+  ""
+  (let
+      ((issuekey (if (bound-and-true-p issuekey)
+		    issuekey
+		   jiralib-current-issue))
+       (permission (if (bound-and-true-p permission)
+		       permission
+		     nil))
+       (perm-alist (
+       
+    
+    
+    
 
 (defvar jiralib-resolution-code-cache nil)
 

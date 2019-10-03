@@ -3,3 +3,6 @@
 *.#*
 flycheck_*
 *.elc
+GPATH
+GRTAGS
+GTAGS
