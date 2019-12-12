@@ -1727,7 +1727,7 @@ that should be bound to an issue."
              (parent (key . ,parent-id))
              (issuetype (id . ,(car (rassoc type (if (and (boundp 'parent-id) parent-id)
                                                      (jiralib-get-subtask-types)
-                                                   (jiralib-get-issue-types))))))
+                                                   (jiralib-get-issue-types-by-project project))))))
              (summary . ,(format "%s%s" summary
                                  (if (and (boundp 'parent-id) parent-id)
                                      (format " (subtask of [jira:%s])" parent-id)
