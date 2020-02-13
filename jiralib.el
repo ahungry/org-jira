@@ -272,13 +272,13 @@ when invoking it through `jiralib-call', the call should be:
 CALLBACK should be the post processing function to run with the
 completed data from the request result, which can be accessed with:
 
-  (getf data :data)
+  (cl-getf data :data)
 
 as such, the CALLBACK should follow this type of form:
 
   (cl-function
     (lambda (&rest data &allow-other-keys)
-      (print (getf data :data))))
+      (print (cl-getf data :data))))
 
 If CALLBACK is set to nil then the request will occur with sync.
 This produces a noticeable slowdown and is not recommended by
@@ -1167,8 +1167,8 @@ PARAMS - extra parameters (as keyword arguments), the supported parameters are:
   (setq jiralib-complete-callback nil)
   (let ((not-last t)
         (start-at 0)
-	(limit (getf params :limit))
-	(query-params (getf params :query-params))
+	(limit (cl-getf params :limit))
+	(query-params (cl-getf params :query-params))
 	;; maximum page size, 50 is server side maximum
         (max-results jiralib-agile-page-size)
         (values ()))
@@ -1195,8 +1195,8 @@ PARAMS - extra parameters (as keyword arguments), the supported parameters are:
 limit - limit total number of retrieved entries."
   (lexical-let
       ((start-at 0)
-       (limit (getf params :limit))
-       (query-params (getf params :query-params))
+       (limit (cl-getf params :limit))
+       (query-params (cl-getf params :query-params))
        ;; maximum page size, 50 is server side maximum
        (max-results jiralib-agile-page-size)
        (values-list ())
