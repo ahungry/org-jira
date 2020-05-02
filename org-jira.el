@@ -176,7 +176,7 @@ where both are strings.  NEW-FILE-NAME is relative to
   :type '(repeat (string :tag "Jira state name:")))
 
 (defcustom org-jira-users
-  '(("Full Name" . "username"))
+  '(("Full Name" . "account-id"))
   "A list of displayName and key pairs."
   :group 'org-jira
   :type 'list)
@@ -596,7 +596,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
    org-jira-users
    (mapcar (lambda (user)
              (cons (org-jira-decode (cdr (assoc 'displayName user)))
-                   (org-jira-decode (cdr (assoc 'name user)))))
+                   (org-jira-decode (cdr (assoc 'accountId user)))))
            (jiralib-get-users project-key))))
 
 (defun org-jira-get-reporter-candidates (project-key)
@@ -605,7 +605,7 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
    org-jira-users
    (mapcar (lambda (user)
              (cons (org-jira-decode (cdr (assoc 'displayName user)))
-                   (org-jira-decode (cdr (assoc 'name user)))))
+                   (org-jira-decode (cdr (assoc 'accountId user)))))
            (jiralib-get-users project-key))))
 
 (defun org-jira-entry-put (pom property value)
@@ -950,7 +950,6 @@ With a prefix argument, allow you to customize the jql.  See
     (when issue-pos
       (goto-char issue-pos)
       (recenter 0))))
-
 ;;;###autoload
 (defun org-jira-get-issues-by-fixversion (fixversion)
   "Get list of issues by FIXVERSION."
@@ -1565,7 +1564,7 @@ purpose of wiping an old subtree."
                           (cdr (rassoc user jira-users)))))
           (when (null reporter)
             (error "No reporter found, this should probably never happen."))
-          (org-jira-update-issue-details issue-id filename :reporter reporter))
+          (org-jira-update-issue-details issue-id filename :reporter (jiralib-get-account-id reporter)))
       (error "Not on an issue"))))
 
 ;;;###autoload
@@ -1586,7 +1585,7 @@ purpose of wiping an old subtree."
                           (cdr (rassoc user jira-users)))))
           (when (null assignee)
             (error "No assignee found, use org-jira-unassign-issue to make the issue unassigned"))
-          (org-jira-update-issue-details issue-id filename :assignee assignee))
+          (org-jira-update-issue-details issue-id filename :assignee (jiralib-get-account-id assignee)))
       (error "Not on an issue"))))
 
 ;;;###autoload
@@ -2105,8 +2104,8 @@ otherwise it should return:
                    (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                        (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
-                   (cons 'assignee (jiralib-get-user org-issue-assignee))
-                   (cons 'reporter (jiralib-get-user org-issue-reporter))
+                   (cons 'assignee (list (cons 'id (jiralib-get-account-id org-issue-assignee))))
+                   (cons 'reporter (list (cons 'id (jiralib-get-account-id org-issue-reporter))))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                    (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
                                                         (jiralib-get-issue-types))))))
@@ -2133,6 +2132,8 @@ otherwise it should return:
               (-> cb-data list org-jira-get-issues))))
          ))
       )))
+
+       
 
 (defun org-jira-parse-issue-id ()
   "Get issue id from org text."
