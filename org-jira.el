@@ -1065,8 +1065,8 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 
 (defun org-jira--render-issue (Issue)
   "Render single ISSUE."
-  ;; (org-jira-log "Rendering issue from issue list")
-  ;; (org-jira-log (org-jira-sdk-dump Issue))
+  (org-jira-log "Rendering issue from issue list")
+  (org-jira-log (org-jira-sdk-dump Issue))
   (with-slots (filename proj-key issue-id summary status priority headline id) Issue
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
@@ -1564,7 +1564,7 @@ purpose of wiping an old subtree."
                           (cdr (rassoc user jira-users)))))
           (when (null reporter)
             (error "No reporter found, this should probably never happen."))
-          (org-jira-update-issue-details issue-id filename :reporter (jiralib-get-account-id reporter)))
+          (org-jira-update-issue-details issue-id filename :reporter (jiralib-get-user-account-id reporter)))
       (error "Not on an issue"))))
 
 ;;;###autoload
@@ -1585,7 +1585,7 @@ purpose of wiping an old subtree."
                           (cdr (rassoc user jira-users)))))
           (when (null assignee)
             (error "No assignee found, use org-jira-unassign-issue to make the issue unassigned"))
-          (org-jira-update-issue-details issue-id filename :assignee (jiralib-get-account-id assignee)))
+          (org-jira-update-issue-details issue-id filename :assignee (jiralib-get-user-account-id assignee)))
       (error "Not on an issue"))))
 
 ;;;###autoload
@@ -2104,8 +2104,8 @@ otherwise it should return:
                    (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                        (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
-                   (cons 'assignee (list (cons 'id (jiralib-get-account-id org-issue-assignee))))
-                   (cons 'reporter (list (cons 'id (jiralib-get-account-id org-issue-reporter))))
+                   (cons 'assignee (list (cons 'id (jiralib-get-user-account-id org-issue-assignee))))
+                   (cons 'reporter (list (cons 'id (jiralib-get-user-account-id org-issue-reporter))))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                    (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
                                                         (jiralib-get-issue-types))))))
