@@ -523,30 +523,6 @@ emacs-lisp"
 
     (apply 'vector (nreverse remote-field-values))))
 
-(defvar jiralib-subvalue-map
-  '((assignee . displayName)
-    (creator . displayName)
-    (priority . name)
-    (issuetype . name)))
-
-(defun jiralib-flatten-data (data)
-  "Extracts the displayName Value an creates a tuple of ((car list) . subvalue).
-If no key is given, returns list as-is."
-  (loop for item in data collect
-        (cond ((and (listp (cdr item))
-                    (assoc (car item) jiralib-subvalue-map))
-               (cons (car item) (cdr (assoc (cdr (assoc (car item) jiralib-subvalue-map)) (cdr item)))))
-              ((listp (cdr item))
-               (cons (car item) (jiralib-flatten-data (cdr item))))
-              (t item))))
-
-
-
-
-
-
-
-
 
 ;;;; Wrappers around JIRA methods
 
