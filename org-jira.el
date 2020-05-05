@@ -1065,8 +1065,8 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 
 (defun org-jira--render-issue (Issue)
   "Render single ISSUE."
-  (org-jira-log "Rendering issue from issue list")
-  (org-jira-log (org-jira-sdk-dump Issue))
+;;  (org-jira-log "Rendering issue from issue list")
+;;  (org-jira-log (org-jira-sdk-dump Issue))
   (with-slots (filename proj-key issue-id summary status priority headline id) Issue
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
@@ -1733,7 +1733,7 @@ that should be bound to an issue."
                                    "")))
              (description . ,description)
              (priority (id . ,priority))
-             (assignee (name . ,(or (cdr (assoc user jira-users)) user)))))))
+             (assignee (accountId . ,(or (cdr (assoc user jira-users)) user)))))))
     ticket-struct))
 
 ;;;###autoload
