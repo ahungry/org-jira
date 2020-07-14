@@ -313,6 +313,11 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type '(alist :value-type plist))
 
+(defcustom org-jira-download-comments t
+  "Set to nil if you don't want to update comments during issue rendering."
+  :group 'org-jira
+  :type 'boolean)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -1151,10 +1156,12 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                      (format "%s" (slot-value Issue heading-entry)))))))
              '(description))
 
-            (org-jira-update-comments-for-issue Issue)
+            (when org-jira-download-comments
+              (org-jira-update-comments-for-issue Issue)
 
-            ;; FIXME: Re-enable when attachments are not erroring.
-            ;;(org-jira-update-attachments-for-current-issue)
+              ;; FIXME: Re-enable when attachments are not erroring.
+              ;;(org-jira-update-attachments-for-current-issue)
+              )
 
             ;; only sync worklog clocks when the user sets it to be so.
             (when org-jira-worklog-sync-p
