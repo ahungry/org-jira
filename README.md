@@ -44,6 +44,13 @@ has MELPA set up):
 
 Then run `M-x package-install RET org-jira RET` and you're done!
 ### Configuration
+
+Create the `org-jira-working-dir` directory:
+
+```lisp
+(make-directory "~/.org-jira")
+```
+
 In your ~/.emacs, you should set the variable as such:
 
 ```conf

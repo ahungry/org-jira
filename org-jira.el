@@ -510,6 +510,14 @@ See `org-default-priority' for more info."
        (org-narrow-to-subtree)
        ,@body)))
 
+(defun org-jira--ensure-working-dir ()
+  "Ensure that the org-jira-working-dir exists"
+  (unless (file-exists-p org-jira-working-dir)
+    (error (format "org-jira directory does not exist! Run (make-directory \"%s\")" org-jira-working-dir))
+    )
+  org-jira-working-dir
+  )
+
 (defvar org-jira-entry-mode-map
   (let ((org-jira-map (make-sparse-keymap)))
     (define-key org-jira-map (kbd "C-c pg") 'org-jira-get-projects)
@@ -583,8 +591,8 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 (defun org-jira--get-project-file-name (project-key)
   "Translate PROJECT-KEY into filename."
   (-if-let (translation (cdr (assoc project-key org-jira-project-filename-alist)))
-      (expand-file-name translation org-jira-working-dir)
-    (expand-file-name (concat project-key ".org") org-jira-working-dir)))
+      (expand-file-name translation (org-jira--ensure-working-dir))
+    (expand-file-name (concat project-key ".org") (org-jira--ensure-working-dir))))
 
 (defun org-jira-get-project-lead (proj)
   (org-jira-find-value proj 'lead 'name))
@@ -649,7 +657,7 @@ to change the property names this sets."
 (defun org-jira-get-projects ()
   "Get list of projects."
   (interactive)
-  (let ((projects-file (expand-file-name "projects-list.org" org-jira-working-dir)))
+  (let ((projects-file (expand-file-name "projects-list.org" (org-jira--ensure-working-dir))))
     (or (find-buffer-visiting projects-file)
         (find-file projects-file))
     (org-jira-mode t)
@@ -927,7 +935,7 @@ With a prefix argument, allow you to customize the jql.  See
   (interactive
    (org-jira-get-issue-list))
 
-  (let* ((issues-file (expand-file-name "issues-headonly.org" org-jira-working-dir))
+  (let* ((issues-file (expand-file-name "issues-headonly.org" (org-jira--ensure-working-dir)))
          (issues-headonly-buffer (or (find-buffer-visiting issues-file)
                                      (find-file issues-file))))
     (with-current-buffer issues-headonly-buffer
@@ -2111,6 +2119,7 @@ otherwise it should return:
                    (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
                                                         (jiralib-get-issue-types))))))
 
+
         ;; If we enable duedate sync and we have a deadline present
         (when (and org-jira-deadline-duedate-sync-p
                    (org-jira-get-issue-val-from-org 'deadline))
@@ -2384,7 +2393,7 @@ boards -  list of `org-jira-sdk-board' records."
               (org-jira-entry-put (point) "ID"   id))))))))
 
 (defun org-jira--get-boards-file ()
-  (expand-file-name "boards-list.org" org-jira-working-dir))
+  (expand-file-name "boards-list.org" (org-jira--ensure-working-dir)))
 
 (defun org-jira--get-boards-buffer ()
   "Return buffer for list of agile boards. Create one if it does not exist."
