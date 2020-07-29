@@ -1394,6 +1394,17 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
        org-jira-maybe-reverse-comments
        (cl-remove-if #'org-jira-isa-ignored-comment?)))
 
+(defun org-jira-lookup-display-name (acount-id project-key)
+  "Get user with ACCOUNT-ID and PROJECT-KEY"
+  (alist-get acount-id
+             (mapcar (lambda (user)
+                       (cons (org-jira-decode (cdr (assoc 'accountId user)))
+                             (org-jira-decode (cdr (assoc 'displayName user)))))
+                     (jiralib-get-users project-key))
+             nil
+             nil
+             #'equal))
+
 (defun org-jira--render-comment (Issue Comment)
   (with-slots (issue-id) Issue
     (with-slots (comment-id author headline created updated body) Comment
@@ -1416,8 +1427,19 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
         (unless (string= created updated)
           (org-jira-entry-put (point) "updated" updated))
         (goto-char (point-max))
-        ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-        (org-jira-insert (replace-regexp-in-string "^" "  " (or body "")))))))
+        (let ((start (point))
+              (project-key (org-jira--get-proj-key-from-issue Issue)))
+          ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+          (org-jira-insert (replace-regexp-in-string "^" "  " (or body "")))
+          (let ((end (point)))
+            (goto-char start)
+            (while (re-search-forward "\\(\\[~accountid:\\([0-9a-zA-Z:-]+\\)\\]\\)" end t)
+              (when-let (display-name (org-jira-lookup-display-name (match-string 2) project-key))
+                (add-text-properties
+                 (match-beginning 1)
+                 (match-end 1)
+                 (list 'display
+                       (concat "[" display-name "]")))))))))))
 
 (defun org-jira-update-comments-for-issue (Issue)
   "Update the comments for the specified ISSUE issue."
