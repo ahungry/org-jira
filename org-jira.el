@@ -1115,7 +1115,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                       (when (or (and val (not (string= val "")))
                                 (eq entry 'assignee)) ;; Always show assignee
                         (org-jira-entry-put (point) (symbol-name entry) val))))
-                  '(assignee filename reporter type priority labels resolution status components created updated))
+                  '(assignee filename reporter type type-id priority labels resolution status components created updated))
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
@@ -2095,6 +2095,7 @@ otherwise it should return:
            (org-issue-description (org-trim (org-jira-get-issue-val-from-org 'description)))
            (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
            (org-issue-type (org-jira-get-issue-val-from-org 'type))
+           (org-issue-type-id (org-jira-get-issue-val-from-org 'type-id))
            (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
            (org-issue-reporter (cl-getf rest :reporter (org-jira-get-issue-val-from-org 'reporter)))
            (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
@@ -2122,8 +2123,8 @@ otherwise it should return:
                    (cons 'assignee (list (cons 'id (jiralib-get-user-account-id org-issue-assignee))))
                    (cons 'reporter (list (cons 'id (jiralib-get-user-account-id org-issue-reporter))))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
-                   (cons 'issuetype (org-jira-get-id-name-alist org-issue-type
-                                                        (jiralib-get-issue-types))))))
+                   (cons 'issuetype `((id . ,org-issue-type-id)
+      (name . ,org-issue-type))))))
 
 
         ;; If we enable duedate sync and we have a deadline present
