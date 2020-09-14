@@ -314,7 +314,7 @@ request.el, so if at all possible, it should be avoided."
       ('getIssueTypesByProject
        (let ((response (jiralib--rest-call-it (format "/rest/api/2/project/%s" (first params)))))
          (cl-coerce (cdr (assoc 'issueTypes response)) 'list)))
-      ('getUser (jiralib--rest-call-it "/rest/api/2/user" :params `((username . ,(first params)))))
+      ('getUser (jiralib--rest-call-it "/rest/api/2/user" :params `((accountId . ,(first params)))))
       ('getVersions (jiralib--rest-call-it (format "/rest/api/2/project/%s/versions" (first params))))
 
       ;; Worklog calls
@@ -522,6 +522,7 @@ emacs-lisp"
               remote-field-values)))
 
     (apply 'vector (nreverse remote-field-values))))
+
 
 ;;;; Wrappers around JIRA methods
 
@@ -850,15 +851,26 @@ Return nil if the field is not found"
           (setf name (cdr (assoc 'name type)))))
     name))
 
-(defun jiralib-get-user-fullname (username)
-  "Return the full name (display name) of the user with USERNAME."
-  (if (assoc username jiralib-user-fullnames)
-      (cdr (assoc username jiralib-user-fullnames))
-    (progn
-      (let ((user (jiralib-get-user username)))
-        (setf jiralib-user-fullnames (append jiralib-user-fullnames (list (cons username (cdr (assoc 'fullname user))))))
-        (cdr (assoc 'fullname user))))))
+;; (defun jiralib-get-user-fullname (account-id)
+;;   "Return the full name (display name) of the user with USERNAME."
+  ;; (if (assoc account-id jiralib-user-fullnames)
+  ;;     (cdr (assoc account-id jiralib-user-fullnames))
+  ;;   (progn
+  ;;     (let ((user (jiralib-get-user account-id)))
+  ;;       (setf jiralib-user-fullnames (append jiralib-user-fullnames (list (cons account-id (cdr (assoc 'fullname user))))))
+  ;;       (cdr (assoc 'fullname user))))))
 
+(defun jiralib-get-user-fullname (account-id)
+  "Return the full name (displaName) of the user with accountId."
+  (loop for user in (jiralib-get-users nil)
+        when (rassoc account-id user)
+        return (cdr (assoc 'displayName user))))
+
+(defun jiralib-get-user-account-id (full-name)
+    "Return the account-id (accountId) of the user with displayName."
+  (loop for user in (jiralib-get-users nil)
+        when (rassoc full-name user)
+        return (cdr (assoc 'accountId user))))
 
 (defun jiralib-get-filter (filter-id)
   "Return a filter given its FILTER-ID."
@@ -1010,10 +1022,10 @@ Return no more than MAX-NUM-RESULTS."
   "Return all visible subtask issue types in the system."
   (jiralib-call "getSubTaskIssueTypes" nil))
 
-(defun jiralib-get-user (username)
-  "Return a user's information given their USERNAME."
-  (cond ((eq 0 (length username)) nil) ;; Unassigned
-        (t (jiralib-call "getUser" nil username))))
+(defun jiralib-get-user (account-id)
+  "Return a user's information given their full name."
+  (cond ((eq 0 (length account-id)) nil) ;; Unassigned
+        (t (jiralib-call "getUser" nil account-id))))
 
 (defvar jiralib-users-cache nil "Cached list of users.")
 
@@ -1021,7 +1033,9 @@ Return no more than MAX-NUM-RESULTS."
   "Return assignable users information given the PROJECT-KEY."
   (unless jiralib-users-cache
     (setq jiralib-users-cache
-          (jiralib-call "getUsers" nil project-key)))
+          (jiralib-call "getUsers" nil project-key))
+    (loop for (name . id) in org-jira-users do
+          (setf jiralib-users-cache (append (list (jiralib-get-user id)) jiralib-users-cache))))
   jiralib-users-cache)
 
 (defun jiralib-get-versions (project-key)
