@@ -110,6 +110,7 @@
    (status :type string :initarg :status)
    (summary :type string :initarg :summary)
    (type :type string :initarg :type)
+   (type-id :type string :initarg :type-id)
    (updated :type string :initarg :updated)
    (data :initarg :data :documentation "The remote Jira data object (alist).")
    (hydrate-fn :initform #'jiralib-get-issue :initarg :hydrate-fn))
@@ -163,6 +164,7 @@
      :status (org-jira-decode (path '(fields status name)))
      :summary (path '(fields summary))
      :type (path '(fields issuetype name))
+     :type-id (path '(fields issuetype id))
      :updated (path '(fields updated))  ; confirm
      ;; TODO: Remove this
      ;; :data (oref rec data)
