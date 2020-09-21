@@ -364,7 +364,7 @@ See `org-default-priority' for more info."
 
 (defvar org-jira-verbosity 'debug)
 
-(defun org-jira-log (s) (when (eq 'debug org-jira-verbosity) (message (format "%s" s))))
+(defun org-jira-log (s) (when (eq 'debug org-jira-verbosity) (message "%s" s)))
 
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
