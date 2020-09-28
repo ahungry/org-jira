@@ -1711,7 +1711,7 @@ that should be bound to an issue."
      nil
      t
      nil
-     'initial-input
+     initial-input
      (car initial-input))))
 
 (defun org-jira-read-subtask-type ()
@@ -2150,7 +2150,7 @@ otherwise it should return:
          ))
       )))
 
-       
+
 
 (defun org-jira-parse-issue-id ()
   "Get issue id from org text."
