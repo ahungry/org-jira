@@ -2430,7 +2430,7 @@ boards -  list of `org-jira-sdk-board' records."
             (progn
               (goto-char pos)
               (apply 'org-jira-sdk-board
-                     (reduce
+                     (cl-reduce
                       #'(lambda (acc entry)
                           (let* ((pname   (car entry))
                                  (pval (cdr entry))
