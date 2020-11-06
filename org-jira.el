@@ -1889,10 +1889,12 @@ Where issue-id will be something such as \"EX-22\"."
       (outline-show-all)
       (outline-hide-sublevels 2)
       (goto-char (point-min))
-      (while (looking-at "^ *$")
+      (while (and (looking-at "^ *$")
+                  (not (eobp)))
         (forward-line))
       (outline-next-visible-heading 1)
-      (while (not (org-next-line-empty-p))
+      (while (and (not (org-next-line-empty-p))
+                  (not (eobp)))
         (when (outline-on-heading-p t)
           ;; It's possible we could be on a non-org-jira headline, but
           ;; that should be an exceptional case and not necessitating a
