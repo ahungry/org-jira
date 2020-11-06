@@ -1889,6 +1889,8 @@ Where issue-id will be something such as \"EX-22\"."
       (outline-show-all)
       (outline-hide-sublevels 2)
       (goto-char (point-min))
+      (while (looking-at "^ *$")
+        (forward-line))
       (outline-next-visible-heading 1)
       (while (not (org-next-line-empty-p))
         (when (outline-on-heading-p t)
