@@ -866,9 +866,9 @@ Return nil if the field is not found"
         when (rassoc account-id user)
         return (cdr (assoc 'displayName user))))
 
-(defun jiralib-get-user-account-id (full-name)
-    "Return the account-id (accountId) of the user with displayName."
-  (loop for user in (jiralib-get-users nil)
+(defun jiralib-get-user-account-id (project full-name)
+    "Return the account-id (accountId) of the user with FULL-NAME (displayName) in PROJECT."
+  (loop for user in (jiralib-get-users project)
         when (rassoc full-name user)
         return (cdr (assoc 'accountId user))))
 
