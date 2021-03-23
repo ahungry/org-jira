@@ -1308,22 +1308,18 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
                      (cdr (assoc 'started worklog))
                      (cdr (assoc 'time-spent-seconds worklog))
                      comment-text
-                     (cl-function
-                      (lambda (&key data &allow-other-keys)
-                        (org-jira-log (format "Updating worklog from org-jira-update-worklogs-from-org-clocks call"))
-                        (org-jira-update-worklogs-for-issue issue-id filename))))
+                     nil) ; no callback - synchronous
                   ;; else
                   (jiralib-add-worklog
                    issue-id
                    (cdr (assoc 'started worklog))
                    (cdr (assoc 'time-spent-seconds worklog))
                    comment-text
-                   (cl-function
-                    (lambda (&key data &allow-other-keys)
-                      (org-jira-log (format "Adding worklog from org-jira-update-worklogs-from-org-clocks call"))
-                      (org-jira-update-worklogs-for-issue issue-id filename))))
+                   nil) ; no callback - synchronous
                   )
                 )))))
+      (org-jira-log (format "Updating worklog from org-jira-update-worklogs-from-org-clocks call"))
+      (org-jira-update-worklogs-for-issue issue-id filename)
       )))
 
 (defun org-jira-update-worklog ()
