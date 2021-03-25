@@ -307,7 +307,7 @@ request.el, so if at all possible, it should be avoided."
       (car (apply 'jiralib--call-it method params))
     (unless jiralib-token
       (call-interactively 'jiralib-login))
-    (case (intern method)
+    (cl-case (intern method)
       ('getStatuses (jiralib--rest-call-it "/rest/api/2/status"))
       ('getIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
       ('getSubTaskIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
@@ -482,7 +482,7 @@ first is normally used."
 
 (defun jiralib-make-list (data field)
   "Map all assoc elements in DATA to the value of FIELD in that element."
-  (loop for element in data
+  (cl-loop for element in data
         collect (cdr (assoc field element))))
 
 (defun jiralib-make-assoc-list (data key-field value-field)
@@ -491,7 +491,7 @@ first is normally used."
 DATA is a list of association lists (a SOAP array-of type)
 KEY-FIELD is the field to use as the key in the returned alist
 VALUE-FIELD is the field to use as the value in the returned alist"
-  (loop for element in data
+  (cl-loop for element in data
         collect (cons (cdr (assoc key-field element))
                       (cdr (assoc value-field element)))))
 
@@ -862,13 +862,13 @@ Return nil if the field is not found"
 
 (defun jiralib-get-user-fullname (account-id)
   "Return the full name (displaName) of the user with accountId."
-  (loop for user in (jiralib-get-users nil)
+  (cl-loop for user in (jiralib-get-users nil)
         when (rassoc account-id user)
         return (cdr (assoc 'displayName user))))
 
 (defun jiralib-get-user-account-id (project full-name)
     "Return the account-id (accountId) of the user with FULL-NAME (displayName) in PROJECT."
-  (loop for user in (jiralib-get-users project)
+  (cl-loop for user in (jiralib-get-users project)
         when (rassoc full-name user)
         return (cdr (assoc 'accountId user))))
 
@@ -1034,7 +1034,7 @@ Return no more than MAX-NUM-RESULTS."
   (unless jiralib-users-cache
     (setq jiralib-users-cache
           (jiralib-call "getUsers" nil project-key))
-    (loop for (name . id) in org-jira-users do
+    (cl-loop for (name . id) in org-jira-users do
           (setf jiralib-users-cache (append (list (jiralib-get-user id)) jiralib-users-cache))))
   jiralib-users-cache)
 
