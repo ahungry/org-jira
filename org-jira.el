@@ -1269,12 +1269,28 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
         (time-spent-seconds . ,(cdr (assoc 'time-spent-seconds worklog-time)))
         ))))
 
+(defun org-jira-worklog-to-hashtable (issue-id)
+  "Given ISSUE-ID, return a hashtable of worklog-id -> jira worklog."
+  (let ((worklog-hashtable (make-hash-table :test 'equal)))
+    (mapc
+     (lambda (worklog)
+       (let ((worklog-id (cdr (assoc 'id worklog))))
+         (puthash worklog-id worklog worklog-hashtable)))
+     (jiralib-worklog-import--filter-apply
+      (org-jira-find-value
+       (jiralib-get-worklogs
+        issue-id)
+       'worklogs)))
+    worklog-hashtable))
+
 ;;;###autoload
 (defun org-jira-update-worklogs-from-org-clocks ()
   "Update or add a worklog based on the org clocks."
   (interactive)
-  (let ((issue-id (org-jira-get-from-org 'issue 'key))
-        (filename (org-jira-filename)))
+  (let* ((issue-id (org-jira-get-from-org 'issue 'key))
+         (filename (org-jira-filename))
+         ;; Fetch all workflogs for this issue
+         (jira-worklogs-ht (org-jira-worklog-to-hashtable issue-id)))
     (org-jira-log (format "About to sync worklog for issue: %s in file: %s"
                   issue-id filename))
     (ensure-on-issue-id-with-filename issue-id filename
@@ -1291,39 +1307,40 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
               (setq next-clock-point (point)))
             (let ((clock-content
                    (buffer-substring-no-properties (point) next-clock-point)))
-
-              ;; @TODO :optim: This is inefficient, calling the resync on each update/insert event,
-              ;; ideally we would track and only insert/update changed entries, as well
-              ;; only call a resync once (when the entire list is processed, which will
-              ;; basically require a dry run to see how many items we should be updating.
-
               ;; Update via jiralib call
               (let* ((worklog (org-jira-org-clock-to-jira-worklog org-time clock-content))
                      (comment-text (cdr (assoc 'comment worklog)))
                      (comment-text (if (string= (org-trim comment-text) "") nil comment-text)))
                 (if (cdr (assoc 'worklog-id worklog))
-                    (jiralib-update-worklog
-                     issue-id
-                     (cdr (assoc 'worklog-id worklog))
-                     (cdr (assoc 'started worklog))
-                     (cdr (assoc 'time-spent-seconds worklog))
-                     comment-text
-                     (cl-function
-                      (lambda (&key data &allow-other-keys)
-                        (org-jira-log (format "Updating worklog from org-jira-update-worklogs-from-org-clocks call"))
-                        (org-jira-update-worklogs-for-issue issue-id filename))))
+                    ;; If there is a worklog in jira for this ID, check if the worklog has changed.
+                    ;; If it has changed, update the worklog.
+                    ;; If it has not changed, skip.
+                    (let ((jira-worklog (gethash (cdr (assoc 'worklog-id worklog)) jira-worklogs-ht)))
+                      (when (and jira-worklog
+                                 ;; Check if the entries are differing lengths.
+                                 (or (not (= (cdr (assoc 'timeSpentSeconds jira-worklog))
+                                         (cdr (assoc 'time-spent-seconds worklog))))
+                                 ;; Check if the entries start at different times.
+                                     (not (string= (cdr (assoc 'started jira-worklog))
+                                               (cdr (assoc 'started worklog))))))
+                        (jiralib-update-worklog
+                         issue-id
+                         (cdr (assoc 'worklog-id worklog))
+                         (cdr (assoc 'started worklog))
+                         (cdr (assoc 'time-spent-seconds worklog))
+                         comment-text
+                         nil))) ; no callback - synchronous
                   ;; else
                   (jiralib-add-worklog
                    issue-id
                    (cdr (assoc 'started worklog))
                    (cdr (assoc 'time-spent-seconds worklog))
                    comment-text
-                   (cl-function
-                    (lambda (&key data &allow-other-keys)
-                      (org-jira-log (format "Adding worklog from org-jira-update-worklogs-from-org-clocks call"))
-                      (org-jira-update-worklogs-for-issue issue-id filename))))
+                   nil) ; no callback - synchronous
                   )
                 )))))
+      (org-jira-log (format "Updating worklog from org-jira-update-worklogs-from-org-clocks call"))
+      (org-jira-update-worklogs-for-issue issue-id filename)
       )))
 
 (defun org-jira-update-worklog ()
