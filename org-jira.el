@@ -805,7 +805,7 @@ This format is typically generated from org-jira-worklogs-to-org-clocks call."
   (org-end-of-line)
   (insert "\n")
   (insert (format "  :id: %s\n" (cadddr clock-entry)))
-  (when (caddr clock-entry) (insert (format "  %s\n" (org-jira-decode (caddr clock-entry))))) ;; No comment is nil, so don't print it
+  (when (caddr clock-entry) (insert (replace-regexp-in-string "^\\*" "-" (format "  %s\n" (org-jira-decode (caddr clock-entry)))))) ;; No comment is nil, so don't print it
   )
 
 (defun org-jira-logbook-reset (issue-id filename &optional clocks)
