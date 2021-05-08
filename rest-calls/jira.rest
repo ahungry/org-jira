@@ -1,0 +1,16 @@
+# Update to your own before hacking in here
+:url := jiralib-url
+
+# Set after authenticating with the remote
+:auth := my-jiralib-token-string
+
+:project = AHU
+
+#GET :url/rest/api/2/issue/EX-2
+GET :url/rest/api/2/user/assignable/search?project=:project&maxResults=1000
+:auth
+#
+
+GET :url/rest/api/2/issue/:project-2
+:auth
+#
