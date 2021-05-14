@@ -1181,9 +1181,12 @@ ISSUES is a list of `org-jira-sdk-issue' records."
 
   ;; If we have any left, we map over them.
   (mapc 'org-jira--render-issue Issues)
-  ;; Oh, are you the culprit?
-  ;; (switch-to-buffer (org-jira--get-project-buffer (-last-item Issues)))
-  )
+
+  ;; Prior text: "Oh, are you the culprit?" - Not sure if this caused an issue at some point.
+  ;; We want to ensure we fix broken org narrowing though, by doing org-show-all and then org-cycle.
+  (switch-to-buffer (org-jira--get-project-buffer (-last-item Issues)))
+  (org-show-all)
+  (org-cycle))
 
 ;;;###autoload
 (defun org-jira-update-comment ()
