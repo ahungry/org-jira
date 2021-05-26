@@ -182,7 +182,7 @@ required to auth via Google usually on the browser domain.
 #### Authorization workaround (NOT secure)
 However, if all else fails (your Jira instance has disabled basic auth
 entirely), you can still get in by copying your web browser's
-cookie. Open up developer console an in the Network tab right click
+cookie. Open up developer console and in the Network tab right click
 the request for the JIRA page and select 'Copy request as cURL'. Paste
 it into a file so you can copy out the value for the cookie
 "cloud.session.token". Then set jiralib-token like this:
