@@ -24,3 +24,29 @@ Content-Type: application/json
   "maxResults": "2"
 }
 #
+
+# {
+#   "errorMessages": [],
+#   "errors": {
+#     "assignee": "Specify a valid value for assignee"
+#   }
+#
+# Create an issue
+POST :url/rest/api/2/issue
+Content-Type: application/json
+:auth
+{
+  "fields": {
+    "project":{
+      "key":"AHU"
+    },
+    "parent":{
+      "key":null
+    },
+    "issuetype":{
+      "id":"10003"
+    },
+    "summary":"some epic with no assignee",
+    "description":"some epic with no assignee",
+    "priority":{"id":"3"},
+    "assignee":{"accountId":null}}}

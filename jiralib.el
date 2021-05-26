@@ -439,6 +439,7 @@ Pass ARGS to jiralib-call."
 Invoking COMPLETE-CALLBACK when the
 JIRALIB-COMPLETE-CALLBACK is non-nil, request finishes, and
 passing ARGS to REQUEST."
+  (unless api (error "jiralib--rest-call-it was called with a NIL api value."))
   (setq args
         (mapcar
          (lambda (arg)
@@ -454,6 +455,21 @@ passing ARGS to REQUEST."
                   :headers `(,jiralib-token ("Content-Type" . "application/json"))
                   :parser 'jiralib--json-read
                   :complete jiralib-complete-callback
+                  ;; Ensure we have useful errors
+                  :error
+                  (lexical-let
+                      ((my-api api)
+                       (my-args args))
+                    (cl-function
+                       (lambda (&key data &allow-other-keys)
+                         (print "JIRA_ERROR - see your *Messages* buffer for more details.")
+                         (print "JIRA_ERROR REQUEST: ")
+                         (print my-api)
+                         (print my-args)
+                         (print "JIRA_ERROR RESPONSE: ")
+                         (print data)
+                         (error "JIRA_ERROR - see your *Messages* buffer for more details.")
+                         )))
                   args))
           nil))
 
@@ -861,7 +877,7 @@ Return nil if the field is not found"
   ;;       (cdr (assoc 'fullname user))))))
 
 (defun jiralib-get-user-fullname (account-id)
-  "Return the full name (displaName) of the user with accountId."
+  "Return the full name (displayName) of the user with ACCOUNT-ID."
   (cl-loop for user in (jiralib-get-users nil)
         when (rassoc account-id user)
         return (cdr (assoc 'displayName user))))

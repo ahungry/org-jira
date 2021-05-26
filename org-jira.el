@@ -602,10 +602,11 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
 (defun org-jira-get-project-lead (proj)
   (org-jira-find-value proj 'lead 'name))
 
+;; This is mapped to accountId and not username, so we need nil not blank string.
 (defun org-jira-get-assignable-users (project-key)
   "Get the list of assignable users for PROJECT-KEY, adding user set jira-users first."
   (append
-   '(("Unassigned" . ""))
+   '(("Unassigned" . nil))
    org-jira-users
    (mapcar (lambda (user)
              (cons (org-jira-decode (cdr (assoc 'displayName user)))
@@ -1768,7 +1769,8 @@ that should be bound to an issue."
                                    "")))
              (description . ,description)
              (priority (id . ,priority))
-             (assignee (accountId . ,(or (cdr (assoc user jira-users)) user)))))))
+             ;; accountId should be nil if Unassigned, not the key slot.
+             (assignee (accountId . ,(or (cdr (assoc user jira-users)) nil)))))))
     ticket-struct))
 
 ;;;###autoload
