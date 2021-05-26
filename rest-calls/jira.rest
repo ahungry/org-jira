@@ -11,6 +11,16 @@ GET :url/rest/api/2/user/assignable/search?project=:project&maxResults=1000
 :auth
 #
 
+# Get single issue
 GET :url/rest/api/2/issue/:project-2
 :auth
+#
+
+# Get search of issues
+POST :url/rest/api/2/search
+Content-Type: application/json
+:auth
+{
+  "maxResults": "2"
+}
 #
