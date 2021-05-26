@@ -572,6 +572,12 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   (if org-jira-mode
       (run-mode-hooks 'org-jira-mode-hook)))
 
+(defun org-jira-maybe-activate-mode ()
+  "Having hooks can be an expensive operation, and they are invoked each
+time the mode is started - we should only ever re-activate the mode if
+it isn't already on."
+  (unless (bound-and-true-p org-jira-mode) (org-jira-mode t)))
+
 (defun org-jira-get-project-name (proj)
   (org-jira-find-value proj 'key))
 
@@ -666,7 +672,7 @@ to change the property names this sets."
   (let ((projects-file (expand-file-name "projects-list.org" (org-jira--ensure-working-dir))))
     (or (find-buffer-visiting projects-file)
         (find-file projects-file))
-    (org-jira-mode t)
+    (org-jira-maybe-activate-mode)
     (save-excursion
       (let* ((oj-projs (jiralib-get-projects)))
         (mapc (lambda (proj)
@@ -1086,7 +1092,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
-          (org-jira-mode t)
+          (org-jira-maybe-activate-mode)
           (org-jira--maybe-render-top-heading proj-key)
           (setq p (org-find-entry-with-id issue-id))
           (save-restriction
@@ -1131,30 +1137,30 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
             (mapc
              (lambda (heading-entry)
                (ensure-on-issue-id-with-filename issue-id filename
-                 (let* ((entry-heading
-                         (concat (symbol-name heading-entry)
-                                 (format ": [[%s][%s]]"
-                                         (concat jiralib-url "/browse/" issue-id) issue-id))))
-                   (setq p (org-find-exact-headline-in-buffer entry-heading))
-                   (if (and p (>= p (point-min))
-                            (<= p (point-max)))
-                       (progn
-                         (goto-char p)
-                         (org-narrow-to-subtree)
-                         (goto-char (point-min))
-                         (forward-line 1)
-                         (delete-region (point) (point-max)))
-                     (if (org-goto-first-child)
-                         (org-insert-heading)
-                       (goto-char (point-max))
-                       (org-insert-subheading t))
-                     (org-jira-insert entry-heading "\n"))
+                                                 (let* ((entry-heading
+                                                         (concat (symbol-name heading-entry)
+                                                                 (format ": [[%s][%s]]"
+                                                                         (concat jiralib-url "/browse/" issue-id) issue-id))))
+                                                   (setq p (org-find-exact-headline-in-buffer entry-heading))
+                                                   (if (and p (>= p (point-min))
+                                                            (<= p (point-max)))
+                                                       (progn
+                                                         (goto-char p)
+                                                         (org-narrow-to-subtree)
+                                                         (goto-char (point-min))
+                                                         (forward-line 1)
+                                                         (delete-region (point) (point-max)))
+                                                     (if (org-goto-first-child)
+                                                         (org-insert-heading)
+                                                       (goto-char (point-max))
+                                                       (org-insert-subheading t))
+                                                     (org-jira-insert entry-heading "\n"))
 
-                   ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-                   (org-jira-insert
-                    (replace-regexp-in-string
-                     "^" "  "
-                     (format "%s" (slot-value Issue heading-entry)))))))
+                                                   ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+                                                   (org-jira-insert
+                                                    (replace-regexp-in-string
+                                                     "^" "  "
+                                                     (format "%s" (slot-value Issue heading-entry)))))))
              '(description))
 
             (when org-jira-download-comments
@@ -2395,7 +2401,7 @@ boards -  list of `org-jira-sdk-board' records."
   ;;(org-jira-sdk-dump board)
   (with-slots (id name url board-type jql limit) board
     (with-current-buffer (org-jira--get-boards-buffer)
-      (org-jira-mode t)
+      (org-jira-maybe-activate-mode)
       (org-jira-freeze-ui
         (org-save-outline-visibility t
           (save-restriction
