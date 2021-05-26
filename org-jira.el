@@ -916,9 +916,10 @@ jql."
   "Get issue summary from point and place next to issue id from jira"
   (interactive)
   (let ((jira-id (thing-at-point 'symbol)))
+    (unless jira-id (error "ORG_JIRA_ERROR: JIRA-ID missing in org-jira-get-summary!"))
     (forward-symbol 1)
     (insert (format " - %s"
-                    (cdr (assoc 'summary (car (org-jira-get-issue-by-id jira-id))))))))
+                    (cdr (assoc 'summary (assoc 'fields (car (org-jira-get-issue-by-id jira-id)))))))))
 
 ;;;###autoload
 (defun org-jira-get-summary-url ()
