@@ -198,8 +198,29 @@ This is maintained by `jiralib-login'.")
 
 (defcustom jiralib-worklog-import--filters-alist
   (list
-   '(nil "WorklogUpdatedByCurrentUser" (lambda (wl) (let-alist wl (when (and wl (string-equal (downcase (or jiralib-user-login-name user-login-name)) (downcase .updateAuthor.name))) wl))))
-   '(nil "WorklogAuthoredByCurrentUser" (lambda (wl) (let-alist wl (when (and wl (string-equal (downcase (or jiralib-user-login-name user-login-name)) (downcase .author.name))) wl)))))
+   '(nil "WorklogUpdatedByCurrentUser"
+         (lambda (wl)
+           (let-alist wl
+             (when
+                 (and wl
+                      (string-equal
+                       (downcase
+                        (or jiralib-user-login-name user-login-name ""))
+                       (downcase (or .updateAuthor.name
+                                     (car (split-string .updateAuthor.emailAddress "@"))
+                                     ""))))
+               wl))))
+   '(nil "WorklogAuthoredByCurrentUser"
+         (lambda (wl)
+           (let-alist wl
+             (when
+                 (and wl
+                      (string-equal
+                       (downcase
+                        (or jiralib-user-login-name user-login-name))
+                       (downcase (or .author.name
+                                     (car (split-string .author.name "@"))))))
+               wl)))))
   "A list of triplets: ('Global-Enable 'Descriptive-Label 'Function-Definition)
 that apply worklog predicate filters during import.
 
