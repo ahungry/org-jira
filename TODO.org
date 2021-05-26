@@ -9,11 +9,3 @@ worklog / comments) is derived from the proj-key and attempts are made
 to switch to that active buffer (which is not active).
 
 Everything running async doesn't help much either.
-
-* TODO Fix issue with org-jira-assign-issue
-Priority id needs to be set to the number, not left as null or
-whatever it's doing at the moment (may be a local issue due to using
-priority caching stuff).
-
-Also, org-jira-unassign-issue doesn't make sense as a distinct
-command, Unassigned should be a valid choice on the re-assignment list.
