@@ -219,7 +219,7 @@ This is maintained by `jiralib-login'.")
                        (downcase
                         (or jiralib-user-login-name user-login-name))
                        (downcase (or .author.name
-                                     (car (split-string (or .author.name "") "@"))))))
+                                     (car (split-string (or .author.emailAddress "") "@"))))))
                wl)))))
   "A list of triplets: ('Global-Enable 'Descriptive-Label 'Function-Definition)
 that apply worklog predicate filters during import.
