@@ -147,7 +147,7 @@
     (org-jira-sdk-issue
      :assignee (path '(fields assignee displayName))
      :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
-     :labels (mapconcat (lambda (c) (format "%s" c)) (map 'list #'identity (path '(fields labels))) ", ")
+     :labels (mapconcat (lambda (c) (format "%s" c)) (mapcar #'identity (path '(fields labels))) ", ")
      :created (path '(fields created))     ; confirm
      :description (or (path '(fields description)) "")
      :duedate (path '(fields duedate))         ; confirm
