@@ -213,9 +213,9 @@
 (defun org-jira-sdk-create-comment-from-data (d) (org-jira-sdk-create-from-data :comment d))
 (defun org-jira-sdk-create-comments-from-data-list (ds) (mapcar #'org-jira-sdk-create-comment-from-data ds))
 
-(defun org-jira-sdk-isa-record? (i) (typep i 'org-jira-sdk-record))
-(defun org-jira-sdk-isa-issue? (i) (typep i 'org-jira-sdk-issue))
-(defun org-jira-sdk-isa-comment? (i) (typep i 'org-jira-sdk-comment))
+(defun org-jira-sdk-isa-record? (i) (cl-typep i 'org-jira-sdk-record))
+(defun org-jira-sdk-isa-issue? (i) (cl-typep i 'org-jira-sdk-issue))
+(defun org-jira-sdk-isa-comment? (i) (cl-typep i 'org-jira-sdk-comment))
 
 ;; Board
 (defun org-jira-sdk-create-board-from-data (d) (org-jira-sdk-create-from-data :board d))
