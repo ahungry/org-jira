@@ -21,7 +21,9 @@ Use Jira in Emacs org-mode.
         - [Customization](#customization)
             - [Get Issues from Custom JQL](#get-issues-from-custom-jql)
             - [Streamlined transition flow](#streamlined-transition-flow)
-            - [Authorization workaround (NOT secure)](#authorization-workaround-not-secure)
+            - [Basic auth via personal API tokens (secure'ish)](#basic-auth-via-personal-api-tokens-secureish)
+                - [Extra basic auth note (thanks @mujo-hash)](#extra-basic-auth-note-thanks-mujo-hash)
+            - [Last Resort Authorization workaround (NOT secure)](#last-resort-authorization-workaround-not-secure)
         - [Optimizations](#optimizations)
             - [Optimizing available actions for status changes](#optimizing-available-actions-for-status-changes)
     - [About](#about)
@@ -57,7 +59,11 @@ In your ~/.emacs, you should set the variable as such:
 (setq jiralib-url "https://your-site.atlassian.net")
 ```
 
-The first time you try and connect to jira you will be asked for your username and password. Make sure to enter your username and not your email if they are different. If you use two-step verification you will need to create an [API token](https://confluence.atlassian.com/cloud/api-tokens-938839638.html) and use that instead of your password.
+The first time you try and connect to jira you will be asked for your
+username and password. Make sure to enter your username and not your
+email if they are different. If you use two-step verification you will
+need to create an [APItoken](https://confluence.atlassian.com/cloud/api-tokens-938839638.html)
+and use that instead of your password.
 
 If you don't want to enter your credentials (login/password) each time
 you go to connect, you can add to your ~/.authinfo.gpg or ~/.authinfo
@@ -179,7 +185,15 @@ https://id.atlassian.com/manage-profile/email
 and you should be able to work with basic auth, even if you are
 required to auth via Google usually on the browser domain.
 
-#### Authorization workaround (NOT secure)
+##### Extra basic auth note (thanks @mujo-hash)
+For Basic Authentication on cloud Jira, an api token must be used now in place of a password:
+https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
+https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
+
+The self-hosted version of Jira appears to still support Basic Authentication with a user password:
+https://developer.atlassian.com/server/jira/platform/basic-authentication/
+
+#### Last Resort Authorization workaround (NOT secure)
 However, if all else fails (your Jira instance has disabled basic auth
 entirely), you can still get in by copying your web browser's
 cookie. Open up developer console and in the Network tab right click
