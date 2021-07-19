@@ -32,6 +32,8 @@ Use Jira in Emacs org-mode.
 
 <!-- markdown-toc end -->
 
+## Contributing
+![CONTRIBUTING.md](https://github.com/ahungry/org-jira/blob/master/CONTRIBUTING.md)
 
 ## Setup
 ### Installation
