@@ -82,6 +82,7 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
+(require 'cl-seq)
 (require 'soap-client)
 (require 'request)
 (require 'json)
@@ -229,6 +230,11 @@ Example: (list '('t \"descriptive-predicate-label\" (lambda (x) x)))"
   :group 'org-jira)
 
 
+(defcustom jiralib-update-issue-fields-exclude-list nil
+  "A list of symbols to check for exclusion on updates based on matching key.
+Key names should be one of components, description, assignee, reporter, summary, issuetype."
+  :type 'list
+  :group 'org-jira)
 
 (defun jiralib-load-wsdl ()
   "Load the JIRA WSDL descriptor."
@@ -567,14 +573,21 @@ emacs-lisp"
   "Return jira rest api for issue KEY."
   (concat "rest/api/2/issue/" key))
 
+(defun jiralib-filter-fields-by-exclude-list (exclude-list fields)
+  (cl-remove-if
+   (lambda (el) (cl-member (car el) exclude-list)) fields))
+
 (defun jiralib-update-issue (key fields &optional callback)
   "Update the issue with id KEY with the values in FIELDS, invoking CALLBACK."
-  (jiralib-call
-   "updateIssue"
-   callback
-   key (if jiralib-use-restapi
-           fields
-         (jiralib-make-remote-field-values fields))))
+  (let ((filtered-fields (jiralib-filter-fields-by-exclude-list
+                          jiralib-update-issue-fields-exclude-list
+                          fields)))
+    (jiralib-call
+     "updateIssue"
+     callback
+     key (if jiralib-use-restapi
+             filtered-fields
+           (jiralib-make-remote-field-values filtered-fields)))))
 
 (defvar jiralib-status-codes-cache nil)
 
