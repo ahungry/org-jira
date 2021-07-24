@@ -259,7 +259,9 @@ After a successful login, store the authentication token in
                                                        (url-host (url-generic-parse-url jiralib-url))
                                                      jiralib-host)
                                              ;; secrets.el wouldn’t accept a number.
-                                             :port (number-to-string (url-port (url-generic-parse-url jiralib-url)))
+                                             :port (list (number-to-string (url-port (url-generic-parse-url jiralib-url)))
+							 (url-port (url-generic-parse-url jiralib-url))
+							 (url-type (url-generic-parse-url jiralib-url)))
                                              :require '(:user :secret)
                                              :create t)))
            user secret)
