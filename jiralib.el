@@ -1128,13 +1128,13 @@ Auxiliary Notes:
                  (boundp 'unwrap-worklog-records-fn)
                  (functionp unwrap-worklog-records-fn))
                 unwrap-worklog-records-fn
-              (lambda (x) (coerce x 'list))))
+              (lambda (x) (cl-coerce x 'list))))
       (setq rewrap-worklog-records-fn
             (if (and
                  (boundp 'rewrap-worklog-records-fn)
                  (functionp rewrap-worklog-records-fn))
                 rewrap-worklog-records-fn
-              (lambda (x) (remove 'nil (coerce x 'vector)))))
+              (lambda (x) (remove 'nil (cl-coerce x 'vector)))))
       (setq predicate-fn-lst
             (if (and (boundp 'predicate-fn-lst)
                      (not (null predicate-fn-lst))
