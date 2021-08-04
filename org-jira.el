@@ -523,34 +523,43 @@ See `org-default-priority' for more info."
   org-jira-working-dir
   )
 
+(defcustom org-jira-keymap-prefix "C-c"
+  "Org-Jira keymap prefix."
+  :group 'org-jira
+  :type 'string)
+
+
 (defvar org-jira-entry-mode-map
-  (let ((org-jira-map (make-sparse-keymap)))
-    (define-key org-jira-map (kbd "C-c pg") 'org-jira-get-projects)
-    (define-key org-jira-map (kbd "C-c bg") 'org-jira-get-boards)
-    (define-key org-jira-map (kbd "C-c iv") 'org-jira-get-issues-by-board)
-    (define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
-    (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
-    (define-key org-jira-map (kbd "C-c ij") 'org-jira-get-issues-from-custom-jql)
-    (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
-    ;;(define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
-    ;;(define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
-    (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
-    (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
-    (define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
-    (define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
-    ;(define-key org-jira-map (kbd "C-c isr") 'org-jira-set-issue-reporter)
-    (define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
-    (define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
-    (define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
-    (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
-    (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
-    (define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
-    (define-key org-jira-map (kbd "C-c cc") 'org-jira-add-comment)
-    (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
-    (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
-    (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
-    (define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-by-fixversion)
-    org-jira-map))
+  (progn
+    (define-prefix-command 'org-jira-entry-mode-map)
+    (define-key org-jira-entry-mode-map (kbd "pg") 'org-jira-get-projects)
+    (define-key org-jira-entry-mode-map (kbd "bg") 'org-jira-get-boards)
+    (define-key org-jira-entry-mode-map (kbd "iv") 'org-jira-get-issues-by-board)
+    (define-key org-jira-entry-mode-map (kbd "ib") 'org-jira-browse-issue)
+    (define-key org-jira-entry-mode-map (kbd "ig") 'org-jira-get-issues)
+    (define-key org-jira-entry-mode-map (kbd "ij") 'org-jira-get-issues-from-custom-jql)
+    (define-key org-jira-entry-mode-map (kbd "ih") 'org-jira-get-issues-headonly)
+    ;;(define-key org-jira-entry-mode-map (kbd "if") 'org-jira-get-issues-from-filter-headonly)
+    ;;(define-key org-jira-entry-mode-map (kbd "iF") 'org-jira-get-issues-from-filter)
+    (define-key org-jira-entry-mode-map (kbd "iu") 'org-jira-update-issue)
+    (define-key org-jira-entry-mode-map (kbd "iw") 'org-jira-progress-issue)
+    (define-key org-jira-entry-mode-map (kbd "in") 'org-jira-progress-issue-next)
+    (define-key org-jira-entry-mode-map (kbd "ia") 'org-jira-assign-issue)
+    ;(define-key org-jira-entry-mode-map (kbd "isr") 'org-jira-set-issue-reporter)
+    (define-key org-jira-entry-mode-map (kbd "ir") 'org-jira-refresh-issue)
+    (define-key org-jira-entry-mode-map (kbd "iR") 'org-jira-refresh-issues-in-buffer)
+    (define-key org-jira-entry-mode-map (kbd "ic") 'org-jira-create-issue)
+    (define-key org-jira-entry-mode-map (kbd "ik") 'org-jira-copy-current-issue-key)
+    (define-key org-jira-entry-mode-map (kbd "sc") 'org-jira-create-subtask)
+    (define-key org-jira-entry-mode-map (kbd "sg") 'org-jira-get-subtasks)
+    (define-key org-jira-entry-mode-map (kbd "cc") 'org-jira-add-comment)
+    (define-key org-jira-entry-mode-map (kbd "cu") 'org-jira-update-comment)
+    (define-key org-jira-entry-mode-map (kbd "wu") 'org-jira-update-worklogs-from-org-clocks)
+    (define-key org-jira-entry-mode-map (kbd "tj") 'org-jira-todo-to-jira)
+    (define-key org-jira-entry-mode-map (kbd "if") 'org-jira-get-issues-by-fixversion)
+    (global-set-key (kbd org-jira-keymap-prefix) org-jira-entry-mode-map)
+    org-jira-entry-mode-map))
+
 
 ;;;###autoload
 (define-minor-mode org-jira-mode
