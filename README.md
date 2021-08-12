@@ -89,28 +89,31 @@ for example, 'EX.org' for a project named 'EX').
 ### Keybinds
 Some of the important keybindings:
 
-```lisp
-(define-key org-jira-map (kbd "C-c pg") 'org-jira-get-projects)
-(define-key org-jira-map (kbd "C-c ib") 'org-jira-browse-issue)
-(define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
-(define-key org-jira-map (kbd "C-c ij") 'org-jira-get-issues-from-custom-jql)
-(define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
-(define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
-(define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
-(define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
-(define-key org-jira-map (kbd "C-c ia") 'org-jira-assign-issue)
-(define-key org-jira-map (kbd "C-c ir") 'org-jira-refresh-issue)
-(define-key org-jira-map (kbd "C-c iR") 'org-jira-refresh-issues-in-buffer)
-(define-key org-jira-map (kbd "C-c ic") 'org-jira-create-issue)
-(define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
-(define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
-(define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
-(define-key org-jira-map (kbd "C-c cc") 'org-jira-add-comment)
-(define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
-(define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
-(define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
-(define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-by-fixversion)
-```
+
+| keys    | function                                 |
+|---------|:-----------------------------------------|
+| C-c p g | org-jira-get-projects                    |
+| C-c i b | org-jira-browse-issue                    |
+| C-c i g | org-jira-get-issues                      |
+| C-c i j | org-jira-get-issues-from-custom-jql      |
+| C-c i h | org-jira-get-issues-headonly             |
+| C-c i u | org-jira-update-issue                    |
+| C-c i w | org-jira-progress-issue                  |
+| C-c i n | org-jira-progress-issue-next             |
+| C-c i a | org-jira-assign-issue                    |
+| C-c i r | org-jira-refresh-issue                   |
+| C-c i R | org-jira-refresh-issues-in-buffer        |
+| C-c i c | org-jira-create-issue                    |
+| C-c i k | org-jira-copy-current-issue-key          |
+| C-c s c | org-jira-create-subtask                  |
+| C-c s g | org-jira-get-subtasks                    |
+| C-c c c | org-jira-add-comment                     |
+| C-c c u | org-jira-update-comment                  |
+| C-c w u | org-jira-update-worklogs-from-org-clocks |
+| C-c t j | org-jira-todo-to-jira                    |
+| C-c i f | org-jira-get-issues-by-fixversion        |
+
+*(These examples use `org-jira-keymap-prefix`'s default value of "C-c".)*
 
 ### Customization
 
