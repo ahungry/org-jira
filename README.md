@@ -189,10 +189,13 @@ required to auth via Google usually on the browser domain.
 
 ##### Extra basic auth note (thanks @mujo-hash)
 For Basic Authentication on cloud Jira, an api token must be used now in place of a password:
+
 https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
+
 https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
 
 The self-hosted version of Jira appears to still support Basic Authentication with a user password:
+
 https://developer.atlassian.com/server/jira/platform/basic-authentication/
 
 #### Last Resort Authorization workaround (NOT secure)
