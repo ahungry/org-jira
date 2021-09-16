@@ -1229,8 +1229,8 @@ ISSUES is a list of `org-jira-sdk-issue' records."
 (defun org-jira-add-comment (issue-id filename comment)
   "For ISSUE-ID in FILENAME, add a new COMMENT string to the issue region."
   (interactive
-   (let* ((issue-id (org-jira-id))
-          (filename (org-jira-filename))
+   (let* ((issue-id (org-jira-get-from-org 'issue 'id))
+          (filename (org-jira-get-from-org 'issue 'filename))
           (comment (read-string (format  "Comment (%s): " issue-id))))
      (list issue-id filename comment)))
   (lexical-let ((issue-id issue-id)
