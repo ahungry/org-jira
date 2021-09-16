@@ -1201,7 +1201,7 @@ ISSUES is a list of `org-jira-sdk-issue' records."
   "Update a comment for the current issue."
   (interactive)
   (let* ((issue-id (org-jira-get-from-org 'issue 'key)) ; Really the key
-         (filename (org-jira-filename))
+         (filename (org-jira-get-from-org 'issue 'filename))
          (comment-id (org-jira-get-from-org 'comment 'id))
          (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id))))
     (lexical-let ((issue-id issue-id)
