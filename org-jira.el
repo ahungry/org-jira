@@ -1201,7 +1201,7 @@ ISSUES is a list of `org-jira-sdk-issue' records."
   "Update a comment for the current issue."
   (interactive)
   (let* ((issue-id (org-jira-get-from-org 'issue 'key)) ; Really the key
-         (filename (org-jira-get-from-org 'issue 'filename))
+         (filename (org-jira-filename))
          (comment-id (org-jira-get-from-org 'comment 'id))
          (comment (replace-regexp-in-string "^  " "" (org-jira-get-comment-body comment-id))))
     (lexical-let ((issue-id issue-id)
@@ -1230,7 +1230,7 @@ ISSUES is a list of `org-jira-sdk-issue' records."
   "For ISSUE-ID in FILENAME, add a new COMMENT string to the issue region."
   (interactive
    (let* ((issue-id (org-jira-get-from-org 'issue 'id))
-          (filename (org-jira-get-from-org 'issue 'filename))
+          (filename (org-jira-filename))
           (comment (read-string (format  "Comment (%s): " issue-id))))
      (list issue-id filename comment)))
   (lexical-let ((issue-id issue-id)
@@ -2275,7 +2275,7 @@ it is a symbol, it will be converted to string."
 
 (defun org-jira-filename ()
   "Get the ID entry for the current heading."
-  (org-entry-get (point) "filename"))
+  (org-jira-get-from-org 'issue 'filename))
 
 ;;;###autoload
 (defun org-jira-browse-issue ()
