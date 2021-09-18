@@ -1229,7 +1229,7 @@ ISSUES is a list of `org-jira-sdk-issue' records."
 (defun org-jira-add-comment (issue-id filename comment)
   "For ISSUE-ID in FILENAME, add a new COMMENT string to the issue region."
   (interactive
-   (let* ((issue-id (org-jira-id))
+   (let* ((issue-id (org-jira-get-from-org 'issue 'id))
           (filename (org-jira-filename))
           (comment (read-string (format  "Comment (%s): " issue-id))))
      (list issue-id filename comment)))
@@ -2275,7 +2275,7 @@ it is a symbol, it will be converted to string."
 
 (defun org-jira-filename ()
   "Get the ID entry for the current heading."
-  (org-entry-get (point) "filename"))
+  (org-jira-get-from-org 'issue 'filename))
 
 ;;;###autoload
 (defun org-jira-browse-issue ()
