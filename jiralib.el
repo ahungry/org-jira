@@ -233,7 +233,12 @@ Example: (list '('t \"descriptive-predicate-label\" (lambda (x) x)))"
 (defcustom jiralib-update-issue-fields-exclude-list nil
   "A list of symbols to check for exclusion on updates based on matching key.
 Key names should be one of components, description, assignee, reporter, summary, issuetype."
-  :type 'list
+  :type '(set (const :tag "Exclude components" components)
+              (const :tag "Exclude description" description)
+              (const :tag "Exclude assignee" assignee)
+              (const :tag "Exclude reporter" reporter)
+              (const :tag "Exclude summary" summary)
+              (const :tat "Exclude issue type" issuetype))
   :group 'org-jira)
 
 (defun jiralib-load-wsdl ()
