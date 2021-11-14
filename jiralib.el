@@ -238,7 +238,8 @@ Key names should be one of components, description, assignee, reporter, summary,
               (const :tag "Exclude assignee" assignee)
               (const :tag "Exclude reporter" reporter)
               (const :tag "Exclude summary" summary)
-              (const :tat "Exclude issue type" issuetype))
+              (const :tag "Exclude priority" priority)
+              (const :tag "Exclude issue type" issuetype))
   :group 'org-jira)
 
 (defun jiralib-load-wsdl ()
