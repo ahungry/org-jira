@@ -570,7 +570,11 @@ Entry to this mode calls the value of `org-jira-mode-hook'."
   :keymap org-jira-entry-mode-map
 
   (if org-jira-mode
-      (run-mode-hooks 'org-jira-mode-hook)))
+      (progn
+        (set (make-local-variable 'org-element-use-cache) nil)
+        (run-mode-hooks 'org-jira-mode-hook))
+    (progn
+      (kill-local-variable 'org-element-use-cache))))
 
 (defun org-jira-maybe-activate-mode ()
   "Having hooks can be an expensive operation, and they are invoked each
