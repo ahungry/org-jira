@@ -1856,7 +1856,7 @@ that should be bound to an issue."
            ;; about the local properties, not any hierarchal or special
            ;; ones).
            (let ((org-special-properties nil))
-             (or (org-entry-get (point) key)
+             (or (org-entry-get (point) key t)
                  ""))))))
 
 (defun org-jira-read-action (actions)
