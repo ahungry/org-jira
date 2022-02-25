@@ -1,6 +1,6 @@
 ;;; jiralib.el -- Provide connectivity to JIRA SOAP/REST services.
 
-;; Copyright (C) 2016,2017 Matthew Carter <m@ahungry.com>
+;; Copyright (C) 2016-2022 Matthew Carter <m@ahungry.com>
 ;; Copyright (C) 2011 Bao Haojun
 ;; original Copyright (C) 2009 Alex Harsanyi
 
