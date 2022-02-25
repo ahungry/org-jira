@@ -370,23 +370,19 @@ See `org-default-priority' for more info."
 
 (defun org-jira-log (s) (when (eq 'debug org-jira-verbosity) (message "%s" s)))
 
-;; Adding eval-and-compile to resolve error when the inner macro expansion
-;; would cause this to malfunction on 'org-jira-filename' usage, producing oddities
-;; like returning the issue-id as the filename.
 (defmacro ensure-on-issue (&rest body)
   "Make sure we are on an issue heading, before executing BODY."
   (declare (debug t)
            (indent 0))
-  `(eval-and-compile
-     (save-excursion
-       (save-restriction
-         (widen)
-         (unless (looking-at "^\\*\\* ")
-           (search-backward-regexp "^\\*\\* " nil t)) ; go to top heading
-         (let ((org-jira-id (org-jira-id)))
-           (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) (downcase org-jira-id)))
-             (error "Not on an issue region!")))
-         ,@body))))
+  `(save-excursion
+    (save-restriction
+      (widen)
+      (unless (looking-at "^\\*\\* ")
+        (search-backward-regexp "^\\*\\* " nil t)) ; go to top heading
+      (let ((org-jira-id (org-jira-id)))
+        (unless (and org-jira-id (string-match (jiralib-get-issue-regexp) (downcase org-jira-id)))
+          (error "Not on an issue region!")))
+      ,@body)))
 
 (defmacro org-jira-with-callback (&rest body)
   "Simpler way to write the data BODY callbacks."
