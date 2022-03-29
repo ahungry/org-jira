@@ -25,6 +25,9 @@ Sample of an org-jira buffer with a ticket synced using the
 :type-id:  10100
 :END:
 :LOGBOOK:
+CLOCK: [2022-02-24 Thu 20:30]--[2022-02-24 Thu 20:35] =>  0:05
+  :id: 10359
+  Sample time clock entry
 :END:
 *** description: [[https://example.atlassian.net/browse/AHU-39][AHU-39]]
   The summary is here
