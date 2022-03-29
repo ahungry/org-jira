@@ -5,6 +5,39 @@
 
 Use Jira in Emacs org-mode.
 
+Sample of an org-jira buffer with a ticket synced using the
+`org-jira-get-issues-from-custom-jql` functionality:
+
+```org
+* AHU-Tickets
+** BUZ [#C] a sample ticket with priority, in my AHU project           :AHU_39:
+:PROPERTIES:
+:assignee: Matthew Carter
+:filename: this-years-work
+:reporter: Matthew Carter
+:type:     Story
+:priority: Medium
+:status:   To Do
+:created:  2019-01-24T23:24:54.321-0500
+:updated:  2021-07-19T18:40:30.722-0400
+:ID:       AHU-39
+:CUSTOM_ID: AHU-39
+:type-id:  10100
+:END:
+:LOGBOOK:
+:END:
+*** description: [[https://example.atlassian.net/browse/AHU-39][AHU-39]]
+  The summary is here
+*** Comment: Matthew Carter
+:PROPERTIES:
+:ID:       10680
+:created:  2019-01-24T23:25:19.455-0500
+:updated:  2019-01-24T23:27:36.125-0500
+:END:
+  a sample comment on 39
+
+```
+
 ## TOC
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
