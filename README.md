@@ -10,7 +10,7 @@ Sample of an org-jira buffer with a ticket synced using the
 
 ```org
 * AHU-Tickets
-** BUZ [#C] a sample ticket with priority, in my AHU project           :AHU_39:
+** TODO [#C] a sample ticket with priority, in my AHU project           :AHU_39:
 :PROPERTIES:
 :assignee: Matthew Carter
 :filename: this-years-work
