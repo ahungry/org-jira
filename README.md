@@ -234,6 +234,24 @@ The self-hosted version of Jira appears to still support Basic Authentication wi
 
 https://developer.atlassian.com/server/jira/platform/basic-authentication/
 
+#### Using Bearer authentication with Personal Access Tokens
+
+Some JIRA instances might require usage of Authorization headers using Bearer
+tokens as documented in [Using
+PATs](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html#UsingPersonalAccessTokens-UsingPATs)
+Atlassian documentation.
+
+As documented, PATs should be used without a username in Authorization header as
+Bearer tokens. Following is an example of using PAT token stored in `authinfo`
+to authenticate to JIRA:
+
+```lisp
+(setq jiralib-token
+    (cons "Authorization"
+          (concat "Bearer " (auth-source-pick-first-password
+              :host "jira.company.com"))))
+```
+
 #### Last Resort Authorization workaround (NOT secure)
 However, if all else fails (your Jira instance has disabled basic auth
 entirely), you can still get in by copying your web browser's
