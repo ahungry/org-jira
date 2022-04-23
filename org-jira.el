@@ -1009,6 +1009,20 @@ Will send a list of org-jira-sdk-issue objects to the list printer."
           org-jira-sdk-create-issues-from-data-list
           org-jira-get-issues))))
 
+(defvar org-jira-get-sprint-list-callback
+  (cl-function
+   (lambda (&key data &allow-other-keys)
+     "Callback for async, DATA is the response from the request call.
+
+Will send a list of org-jira-sdk-issue objects to the list printer."
+     (org-jira-log "Received data for org-jira-get-sprint-list-callback.")
+     (--> data
+          (org-jira-sdk-path it '(sprint))
+          (append it nil)               ; convert the conses into a proper list.
+          org-jira-sdk-create-issues-from-data-list
+          org-jira-get-issues))))
+
+
 ;;;###autoload
 (defun org-jira-get-issues (issues)
   "Get list of ISSUES into an org buffer.
@@ -1131,7 +1145,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                       (when (or (and val (not (string= val "")))
                                 (eq entry 'assignee)) ;; Always show assignee
                         (org-jira-entry-put (point) (symbol-name entry) val))))
-                  '(assignee filename reporter type type-id priority labels resolution status components created updated))
+                  '(assignee filename reporter type type-id priority labels resolution status components created updated sprint))
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
@@ -2369,6 +2383,17 @@ See `org-jira-get-issues-from-filter'."
                               :callback org-jira-get-issue-list-callback
                               :limit (org-jira-get-board-limit board-id)
                               :query-params (org-jira--make-jql-queryparams board-id))))
+;;;###autoload
+(defun org-jira-get-sprints-by-board ()
+  "Get list of SPRINTS from agile board."
+  (interactive)
+  (let* ((board (org-jira-read-board))
+         (board-id (cdr board)))
+    (jiralib-get-board-sprints board-id
+                              :callback org-jira-get-sprint-list-callback
+                              :limit (org-jira-get-board-limit board-id)
+                              :query-params (org-jira--make-jql-queryparams board-id))))
+
 
 (defun org-jira-get-board-limit (id)
   "Get limit for number of retrieved issues for a board

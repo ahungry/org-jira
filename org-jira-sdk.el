@@ -106,6 +106,7 @@
    (proj-key :type string :initarg :proj-key)
    (reporter :type (or null string) :initarg :reporter)
    (resolution :type (or null string) :initarg :resolution)
+   (sprint :type (or null string) :initarg :sprint)
    (start-date :type (or null string) :initarg :start-date)
    (status :type string :initarg :status)
    (summary :type string :initarg :summary)
@@ -160,6 +161,7 @@
      :proj-key (path '(fields project key))
      :reporter (path '(fields reporter displayName)) ; reporter could be an object of its own slot values
      :resolution (path '(fields resolution name))  ; confirm
+     :sprint (path '(fields sprint name))
      :start-date (path '(fields start-date))  ; confirm
      :status (org-jira-decode (path '(fields status name)))
      :summary (path '(fields summary))

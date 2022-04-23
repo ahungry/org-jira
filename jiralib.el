@@ -416,6 +416,11 @@ request.el, so if at all possible, it should be avoided."
 				   (format "rest/agile/1.0/board/%d/issue" (first params))
 				   'issues
 				   (cdr params)))
+      ('getSprintsFromBoard  (apply 'jiralib--agile-call-it
+				   (format "rest/agile/1.0/board/%d/sprint" (first params))
+				   'issues
+				   (cdr params)))
+      
       ('getIssuesFromJqlSearch  (append (cdr ( assoc 'issues (jiralib--rest-call-it
                                                               "/rest/api/2/search"
                                                               :type "POST"
@@ -1174,6 +1179,12 @@ Auxiliary Notes:
   "Return list of jira issues in the specified jira board"
   (apply 'jiralib-call "getIssuesFromBoard"
 	 (cl-getf params :callback) board-id params))
+
+(defun jiralib-get-board-sprints (board-id &rest params)
+  "Return list of jira sprints in the specified jira board"
+  (apply 'jiralib-call "getSprintsFromBoard"
+	 (cl-getf params :callback) board-id params))
+
 
 (defun jiralib--agile-not-last-entry (num-entries total start-at limit)
   "Return true if need to retrieve next page from agile api"
