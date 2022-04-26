@@ -319,7 +319,7 @@ This produces a noticeable slowdown and is not recommended by
 request.el, so if at all possible, it should be avoided."
   ;; @TODO :auth: Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
-  (print params)
+  
   (setq jiralib-complete-callback
         ;; Don't run with async if we don't have a login token yet.
         (if jiralib-token callback nil))
