@@ -1686,6 +1686,7 @@ purpose of wiping an old subtree."
 
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-boards-read-history nil)
+(defvar org-jira-sprints-read-history nil)
 (defvar org-jira-components-read-history nil)
 (defvar org-jira-priority-read-history nil)
 (defvar org-jira-type-read-history nil)
@@ -1711,6 +1712,17 @@ purpose of wiping an old subtree."
                            'org-jira-boards-read-history
                            (car org-jira-boards-read-history))))
     (assoc board-name boards-alist)))
+
+(defun org-jira-read-sprint (board)
+  "Read sprint name. Returns cons pair (name . integer-id)"
+  (let* ((sprints-alist
+	  (jiralib-make-assoc-list (append (alist-get 'values (jiralib-get-board-sprints board)) nil) 'name 'id))
+	  (sprint-name
+	   (completing-read "Sprints: " sprints-alist
+			    nil t nil
+			    'org-jira-sprints-read-history
+			    (car org-jira-sprints-read-history))))
+       (assoc sprint-name sprints-alist)))
 
 (defun org-jira-read-component (project)
   "Read the components options for PROJECT such as EX."
@@ -2394,6 +2406,18 @@ See `org-jira-get-issues-from-filter'."
                               :limit (org-jira-get-board-limit board-id)
                               :query-params (org-jira--make-jql-queryparams board-id))))
 
+;;;###autoload
+(defun org-jira-get-issues-by-sprint ()
+  "Get list of ISSUES from sprint."
+  (interactive)
+  (let* ((board (org-jira-read-board))
+	 (board-id (cdr board))
+	 (sprint (org-jira-read-sprint board-id))
+	 (sprint-id (cdr sprint)))
+    (jiralib-get-sprint-issues sprint-id
+			       :callback org-jira-get-issue-list-callback
+			       :limit (org-jira-get-board-limit board-id)
+			       :query-params (org-jira--make-jql-queryparams board-id))))
 
 (defun org-jira-get-board-limit (id)
   "Get limit for number of retrieved issues for a board

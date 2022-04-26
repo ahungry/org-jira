@@ -319,6 +319,7 @@ This produces a noticeable slowdown and is not recommended by
 request.el, so if at all possible, it should be avoided."
   ;; @TODO :auth: Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
+  (print params)
   (setq jiralib-complete-callback
         ;; Don't run with async if we don't have a login token yet.
         (if jiralib-token callback nil))
@@ -416,15 +417,16 @@ request.el, so if at all possible, it should be avoided."
 				   (format "rest/agile/1.0/board/%d/issue" (first params))
 				   'issues
 				   (cdr params)))
-      ('getSprintsFromBoard  (apply 'jiralib--agile-call-it
-				   (format "rest/agile/1.0/board/%d/sprint" (first params))
+      ('getSprintsFromBoard  (jiralib--rest-call-it (format "/rest/agile/1.0/board/%s/sprint"  (first params))))
+      ('getIssuesFromSprint  (apply 'jiralib--agile-call-it
+				   (format "rest/agile/1.0/sprint/%d/issue" (first params))
 				   'issues
 				   (cdr params)))
-      
       ('getIssuesFromJqlSearch  (append (cdr ( assoc 'issues (jiralib--rest-call-it
                                                               "/rest/api/2/search"
                                                               :type "POST"
                                                               :data (json-encode `((jql . ,(first params))
+										   (fields . ("*all"))
                                                                                    (maxResults . ,(second params)))))))
                                         nil))
       ('getPriorities (jiralib--rest-call-it
@@ -545,7 +547,7 @@ first is normally used."
 
 DATA is a list of association lists (a SOAP array-of type)
 KEY-FIELD is the field to use as the key in the returned alist
-VALUE-FIELD is the field to use as the value in the returned alist"
+VALUE-FIELD is the field to use as the value in the returned alist"  
   (cl-loop for element in data
         collect (cons (cdr (assoc key-field element))
                       (cdr (assoc value-field element)))))
@@ -1175,16 +1177,19 @@ Auxiliary Notes:
   "Return list of jira boards"
   (jiralib-call "getBoards" nil))
 
+(defun jiralib-get-board-sprints (id)
+  "Return list of jira sprints in the specified jira board"
+  (jiralib-call "getSprintsFromBoard" nil id))
+
+(defun jiralib-get-sprint-issues (id &rest params)
+  "Return list of issues in the specified sprint"
+  (apply 'jiralib-call "getIssuesFromSprint"
+	 (cl-getf params :callback) id params))
+
 (defun jiralib-get-board-issues (board-id &rest params)
   "Return list of jira issues in the specified jira board"
   (apply 'jiralib-call "getIssuesFromBoard"
 	 (cl-getf params :callback) board-id params))
-
-(defun jiralib-get-board-sprints (board-id &rest params)
-  "Return list of jira sprints in the specified jira board"
-  (apply 'jiralib-call "getSprintsFromBoard"
-	 (cl-getf params :callback) board-id params))
-
 
 (defun jiralib--agile-not-last-entry (num-entries total start-at limit)
   "Return true if need to retrieve next page from agile api"

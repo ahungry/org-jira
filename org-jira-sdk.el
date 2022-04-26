@@ -151,7 +151,7 @@
      :labels (mapconcat (lambda (c) (format "%s" c)) (mapcar #'identity (path '(fields labels))) ", ")
      :created (path '(fields created))     ; confirm
      :description (or (path '(fields description)) "")
-     :duedate (path '(fields duedate))         ; confirm
+     :duedate (or (path '(fields sprint endDate)) (path '(fields duedate)))         ; confirm
      :filename (path '(fields project key))
      :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
      :id (path '(key))
