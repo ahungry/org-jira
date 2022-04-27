@@ -2395,16 +2395,6 @@ See `org-jira-get-issues-from-filter'."
                               :callback org-jira-get-issue-list-callback
                               :limit (org-jira-get-board-limit board-id)
                               :query-params (org-jira--make-jql-queryparams board-id))))
-;;;###autoload
-(defun org-jira-get-sprints-by-board ()
-  "Get list of SPRINTS from agile board."
-  (interactive)
-  (let* ((board (org-jira-read-board))
-         (board-id (cdr board)))
-    (jiralib-get-board-sprints board-id
-                              :callback org-jira-get-sprint-list-callback
-                              :limit (org-jira-get-board-limit board-id)
-                              :query-params (org-jira--make-jql-queryparams board-id))))
 
 ;;;###autoload
 (defun org-jira-get-issues-by-sprint ()

@@ -426,7 +426,6 @@ request.el, so if at all possible, it should be avoided."
                                                               "/rest/api/2/search"
                                                               :type "POST"
                                                               :data (json-encode `((jql . ,(first params))
-										   (fields . ("*all"))
                                                                                    (maxResults . ,(second params)))))))
                                         nil))
       ('getPriorities (jiralib--rest-call-it
