@@ -1009,6 +1009,20 @@ Will send a list of org-jira-sdk-issue objects to the list printer."
           org-jira-sdk-create-issues-from-data-list
           org-jira-get-issues))))
 
+(defvar org-jira-get-sprint-list-callback
+  (cl-function
+   (lambda (&key data &allow-other-keys)
+     "Callback for async, DATA is the response from the request call.
+
+Will send a list of org-jira-sdk-issue objects to the list printer."
+     (org-jira-log "Received data for org-jira-get-sprint-list-callback.")
+     (--> data
+          (org-jira-sdk-path it '(sprint))
+          (append it nil)               ; convert the conses into a proper list.
+          org-jira-sdk-create-issues-from-data-list
+          org-jira-get-issues))))
+
+
 ;;;###autoload
 (defun org-jira-get-issues (issues)
   "Get list of ISSUES into an org buffer.
@@ -1131,7 +1145,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                       (when (or (and val (not (string= val "")))
                                 (eq entry 'assignee)) ;; Always show assignee
                         (org-jira-entry-put (point) (symbol-name entry) val))))
-                  '(assignee filename reporter type type-id priority labels resolution status components created updated))
+                  '(assignee filename reporter type type-id priority labels resolution status components created updated sprint))
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
@@ -1672,6 +1686,7 @@ purpose of wiping an old subtree."
 
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-boards-read-history nil)
+(defvar org-jira-sprints-read-history nil)
 (defvar org-jira-components-read-history nil)
 (defvar org-jira-priority-read-history nil)
 (defvar org-jira-type-read-history nil)
@@ -1697,6 +1712,17 @@ purpose of wiping an old subtree."
                            'org-jira-boards-read-history
                            (car org-jira-boards-read-history))))
     (assoc board-name boards-alist)))
+
+(defun org-jira-read-sprint (board)
+  "Read sprint name. Returns cons pair (name . integer-id)"
+  (let* ((sprints-alist
+	  (jiralib-make-assoc-list (append (alist-get 'values (jiralib-get-board-sprints board)) nil) 'name 'id))
+	  (sprint-name
+	   (completing-read "Sprints: " sprints-alist
+			    nil t nil
+			    'org-jira-sprints-read-history
+			    (car org-jira-sprints-read-history))))
+       (assoc sprint-name sprints-alist)))
 
 (defun org-jira-read-component (project)
   "Read the components options for PROJECT such as EX."
@@ -2369,6 +2395,19 @@ See `org-jira-get-issues-from-filter'."
                               :callback org-jira-get-issue-list-callback
                               :limit (org-jira-get-board-limit board-id)
                               :query-params (org-jira--make-jql-queryparams board-id))))
+
+;;;###autoload
+(defun org-jira-get-issues-by-sprint ()
+  "Get list of ISSUES from sprint."
+  (interactive)
+  (let* ((board (org-jira-read-board))
+	 (board-id (cdr board))
+	 (sprint (org-jira-read-sprint board-id))
+	 (sprint-id (cdr sprint)))
+    (jiralib-get-sprint-issues sprint-id
+			       :callback org-jira-get-issue-list-callback
+			       :limit (org-jira-get-board-limit board-id)
+			       :query-params (org-jira--make-jql-queryparams board-id))))
 
 (defun org-jira-get-board-limit (id)
   "Get limit for number of retrieved issues for a board

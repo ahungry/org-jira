@@ -106,6 +106,7 @@
    (proj-key :type string :initarg :proj-key)
    (reporter :type (or null string) :initarg :reporter)
    (resolution :type (or null string) :initarg :resolution)
+   (sprint :type (or null string) :initarg :sprint)
    (start-date :type (or null string) :initarg :start-date)
    (status :type string :initarg :status)
    (summary :type string :initarg :summary)
@@ -150,7 +151,7 @@
      :labels (mapconcat (lambda (c) (format "%s" c)) (mapcar #'identity (path '(fields labels))) ", ")
      :created (path '(fields created))     ; confirm
      :description (or (path '(fields description)) "")
-     :duedate (path '(fields duedate))         ; confirm
+     :duedate (or (path '(fields sprint endDate)) (path '(fields duedate)))         ; confirm
      :filename (path '(fields project key))
      :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
      :id (path '(key))
@@ -160,6 +161,7 @@
      :proj-key (path '(fields project key))
      :reporter (path '(fields reporter displayName)) ; reporter could be an object of its own slot values
      :resolution (path '(fields resolution name))  ; confirm
+     :sprint (path '(fields sprint name))
      :start-date (path '(fields start-date))  ; confirm
      :status (org-jira-decode (path '(fields status name)))
      :summary (path '(fields summary))
