@@ -119,6 +119,15 @@ This will be used with USERNAME to compute password from
   :type 'string
   :initialize 'custom-initialize-set)
 
+(defcustom jiralib-user ""
+  "User customizable user name of the Jiralib server.
+
+This will be used with USERNAME to compute password from
+.authinfo file.  Will be calculated from jiralib-url if not set."
+  :group 'jiralib
+  :type 'string
+  :initialize 'custom-initialize-set)
+
 (defface jiralib-issue-info-face
   '((t (:foreground "black" :background "yellow4")))
   "Base face for issue information."
@@ -264,6 +273,9 @@ After a successful login, store the authentication token in
                                              :host (if (string= jiralib-host "")
                                                        (url-host (url-generic-parse-url jiralib-url))
                                                      jiralib-host)
+                                             :user (if (string= jiralib-user "")
+                                                       (url-user (url-generic-parse-url jiralib-url))
+                                                     jiralib-user)
                                              ;; secrets.el wouldn’t accept a number.
                                              :port (list (number-to-string (url-port (url-generic-parse-url jiralib-url)))
                                                          (url-type (url-generic-parse-url jiralib-url)))
