@@ -1940,15 +1940,13 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
       (cons 'name resolution-name))))
 
 (defun org-jira-refresh-issues-in-buffer-loose ()
-  """
-     Iterates over all level 1-2 headings in current buffer, refreshing on issue :ID:.
+  "Iterates over all level 1-2 headings in current buffer, refreshing on issue :ID:.
      It differs with org-jira-refresh-issues-in-buffer() in that:
        a) It accepts current buffer and its corresponding filename, regardless of whether
           it has been previously registered as an org-jira project file or not.
        b) It doesn't expect a very specific structure in the org buffer, but simply goes
           over every existing heading (level 1-2), and refreshes it IFF a valid jira ID
-          can be detected in it.
-  """
+          can be detected in it."
   (interactive)
   (save-excursion
     (save-restriction
@@ -1956,20 +1954,13 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
       (outline-show-all)
       (outline-hide-sublevels 2)
       (goto-char (point-min))
-      
+
       (while (not (eobp))
-	(progn
-	  (if (org-jira-id)
-	      (progn
-		(org-jira--refresh-issue (org-jira-id) (file-name-sans-extension buffer-file-name) )
-	      )
-	  )
-	  (outline-next-visible-heading 1)
-	)
-      )
-    )
-  )
-)
+        (progn
+          (if (org-jira-id)
+              (progn
+                (org-jira--refresh-issue (org-jira-id) (file-name-sans-extension buffer-file-name))))
+          (outline-next-visible-heading 1))))))
 
 ;; TODO: Refactor to just scoop all ids from buffer, run ensure-on-issue-id on
 ;; each using a map, and refresh them that way.  That way we don't have to iterate
