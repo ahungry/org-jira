@@ -50,3 +50,9 @@ Content-Type: application/json
     "description":"some epic with no assignee",
     "priority":{"id":"3"},
     "assignee":{"accountId":null}}}
+#
+
+GET :url/rest/api/2/issue/AHU-52
+Content-Type: application/json
+:auth
+#
