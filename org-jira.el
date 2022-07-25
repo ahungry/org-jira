@@ -2184,6 +2184,7 @@ otherwise it should return:
   (ensure-on-issue-id-with-filename issue-id filename
     ;; Set up a bunch of values from the org content
     (let* ((org-issue-components (org-jira-get-issue-val-from-org 'components))
+           (org-issue-labels (org-jira-get-issue-val-from-org 'labels))
            (org-issue-description (org-trim (org-jira-get-issue-val-from-org 'description)))
            (org-issue-priority (org-jira-get-issue-val-from-org 'priority))
            (org-issue-type (org-jira-get-issue-val-from-org 'type))
@@ -2209,6 +2210,7 @@ otherwise it should return:
                     (or (org-jira-build-components-list
                          project-components
                          org-issue-components) []))
+                   (cons 'labels (split-string org-issue-labels ",\\s *"))
                    (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                        (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
