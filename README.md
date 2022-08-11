@@ -48,6 +48,7 @@ CLOCK: [2022-02-24 Thu 20:30]--[2022-02-24 Thu 20:35] =>  0:05
 
 - [org-jira mode](#org-jira-mode)
     - [TOC](#toc)
+    - [Contributing](#contributing)
     - [Setup](#setup)
         - [Installation](#installation)
         - [Configuration](#configuration)
@@ -59,6 +60,7 @@ CLOCK: [2022-02-24 Thu 20:30]--[2022-02-24 Thu 20:35] =>  0:05
             - [Streamlined transition flow](#streamlined-transition-flow)
             - [Basic auth via personal API tokens (secure'ish)](#basic-auth-via-personal-api-tokens-secureish)
                 - [Extra basic auth note (thanks @mujo-hash)](#extra-basic-auth-note-thanks-mujo-hash)
+            - [Using Bearer authentication with Personal Access Tokens](#using-bearer-authentication-with-personal-access-tokens)
             - [Last Resort Authorization workaround (NOT secure)](#last-resort-authorization-workaround-not-secure)
         - [Optimizations](#optimizations)
             - [Optimizing available actions for status changes](#optimizing-available-actions-for-status-changes)
