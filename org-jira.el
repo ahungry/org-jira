@@ -9,7 +9,7 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 4.3.2
+;; Version: 4.3.3
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (dash "2.14.1"))
 
@@ -37,6 +37,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes in 4.3.3:
+;; - Address issue with assignee property being removed when Unassigned
 
 ;;;; Changes in 4.3.2:
 ;; - Fixes issues with org-jira-add-comment and org-jira-update-comment
@@ -1140,12 +1143,12 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
             (save-excursion
               (org-back-to-heading t)
               (org-set-tags-to (replace-regexp-in-string "-" "_" issue-id)))
+            (org-jira-entry-put (point) "assignee" (or (slot-value Issue 'assignee) "Unassigned"))
             (mapc (lambda (entry)
                     (let ((val (slot-value Issue entry)))
-                      (when (or (and val (not (string= val "")))
-                                (eq entry 'assignee)) ;; Always show assignee
+                      (when (and val (not (string= val "")))
                         (org-jira-entry-put (point) (symbol-name entry) val))))
-                  '(assignee filename reporter type type-id priority labels resolution status components created updated sprint))
+                  '(filename reporter type type-id priority labels resolution status components created updated sprint))
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
