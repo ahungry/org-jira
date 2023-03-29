@@ -779,20 +779,10 @@ Example: \"2012-01-09T08:59:15.000Z\" becomes \"2012-01-09
   "Convert TIME-STAMP into org-clock format."
   (format-time-string "%Y-%m-%d %a %H:%M" time-stamp))
 
-(defun org-jira-date-strip-letter-t (date)
-  "Convert DATE into a time stamp and then into org-clock format.
-Expects a date in format such as: 2017-02-26T00:08:00.000-0500 and
-returns in format 2017-02-26 00:08:00-0500."
-  (replace-regexp-in-string
-   "\\.000\\([-+]\\)" "\\1"
-   (replace-regexp-in-string "^\\(.*?\\)T" "\\1 " date)))
-
 (defun org-jira-date-to-org-clock (date)
   "Convert DATE into a time stamp and then into org-clock format.
 Expects a date in format such as: 2017-02-26T00:08:00.000-0500."
-  (org-jira-time-stamp-to-org-clock
-   (date-to-time
-    (org-jira-date-strip-letter-t date))))
+  (org-jira-time-stamp-to-org-clock (date-to-time date)))
 
 (defun org-jira-worklogs-to-org-clocks (worklogs)
   "Get a list of WORKLOGS and convert to org-clocks."
