@@ -147,22 +147,22 @@
                 (issueId . "10402"))]))
   "A sample response, as served from the #'jiralib-get-worklogs call.")
 
-;; (ert-deftest org-jira-worklogs-to-org-clocks-test ()
-;;   (let ((result (org-jira-worklogs-to-org-clocks
-;;                  (cdr (assoc 'worklogs org-jira-worklog-fixture-response)))))
-;;     (should
-;;      (string= "2017-02-26 Sun 00:08"
-;;               (caar result)))
-;;     (should
-;;      (string= "2017-02-26 Sun 01:08"
-;;               (cadar result)))
-;;     (should
-;;      (string= "2017-03-16 Thu 22:25"
-;;               (caadr result)))
-;;     (should
-;;      (string= "2017-03-16 Thu 22:57"
-;;               (cadadr result)))
-;;     ))
+(ert-deftest org-jira-worklogs-to-org-clocks-test ()
+  (let ((result (org-jira-worklogs-to-org-clocks
+                 (cdr (assoc 'worklogs org-jira-worklog-fixture-response)))))
+    (should
+     (string= "2017-02-26 Sun 00:08"
+              (caar result)))
+    (should
+     (string= "2017-02-26 Sun 01:08"
+              (cadar result)))
+    (should
+     (string= "2017-03-16 Thu 22:25"
+              (caadr result)))
+    (should
+     (string= "2017-03-16 Thu 22:57"
+              (cadadr result)))
+    ))
 
 (ert-deftest org-jira-format-clock-test ()
     (should
