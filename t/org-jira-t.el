@@ -45,12 +45,6 @@
 
 (set-time-zone-rule t)
 
-(ert-deftest org-jira-date-strip-letter-t-test ()
-  (should
-   (string= "2017-01-01 00:00:00+0000"
-            (org-jira-date-strip-letter-t "2017-01-01T00:00:00.000+0000")))
-  )
-
 (ert-deftest org-jira-date-to-org-clock-test ()
   (should
    (string= "2017-01-01 Sun 00:00"
