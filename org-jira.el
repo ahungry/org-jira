@@ -1758,20 +1758,10 @@ that should be bound to an issue."
 
 (defun org-jira-read-issue-type (&optional project)
   "Read issue type name.  PROJECT is the optional project key."
-  (let* ((issue-types
-          (mapcar 'cdr (if project
-                           (jiralib-get-issue-types-by-project project)
-                         (jiralib-get-issue-types))))
-         (initial-input (when (member (car org-jira-type-read-history) issue-types)
-                          org-jira-type-read-history)))
-    (completing-read
-     "Type: "
-     issue-types
-     nil
-     t
-     nil
-     initial-input
-     (car initial-input))))
+  (let ((issue-types (mapcar 'cdr (if project
+                                      (jiralib-get-issue-types-by-project project)
+                                    (jiralib-get-issue-types)))))
+    (completing-read "Type: " issue-types)))
 
 (defun org-jira-read-subtask-type ()
   "Read issue type name."
