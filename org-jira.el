@@ -1764,14 +1764,18 @@ that should be bound to an issue."
                          (jiralib-get-issue-types))))
          (initial-input (when (member (car org-jira-type-read-history) issue-types)
                           org-jira-type-read-history)))
+
+    ;; TODO: The completing-read cards as such are all over the place, and always tend
+    ;; to follow this exact same call structure - we should abstract to a single fn
+    ;; that will allow calling with fewer or keyword args
     (completing-read
-     "Type: "
-     issue-types
-     nil
-     t
-     nil
-     initial-input
-     (car initial-input))))
+     "Type: "                           ; PROMPT
+     issue-types                        ; COLLECTION
+     nil                                ; PREDICATE
+     t                                  ; REQUIRE-MATCH
+     nil                                ; INITIAL-INPUT
+     'initial-input                     ; HIST
+     (car initial-input))))             ; DEF
 
 (defun org-jira-read-subtask-type ()
   "Read issue type name."
