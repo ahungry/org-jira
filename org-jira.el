@@ -1765,7 +1765,7 @@ that should be bound to an issue."
          (initial-input (when (member (car org-jira-type-read-history) issue-types)
                           org-jira-type-read-history)))
 
-    ;; TODO: The completing-read cards as such are all over the place, and always tend
+    ;; TODO: The completing-read calls as such are all over the place, and always tend
     ;; to follow this exact same call structure - we should abstract to a single fn
     ;; that will allow calling with fewer or keyword args
     (completing-read
