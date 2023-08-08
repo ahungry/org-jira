@@ -1086,8 +1086,8 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   (let ((elem (org-element-at-point)))
     (and (eq 'headline (car elem))
          (equal (format "%s-Tickets" proj-key)
-                (plist-get (cadr elem) :title))
-         (= 1 (plist-get (cadr elem) :level)))))
+                (org-element-property :title elem))
+         (= 1 (org-element-property :level elem)))))
 
 (defun org-jira--maybe-render-top-heading (proj-key)
   "Ensure that there is a headline for PROJ-KEY at the top of the file."
