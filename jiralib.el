@@ -43,7 +43,7 @@
 
 ;;; Commentary:
 
-;; This file provides a programatic interface to JIRA.  It provides access to
+;; This file provides a programmatic interface to JIRA.  It provides access to
 ;; JIRA from other programs, but no user level functionality.
 
 ;; Jira References:
@@ -1236,7 +1236,7 @@ performed asynchronously and JIRALIB-COMPLETE-CALLBACK will be
 called when all data are retrieved.
 
 If JIRALIB-COMPLETE-CALLBACK is nil, then the call will be
-performed syncronously and this function will return the
+performed synchronously and this function will return the
 retrieved data.
 
 API - path to called API that must start with /rest/agile/1.0.
