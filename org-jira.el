@@ -1961,54 +1961,32 @@ Used in org-jira-read-resolution and org-jira-progress-issue calls.")
 
 (defun org-jira-refresh-issues-in-buffer-loose ()
   "Iterates over all level 1-2 headings in current buffer, refreshing on issue :ID:.
-     It differs with org-jira-refresh-issues-in-buffer() in that:
-       a) It accepts current buffer and its corresponding filename, regardless of whether
-          it has been previously registered as an org-jira project file or not.
-       b) It doesn't expect a very specific structure in the org buffer, but simply goes
-          over every existing heading (level 1-2), and refreshes it IFF a valid jira ID
-          can be detected in it."
+It differs with `org-jira-refresh-issues-in-buffer' in that it accepts the current buffer
+and its corresponding filename, regardless of whether it has been previously registered
+as an org-jira project file or not."
   (interactive)
   (save-excursion
     (save-restriction
       (widen)
-      (outline-show-all)
-      (outline-hide-sublevels 2)
-      (goto-char (point-min))
+      (let* ((org-ids (org-map-entries 'org-id-get "LEVEL=1|LEVEL=2"))
+             (org-ids (delq nil org-ids))
+             (file-name (file-name-sans-extension buffer-file-name)))
+        (mapcar (lambda (org-id) (org-jira--refresh-issue org-id file-name))
+                org-ids)))))
 
-      (while (not (eobp))
-        (progn
-          (if (org-jira-id)
-              (progn
-                (org-jira--refresh-issue (org-jira-id) (file-name-sans-extension buffer-file-name))))
-          (outline-next-visible-heading 1))))))
-
-;; TODO: Refactor to just scoop all ids from buffer, run ensure-on-issue-id on
-;; each using a map, and refresh them that way.  That way we don't have to iterate
-;; on the user headings etc.
 (defun org-jira-refresh-issues-in-buffer ()
-  "Iterate across all entries in current buffer, refreshing on issue :ID:.
+  "Iterate across all level 1-2 headings in current buffer, refreshing on issue :ID:.
 Where issue-id will be something such as \"EX-22\"."
   (interactive)
   (save-excursion
     (save-restriction
       (widen)
-      (outline-show-all)
-      (outline-hide-sublevels 2)
-      (goto-char (point-min))
-      (while (and (or (looking-at "^ *$")
-                      (looking-at "^#.*$")
-                      (looking-at "^\\* .*"))
-                  (not (eobp)))
-        (forward-line))
-      (outline-next-visible-heading 1)
-      (while (and (not (org-next-line-empty-p))
-                  (not (eobp)))
-        (when (outline-on-heading-p t)
-          ;; It's possible we could be on a non-org-jira headline, but
-          ;; that should be an exceptional case and not necessitating a
-          ;; fix atm.
-          (org-jira-refresh-issue))
-        (outline-next-visible-heading 1)))))
+      (let* ((org-ids (org-map-entries 'org-id-get "LEVEL=1|LEVEL=2"))
+             (org-ids (delq nil org-ids)))
+        ;; It's possible we could be on a non-org-jira headline, but
+        ;; that should be an exceptional case and not necessitating a
+        ;; fix atm.
+        (mapcar 'org-jira--refresh-issue-by-id org-ids)))))
 
 ;;;###autoload
 (defun org-jira-refresh-issue ()
