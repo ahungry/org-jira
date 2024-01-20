@@ -329,6 +329,39 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type 'boolean)
 
+(defcustom org-jira-issue-field-overrides-alist '()
+  "Alist mapping `org-mode' field names to Jira issue field IDs.
+The car of each element is the org-jira field name.
+The cdr of each element is the Jira issue field ID as returned by the API.
+
+A sample value might be
+  (list (cons 'description 'customfield_10000)
+        (cons 'summary 'customfield_10001)
+        (cons 'duedate 'customfield_10002)).
+
+Valid org-jira fields you can use:
+- assignee
+- components
+- labels
+- created
+- description
+- duedate
+- project
+- summary
+- priority
+- project
+- reporter
+- resolution
+- sprint
+- start-date
+- status
+- summary
+- issuetype
+- issuetype
+- updated"
+  :group 'org-jira
+  :type '(alist :key-type symbol :value-type symbol))
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -423,6 +456,20 @@ See `org-default-priority' for more info."
 (defun org-jira--get-proj-key-from-issue (Issue)
   "Get the proper proj-key from an ISSUE instance."
   (oref Issue filename))
+
+(defun org-jira--org->api-field-id (org-name)
+  "Convert an org-jira slot name ORG-NAME to a Jira API field ID."
+  (-if-let (org-id-pair (assoc org-name org-jira-issue-field-overrides-alist))
+      (cdr org-id-pair)
+    org-name))
+
+(defun org-jira--api->org-field-id (jira-id)
+  "Convert a Jira API field ID JIRA-ID to an org-jira slot name.
+
+Used to override the default description/etc. fields with custom fields."
+  (-if-let (org-id-pair (rassoc jira-id org-jira-issue-field-overrides-alist))
+      (car org-id-pair)
+    jira-id))
 
 ;; TODO: Merge these 3 ensure macros (or, scrap all but ones that work on Issue)
 (defmacro ensure-on-issue-id (issue-id &rest body)
@@ -2202,21 +2249,28 @@ otherwise it should return:
         (org-jira-update-worklogs-from-org-clocks))
 
       ;; Send the update to jira
-      (let ((update-fields
+      (let* ((update-fields
              (list (cons
-                    'components
+                    (org-jira--org->api-field-id 'components)
                     (or (org-jira-build-components-list
                          project-components
                          org-issue-components) []))
-                   (cons 'labels (split-string org-issue-labels ",\\s *"))
-                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
+                   (cons (org-jira--org->api-field-id 'labels)
+                         (split-string org-issue-labels ",\\s *"))
+                   (cons (org-jira--org->api-field-id 'priority)
+                         (org-jira-get-id-name-alist org-issue-priority
                                                        (jiralib-get-priorities)))
-                   (cons 'description org-issue-description)
-                   (cons 'assignee (list (cons 'id (jiralib-get-user-account-id project org-issue-assignee))))
-                   (cons 'reporter (list (cons 'id (jiralib-get-user-account-id project org-issue-reporter))))
-                   (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
-                   (cons 'issuetype `((id . ,org-issue-type-id)
-      (name . ,org-issue-type))))))
+                   (cons (org-jira--org->api-field-id 'description)
+                         org-issue-description)
+                   (cons (org-jira--org->api-field-id 'assignee)
+                         (list (cons 'id (jiralib-get-user-account-id project org-issue-assignee))))
+                   (cons (org-jira--org->api-field-id 'reporter)
+                         (list (cons 'id (jiralib-get-user-account-id project org-issue-reporter))))
+                   (cons (org-jira--org->api-field-id 'summary)
+                         (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
+                   (cons (org-jira--org->api-field-id 'issuetype)
+                         `((id . ,org-issue-type-id)
+                           (name . ,org-issue-type))))))
 
 
         ;; If we enable duedate sync and we have a deadline present
@@ -2224,7 +2278,8 @@ otherwise it should return:
                    (org-jira-get-issue-val-from-org 'deadline))
           (setq update-fields
                 (append update-fields
-                        (list (cons 'duedate (org-jira-get-issue-val-from-org 'deadline))))))
+                        (list (cons (org-jira--org->api-field-id 'duedate)
+                                    (org-jira-get-issue-val-from-org 'deadline))))))
 
         ;; TODO: We need some way to handle things like assignee setting
         ;; and refreshing the proper issue in the proper buffer/filename.
