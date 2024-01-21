@@ -113,6 +113,7 @@
    (type :type string :initarg :type)
    (type-id :type string :initarg :type-id)
    (updated :type string :initarg :updated)
+   (custom-fields :type list :initarg :custom-fields)
    (data :initarg :data :documentation "The remote Jira data object (alist).")
    (hydrate-fn :initform #'jiralib-get-issue :initarg :hydrate-fn))
   "An issue on the end.  ID of the form EX-1, or a numeric such as 10000.")
@@ -144,30 +145,38 @@
     (funcall hydrate-fn proj-key id callback)))
 
 (cl-defmethod org-jira-sdk-from-data ((rec org-jira-sdk-issue))
-  (cl-flet ((path (keys) (org-jira-sdk-path (oref rec data) keys)))
+  (cl-flet ((path (keys) (org-jira-sdk-path (oref rec data) keys))
+            (field (keys)
+                   (let* ((org-name (car keys))
+                          (jira-field-id (org-jira--org->api-field-id org-name))
+                         (path (cdr keys)))
+                     (org-jira-sdk-path (oref rec data) (cons 'fields (cons jira-field-id path))))))
     (org-jira-sdk-issue
-     :assignee (path '(fields assignee displayName))
-     :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
-     :labels (mapconcat (lambda (c) (format "%s" c)) (mapcar #'identity (path '(fields labels))) ", ")
-     :created (path '(fields created))     ; confirm
-     :description (or (path '(fields description)) "")
-     :duedate (or (path '(fields sprint endDate)) (path '(fields duedate)))         ; confirm
-     :filename (path '(fields project key))
-     :headline (path '(fields summary)) ; Duplicate of summary, maybe different.
+     :assignee (field '(assignee displayName))
+     :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (field '(components)) ", ")
+     :labels (mapconcat (lambda (c) (format "%s" c)) (mapcar #'identity (field '(labels))) ", ")
+     :created (field '(created))     ; confirm
+     :description (or (field '(description)) "")
+     :duedate (or (field '(sprint endDate)) (field '(duedate)))         ; confirm
+     :filename (field '(project key))
+     :headline (field '(summary)) ; Duplicate of summary, maybe different.
      :id (path '(key))
      :issue-id (path '(key))
      :issue-id-int (path '(id))
-     :priority (path '(fields priority name))
-     :proj-key (path '(fields project key))
-     :reporter (path '(fields reporter displayName)) ; reporter could be an object of its own slot values
-     :resolution (path '(fields resolution name))  ; confirm
-     :sprint (path '(fields sprint name))
-     :start-date (path '(fields start-date))  ; confirm
-     :status (org-jira-decode (path '(fields status name)))
-     :summary (path '(fields summary))
-     :type (path '(fields issuetype name))
-     :type-id (path '(fields issuetype id))
-     :updated (path '(fields updated))  ; confirm
+     :priority (field '(priority name))
+     :proj-key (field '(project key))
+     :reporter (field '(reporter displayName)) ; reporter could be an object of its own slot values
+     :resolution (field '(resolution name))  ; confirm
+     :sprint (field '(sprint name))
+     :start-date (field '(start-date))  ; confirm
+     :status (org-jira-decode (field '(status name)))
+     :summary (field '(summary))
+     :type (field '(issuetype name))
+     :type-id (field '(issuetype id))
+     :updated (field '(updated))  ; confirm
+     :custom-fields (cl-remove-if-not
+                     (lambda (f) (assoc (car f) org-jira-issue-custom-fields-alist))
+                     (path '(fields)))
      ;; TODO: Remove this
      ;; :data (oref rec data)
      )))
