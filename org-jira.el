@@ -333,17 +333,31 @@ See `org-default-priority' for more info."
   "An alist of plists containing custom fields to add to issues.
 
 A sample value might be
-((customfield_10033 . (:type string :location 'headline))
- (customfield_10108 . (:type number :location 'property :name \"Priority\"))).
+  ((customfield_10033 . (:type string :location 'headline))
+   (customfield_10108 . (:type number :location 'property :name \"Priority\"))).
 
 List of properties for each plist:
-:type     - Required. Type of the field: 'string, 'boolean or 'number.
-:location - A symbol, either 'property to format the field as an Org property,
-            or 'headline to place it under a headline. If nil, defaults to 'property.
-:name - Name to display in the org properties list. If nil, the name parameter
-        of the custom field as returned by the Jira API is used. The name must
-        be unique across existing org-jira property names and other custom field
-        names."
+    :type - Required. Type of the field. Defaults are 'string, 'boolean or
+            'number. You can define custom types inside
+            `org-jira-custom-field-encoders'.
+    :location - A symbol, either 'property to format the field as an Org
+                property, or 'headline to place it under a headline. If nil,
+                defaults to 'property.
+    :name - Name to display in the org properties list. If nil, the name
+            parameter of the custom field as returned by the Jira API is used.
+            The name must be unique across existing org-jira property names and
+            other custom field names."
+  :group 'org-jira
+  :type '(alist :value-type plist))
+
+(defcustom org-jira-issue-custom-field-types '()
+  "An alist of plists containing custom field type handlers.
+
+A sample value might be
+  ((multicheckboxes . (:encode #'my-encoder :decode #'my-decoder)))
+
+Encoding functions take a JSON value and return a string.
+Decoding functions take a string and return a JSON value."
   :group 'org-jira
   :type '(alist :value-type plist))
 
@@ -1203,23 +1217,27 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   '(description)
   "List of org-jira issue slot names to insert as headlines.")
 
-(defun org-jira--format-custom-field (id value)
+(defun org-jira--decode-custom-field (id value)
   "Formats the custom field ID's VALUE."
   (let ((type (org-jira--get-custom-field-property id :type)))
-    (case type
-      ('number (number-to-string value))
-      ('boolean (if (eq t value) "true" "false"))
-      ('string value)
-      (t (error "Unknown custom field type '%s'" type)))))
+    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types))
+        (apply (cadr (plist-get (cdr type-codec) :decode)) (list value))
+      (case type
+        ('number (number-to-string value))
+        ('boolean (if (eq t value) "true" "false"))
+        ('string value)
+        (t (error "Unknown custom field type '%s'" type))))))
 
-(defun org-jira--extract-custom-field (id str)
+(defun org-jira--encode-custom-field (id str)
   "Extracts the custom field ID's value from the string STR."
   (let ((type (org-jira--get-custom-field-property id :type)))
-    (case type
-      ('number (string-to-number str))
-      ('boolean (if (string-equal str "true") t :json-false))
-      ('string str)
-      (t (error "Unknown custom field type '%s'" type)))))
+    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types))
+        (apply (cadr (plist-get (cdr type-codec) :encode)) (list str))
+      (case type
+        ('number (string-to-number str))
+        ('boolean (if (string-equal str "true") t :json-false))
+        ('string str)
+        (t (error "Unknown custom field type '%s'" type))))))
 
 (defun org-jira--get-items-to-render (Issue type)
   (let* ((slot-names (case type
@@ -1237,7 +1255,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
          (custom-field-values (mapcar (lambda (id)
                                         (let ((value (cdr (assoc id custom-fields))))
                                           (list :name (org-jira--get-custom-field-name id)
-                                                :value (org-jira--format-custom-field id value))))
+                                                :value (org-jira--decode-custom-field id value))))
                                       custom-field-ids)))
     (append slot-values custom-field-values)))
 
@@ -1250,7 +1268,6 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   "Renders HEADING and BODY as an Org headline at point.
 
 ISSUE-ID and FILENAME allow linking back to the relevant Jira issue."
-  (message "%s %s" heading body)
   (ensure-on-issue-id-with-filename
       issue-id filename
       (let* ((entry-heading
@@ -2032,7 +2049,7 @@ that should be bound to an issue."
 (defun org-jira--get-issue-custom-field-values-from-org ()
   (mapcar (lambda (id)
             (let ((str (org-jira-get-issue-val-from-org id)))
-              (cons id (org-jira--extract-custom-field id str))))
+              (cons id (org-jira--encode-custom-field id str))))
           (mapcar 'car org-jira-issue-custom-fields)))
 
 (defun org-jira--extract-header-text-1 (key)
