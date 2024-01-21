@@ -175,7 +175,7 @@
      :type-id (field '(issuetype id))
      :updated (field '(updated))  ; confirm
      :custom-fields (cl-remove-if-not
-                     (lambda (f) (assoc (car f) org-jira-issue-custom-fields))
+                     (lambda (f) (assoc (car f) org-jira-issue-custom-fields-alist))
                      (path '(fields)))
      ;; TODO: Remove this
      ;; :data (oref rec data)
