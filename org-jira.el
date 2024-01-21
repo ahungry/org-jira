@@ -329,7 +329,7 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type 'boolean)
 
-(defcustom org-jira-issue-custom-fields '()
+(defcustom org-jira-issue-custom-fields-alist '()
   "An alist of plists containing custom fields to add to issues.
 
 A sample value might be
@@ -350,7 +350,7 @@ List of properties for each plist:
   :group 'org-jira
   :type '(alist :value-type plist))
 
-(defcustom org-jira-issue-custom-field-types '()
+(defcustom org-jira-issue-custom-field-types-alist '()
   "An alist of plists containing custom field type handlers.
 
 A sample value might be
@@ -508,7 +508,7 @@ Used to override the default description/etc. fields with custom fields."
 
 (defun org-jira--get-custom-field-property (id prop)
   "Gets the Org type of a custom field with ID."
-  (let ((plist (-if-let (pl (assoc id org-jira-issue-custom-fields))
+  (let ((plist (-if-let (pl (assoc id org-jira-issue-custom-fields-alist))
                    (cdr pl)
                  org-jira--default-field-properties)))
     (cadr (plist-get plist prop))))
@@ -1220,7 +1220,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 (defun org-jira--decode-custom-field (id value)
   "Formats the custom field ID's VALUE."
   (let ((type (org-jira--get-custom-field-property id :type)))
-    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types))
+    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types-alist))
         (apply (cadr (plist-get (cdr type-codec) :decode)) (list value))
       (case type
         ('number (number-to-string value))
@@ -1231,7 +1231,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 (defun org-jira--encode-custom-field (id str)
   "Extracts the custom field ID's value from the string STR."
   (let ((type (org-jira--get-custom-field-property id :type)))
-    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types))
+    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types-alist))
         (apply (cadr (plist-get (cdr type-codec) :encode)) (list str))
       (case type
         ('number (string-to-number str))
@@ -1251,7 +1251,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
          (custom-fields (slot-value Issue 'custom-fields))
          (custom-field-ids
           (cl-remove-if-not (lambda (id) (eq (org-jira--get-custom-field-property id :location) type))
-                            (mapcar 'car org-jira-issue-custom-fields)))
+                            (mapcar 'car org-jira-issue-custom-fields-alist)))
          (custom-field-values (mapcar (lambda (id)
                                         (let ((value (cdr (assoc id custom-fields))))
                                           (list :name (org-jira--get-custom-field-name id)
@@ -1378,7 +1378,7 @@ ISSUE-ID and FILENAME allow linking back to the relevant Jira issue."
 (defun org-jira--ensure-no-duplicate-field-names ()
   "Ensure that the defined custom field names do not overlap with `org-jira' field names."
   (cl-flet ((get-names (lambda (l &optional ensure) (mapcar (lambda (n) (org-jira--get-custom-field-name n ensure)) l))))
-    (let* ((custom-field-ids (mapcar (lambda (f) (car f)) org-jira-issue-custom-fields))
+    (let* ((custom-field-ids (mapcar (lambda (f) (car f)) org-jira-issue-custom-fields-alist))
            (default-field-ids (mapcar #'org-jira--org->api-field-id
                                       (append org-jira--default-property-slot-names
                                               org-jira--default-headline-slot-names)))
@@ -2050,7 +2050,7 @@ that should be bound to an issue."
   (mapcar (lambda (id)
             (let ((str (org-jira-get-issue-val-from-org id)))
               (cons id (org-jira--encode-custom-field id str))))
-          (mapcar 'car org-jira-issue-custom-fields)))
+          (mapcar 'car org-jira-issue-custom-fields-alist)))
 
 (defun org-jira--extract-header-text-1 (key)
   "Extracts header text for KEY recursively."
@@ -2084,7 +2084,7 @@ that should be bound to an issue."
   ;; See: https://github.com/ahungry/org-jira/issues/319
   ;; See: https://github.com/ahungry/org-jira/issues/296
   ;; See: https://github.com/ahungry/org-jira/issues/316
-  (lexical-let ((my-key key) (is-custom-field (assoc key org-jira-issue-custom-fields)))
+  (lexical-let ((my-key key) (is-custom-field (assoc key org-jira-issue-custom-fields-alist)))
     (ensure-on-issue
       (cond ((or (eq my-key 'description)
                  (and is-custom-field (eq (org-jira--get-custom-field-property my-key :location) 'headline)))
