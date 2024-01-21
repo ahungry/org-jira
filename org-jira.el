@@ -350,6 +350,17 @@ List of properties for each plist:
   :group 'org-jira
   :type '(alist :value-type plist))
 
+(defcustom org-jira-issue-field-show-null-values nil
+  "If non-nil, always show null values in the properties list,
+The value is substituted as `org-jira-issue-field-null-value'."
+  :group 'org-jira
+  :type 'boolean)
+
+(defcustom org-jira-issue-field-null-value "null"
+  "String to substitute for a null value when encoding/decoding custom fields."
+  :group 'org-jira
+  :type 'string)
+
 (defcustom org-jira-issue-custom-field-types-alist '()
   "An alist of plists containing custom field type handlers.
 
@@ -1219,27 +1230,42 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   '(description)
   "List of org-jira issue slot names to insert as headlines.")
 
+(defun org-jira--maybe-decode-field-null (value)
+  "Possibly convert VALUE to a null string representation."
+  (when (or (eq value nil) (eq value :json-null))
+    (if org-jira-issue-field-show-null-values org-jira-issue-field-null-value "")))
+
 (defun org-jira--decode-custom-field (id value)
   "Formats the custom field ID's VALUE."
-  (let ((type (org-jira--get-custom-field-property id :type)))
-    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types-alist))
-        (apply (cadr (plist-get (cdr type-codec) :decode)) (list value))
-      (case type
-        ('number (number-to-string value))
-        ('boolean (if (eq t value) "true" "false"))
-        ('string value)
-        (t (error "Unknown custom field type '%s'" type))))))
+  (-if-let (null-str (org-jira--maybe-decode-field-null value)) null-str
+    (let ((type (org-jira--get-custom-field-property id :type)))
+      (-if-let (type-codec (assoc type org-jira-issue-custom-field-types-alist))
+          (apply (cadr (plist-get (cdr type-codec) :decode)) (list value))
+        (case type
+          ('number (number-to-string value))
+          ('boolean (if (eq t value) "true" "false"))
+          ('string value)
+          (t (error "Unknown custom field type '%s'" type)))))))
+
+(defun org-jira--maybe-encode-field-null (str)
+  "Possibly convert STR to a null value representation."
+  (let ((encode (if org-jira-issue-field-show-null-values
+                    (string= str org-jira-issue-field-null-value)
+                  (string= str ""))))
+    (when encode
+      (if org-jira-issue-field-show-null-values :json-null ""))))
 
 (defun org-jira--encode-custom-field (id str)
   "Extracts the custom field ID's value from the string STR."
-  (let ((type (org-jira--get-custom-field-property id :type)))
-    (-if-let (type-codec (assoc type org-jira-issue-custom-field-types-alist))
-        (apply (cadr (plist-get (cdr type-codec) :encode)) (list str))
-      (case type
-        ('number (string-to-number str))
-        ('boolean (if (string-equal str "true") t :json-false))
-        ('string str)
-        (t (error "Unknown custom field type '%s'" type))))))
+  (-if-let (null-value (org-jira--maybe-encode-field-null str)) null-value
+    (let ((type (org-jira--get-custom-field-property id :type)))
+      (-if-let (type-codec (assoc type org-jira-issue-custom-field-types-alist))
+          (apply (cadr (plist-get (cdr type-codec) :encode)) (list str))
+        (case type
+          ('number (string-to-number str))
+          ('boolean (if (string-equal str "true") t :json-false))
+          ('string str)
+          (t (error "Unknown custom field type '%s'" type)))))))
 
 (defun org-jira--get-items-to-render (Issue type)
   (let* ((slot-names (case type
