@@ -238,7 +238,6 @@ Example: (list '('t \"descriptive-predicate-label\" (lambda (x) x)))"
   :type '(repeat (list boolean string function))
   :group 'org-jira)
 
-
 (defcustom jiralib-update-issue-fields-exclude-list nil
   "A list of symbols to check for exclusion on updates based on matching key.
 Key names should be one of components, description, assignee, reporter, summary, issuetype."
@@ -357,6 +356,7 @@ request.el, so if at all possible, it should be avoided."
     (cl-case (intern method)
       ('getStatuses (jiralib--rest-call-it "/rest/api/2/status"))
       ('getIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
+      ('getIssueFields (jiralib--rest-call-it "/rest/api/2/field"))
       ('getSubTaskIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
       ('getIssueTypesByProject
        (let ((response (jiralib--rest-call-it (format "/rest/api/2/project/%s" (first params)))))
@@ -1041,6 +1041,19 @@ CALLBACK will be invoked if passed in upon endpoint completion."
                    (timeSpentSeconds . ,time-spent-seconds)
                    (comment . ,comment))))
     (jiralib-call "updateWorklog" callback issue-id worklog-id worklog)))
+
+(defvar jiralib-issue-fields-cache nil
+  "Mapping of jiralib issue field keys to symbols.")
+
+(defun jiralib-get-issue-fields ()
+  "Return an assoc list mapping an issue field id to its details.
+
+This function will only ask JIRA for the list of fields once, then
+will cache it."
+  (unless jiralib-issue-fields-cache
+    (setq jiralib-issue-fields-cache
+          (jiralib-make-assoc-list (jiralib-call "getIssueFields" nil) 'id 'name)))
+  jiralib-issue-fields-cache)
 
 (defvar jiralib-components-cache nil "An alist of project components.")
 

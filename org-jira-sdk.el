@@ -113,6 +113,7 @@
    (type :type string :initarg :type)
    (type-id :type string :initarg :type-id)
    (updated :type string :initarg :updated)
+   (custom-fields :type list :initarg :custom-fields)
    (data :initarg :data :documentation "The remote Jira data object (alist).")
    (hydrate-fn :initform #'jiralib-get-issue :initarg :hydrate-fn))
   "An issue on the end.  ID of the form EX-1, or a numeric such as 10000.")
@@ -149,7 +150,7 @@
                    (let* ((org-name (car keys))
                           (jira-field-id (org-jira--org->api-field-id org-name))
                          (path (cdr keys)))
-                     (result (org-jira-sdk-path (oref rec data) (cons 'fields (cons jira-field-id path)))))))
+                     (org-jira-sdk-path (oref rec data) (cons 'fields (cons jira-field-id path))))))
     (org-jira-sdk-issue
      :assignee (field '(assignee displayName))
      :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (field '(components)) ", ")
@@ -173,6 +174,9 @@
      :type (field '(issuetype name))
      :type-id (field '(issuetype id))
      :updated (field '(updated))  ; confirm
+     :custom-fields (cl-remove-if-not
+                     (lambda (f) (assoc (car f) org-jira-issue-custom-fields))
+                     (path '(fields)))
      ;; TODO: Remove this
      ;; :data (oref rec data)
      )))
