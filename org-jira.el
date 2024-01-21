@@ -333,11 +333,11 @@ See `org-default-priority' for more info."
   "An alist of plists containing custom fields to add to issues.
 
 A sample value might be
-  ((customfield_10033 . (:type string :location 'headline))
-   (customfield_10108 . (:type number :location 'property :name \"Priority\"))).
+  '((customfield_10033 . (:type string :location 'headline))
+    (customfield_10108 . (:type number :location 'property :name \"Priority\"))).
 
 List of properties for each plist:
-    :type - Required. Type of the field. Defaults are 'string, 'boolean or
+    :type - Type of the field (required). Built-in types are 'string, 'boolean or
             'number. You can define custom types inside
             `org-jira-custom-field-encoders'.
     :location - A symbol, either 'property to format the field as an Org
@@ -354,7 +354,7 @@ List of properties for each plist:
   "An alist of plists containing custom field type handlers.
 
 A sample value might be
-  ((multicheckboxes . (:encode #'my-encoder :decode #'my-decoder)))
+  '((multicheckboxes . (:encode #'my-encoder :decode #'my-decoder)))
 
 Encoding functions take a JSON value and return a string.
 Decoding functions take a string and return a JSON value."
@@ -365,6 +365,9 @@ Decoding functions take a string and return a JSON value."
   "Alist mapping `org-mode' field names to Jira issue field IDs.
 The car of each element is the org-jira field name.
 The cdr of each element is the Jira issue field ID as returned by the API.
+
+This is useful if your organization uses a custom field for the
+issue description or other \"built-in\" field instead of the default.
 
 A sample value might be
   '((description . customfield_10000)
@@ -388,7 +391,6 @@ Valid org-jira fields you can use:
 - start-date
 - status
 - summary
-- issuetype
 - issuetype
 - updated"
   :group 'org-jira

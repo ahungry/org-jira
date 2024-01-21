@@ -1043,7 +1043,7 @@ CALLBACK will be invoked if passed in upon endpoint completion."
     (jiralib-call "updateWorklog" callback issue-id worklog-id worklog)))
 
 (defvar jiralib-issue-fields-cache nil
-  "Mapping of jiralib issue field keys to symbols.")
+  "Mapping of jiralib issue field IDs to names.")
 
 (defun jiralib-get-issue-fields ()
   "Return an assoc list mapping an issue field id to its details.
