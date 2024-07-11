@@ -38,6 +38,9 @@
 
 ;;; News:
 
+;;;; Changes in 4.4.2
+;; - Fix for org-insert-subheading behavior change in org 9.7+ in render-issues
+
 ;;;; Changes in 4.4.1
 ;; - Fix tag (4.3.3 was out of order - we had a 4.4.0 on repo)
 ;; - Fix for some crazy scoping issue in the org-jira-get-issue-val-from-org function
@@ -1172,6 +1175,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                                                      (if (org-goto-first-child)
                                                          (org-insert-heading)
                                                        (goto-char (point-max))
+                                                       (open-line 1)
                                                        (org-insert-subheading t))
                                                      (org-jira-insert entry-heading "\n"))
 
