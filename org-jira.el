@@ -139,7 +139,7 @@
 (require 'jiralib)
 (require 'org-jira-sdk)
 
-(defconst org-jira-version "4.3.1"
+(defconst org-jira-version "4.4.2"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
