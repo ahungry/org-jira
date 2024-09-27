@@ -1921,6 +1921,13 @@ that should be bound to an issue."
      (car (rassoc action actions))
      (user-error "You specified an empty action, the valid actions are: %s" (mapcar 'cdr actions)))))
 
+(defun org-jira-read-labels ()
+  "Pick multiple labels to add to your jira issue."
+  (if jiralib-labels-cache
+      (completing-read-multiple "Labels: " jiralib-labels-cache)
+    (jiralib-get-labels)
+    (completing-read-multiple "Labels: " jiralib-labels-cache)))
+
 (defvar org-jira-fields-history nil)
 (defun org-jira-read-field (fields)
   "Read (custom) FIELDS for workflow progress."
