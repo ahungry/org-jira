@@ -472,7 +472,8 @@ request.el, so if at all possible, it should be avoided."
       ('updateIssue (jiralib--rest-call-it
                      (format "/rest/api/2/issue/%s" (first params))
                      :type "PUT"
-                     :data (json-encode `((fields . ,(second params)))))))))
+                     :data (json-encode `((fields . ,(second params))))))
+      ('getLabels (jiralib--rest-call-it (format "/rest/api/2/label?startAt=%s" (first params)))))))
 
 (defun jiralib--soap-call-it (&rest args)
   "Deprecated SOAP call endpoint.  Will be removed soon.
@@ -1201,6 +1202,20 @@ Auxiliary Notes:
   "Return list of jira issues in the specified jira board"
   (apply 'jiralib-call "getIssuesFromBoard"
 	 (cl-getf params :callback) board-id params))
+
+(defvar jiralib-labels-cache nil)
+(defun jiralib-get-labels ()
+  "Return assignable labels that can be added to an issue."
+  (unless jiralib-labels-cache
+    (setq jiralib-labels-start-at 0)
+    (while (progn
+             (let* ((labels (jiralib-call "getLabels" nil jiralib-labels-start-at))
+                    (max-results (alist-get 'maxResults labels))
+                    (is-last (alist-get 'isLast labels))
+                    (values (alist-get 'values labels)))
+               (setq jiralib-labels-start-at (+ max-results jiralib-labels-start-at)
+                     jiralib-labels-cache (append values jiralib-labels-cache))
+               (not (eq is-last t)))))))
 
 (defun jiralib--agile-not-last-entry (num-entries total start-at limit)
   "Return true if need to retrieve next page from agile api"
