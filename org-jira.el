@@ -332,6 +332,11 @@ See `org-default-priority' for more info."
   :group 'org-jira
   :type 'boolean)
 
+(defcustom org-jira-update-issue-details-include-reporter t
+  "For Jira Cloud API we will get an error if `reporter' is sent with an update request."
+  :group 'org-jira
+  :type 'string)
+
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
 
@@ -2228,11 +2233,14 @@ otherwise it should return:
                                                        (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
                    (cons 'assignee (list (cons 'id (jiralib-get-user-account-id project org-issue-assignee))))
-                   (cons 'reporter (list (cons 'id (jiralib-get-user-account-id project org-issue-reporter))))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                    (cons 'issuetype `((id . ,org-issue-type-id)
       (name . ,org-issue-type))))))
 
+        (if org-jira-update-issue-details-include-reporter
+            (setq update-fields
+                  (append update-fields
+                          (list (cons 'reporter (list (cons 'id (jiralib-get-user-account-id project org-issue-reporter))))))))
 
         ;; If we enable duedate sync and we have a deadline present
         (when (and org-jira-deadline-duedate-sync-p
