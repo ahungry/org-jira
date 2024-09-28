@@ -553,6 +553,7 @@ See `org-default-priority' for more info."
     (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
     ;;(define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
     ;;(define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
+    (define-key org-jira-map (kbd "C-c il") 'org-jira-update-issue-labels)
     (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
@@ -1689,6 +1690,16 @@ purpose of wiping an old subtree."
   (interactive)
   (ensure-on-issue
     (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
+
+;;;###autoload
+(defun org-jira-update-issue-labels ()
+  "Update jira issue labels."
+  (interactive)
+  (let* ((labels (org-jira-parse-issue-labels))
+         (updated-labels (org-jira-read-labels (format "%s, " labels)))
+         (updated-labels-string (mapconcat 'identity updated-labels ", ")))
+    (org-set-property "labels" updated-labels-string)
+    (org-jira-update-issue)))
 
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-boards-read-history nil)
