@@ -2285,6 +2285,18 @@ otherwise it should return:
           (setq continue nil)))
       filename)))
 
+(defun org-jira-parse-issue-labels ()
+  "Get issue labels from org text."
+  (save-excursion
+    (let ((continue t)
+          labels)
+      (while continue
+        (when (setq labels (org-entry-get (point) "labels"))
+          (setq continue nil))
+        (unless (and continue (org-up-heading-safe))
+          (setq continue nil)))
+      labels)))
+
 (defun org-jira-get-from-org (type entry)
   "Get an org property from the current item.
 
