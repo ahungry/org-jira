@@ -1802,6 +1802,7 @@ that should be bound to an issue."
          (jira-users (org-jira-get-assignable-users project))
          (user (completing-read "Assignee: " (mapcar 'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
+         (labels (org-jira-read-labels))
          (ticket-struct
           `((fields
              (project (key . ,project))
@@ -1815,6 +1816,7 @@ that should be bound to an issue."
                                    "")))
              (description . ,description)
              (priority (id . ,priority))
+             (labels . ,labels)
              ;; accountId should be nil if Unassigned, not the key slot.
              (assignee (accountId . ,(or (cdr (assoc user jira-users)) nil)))))))
     ticket-struct))
@@ -1920,6 +1922,13 @@ that should be bound to an issue."
     (or
      (car (rassoc action actions))
      (user-error "You specified an empty action, the valid actions are: %s" (mapcar 'cdr actions)))))
+
+(defun org-jira-read-labels ()
+  "Pick multiple labels to add to your jira issue."
+  (if jiralib-labels-cache
+      (completing-read-multiple "Labels: " jiralib-labels-cache)
+    (jiralib-get-labels)
+    (completing-read-multiple "Labels: " jiralib-labels-cache)))
 
 (defvar org-jira-fields-history nil)
 (defun org-jira-read-field (fields)
