@@ -133,6 +133,7 @@ Some of the important keybindings:
 (define-key org-jira-map (kbd "C-c ig") 'org-jira-get-issues)
 (define-key org-jira-map (kbd "C-c ij") 'org-jira-get-issues-from-custom-jql)
 (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
+(define-key org-jira-map (kbd "C-c il") 'org-jira-update-issue-labels)
 (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
 (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
 (define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
