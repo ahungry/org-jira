@@ -1923,12 +1923,14 @@ that should be bound to an issue."
      (car (rassoc action actions))
      (user-error "You specified an empty action, the valid actions are: %s" (mapcar 'cdr actions)))))
 
-(defun org-jira-read-labels ()
-  "Pick multiple labels to add to your jira issue."
+(defun org-jira-read-labels (&optional current-labels)
+  "Pick multiple labels which will be added or updating existing
+CURRENT-LABELS and save with the jira issue."
+  (unless current-labels (setq current-labels nil))
   (if jiralib-labels-cache
-      (completing-read-multiple "Labels: " jiralib-labels-cache)
+      (completing-read-multiple "Labels: " jiralib-labels-cache nil nil current-labels)
     (jiralib-get-labels)
-    (completing-read-multiple "Labels: " jiralib-labels-cache)))
+    (completing-read-multiple "Labels: " jiralib-labels-cache nil nil current-labels)))
 
 (defvar org-jira-fields-history nil)
 (defun org-jira-read-field (fields)
