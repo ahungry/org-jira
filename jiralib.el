@@ -505,7 +505,7 @@ passing ARGS to REQUEST."
                               (concat (replace-regexp-in-string "/*$" "/" jiralib-url)
                                       (replace-regexp-in-string "^/*" "" api)))
                   :sync (not jiralib-complete-callback)
-                  :headers `(,jiralib-token ("Content-Type" . "application/json"))
+                  :headers (cons '("Content-Type" . "application/json") jiralib-token)
                   :parser 'jiralib--json-read
                   :complete jiralib-complete-callback
                   ;; Ensure we have useful errors
