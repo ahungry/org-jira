@@ -266,7 +266,7 @@ to authenticate to JIRA:
               :host "yourcompany.atlassian.net"))))
 ```
 
-NOTE FOR PR REVIEWER: should we do the base64 encoding into `(setq jiralib-token)` by using `login` and `password` from `authinfo` file instead of setting `login:password` (password == token) base64 encoded directly into `(setq jiralib-token)`?
+NOTE FOR PR REVIEWER: should we do the base64 encoding into `(setq jiralib-token)` by using `login` and `password` from `authinfo` file instead of setting `login:password` (password == token) base64 encoded directly into `(setq jiralib-token)` or `authinfo` file?
 
 #### Last Resort Authorization workaround (NOT secure)
 However, if all else fails (your Jira instance has disabled basic auth
