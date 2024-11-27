@@ -1116,7 +1116,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   "Render single ISSUE."
   ;;  (org-jira-log "Rendering issue from issue list")
   ;;  (org-jira-log (org-jira-sdk-dump Issue))
-  (with-slots (filename proj-key issue-id summary status priority headline id) Issue
+  (with-slots (filename proj-key issue-id summary status priority headline id parent-key) Issue
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
@@ -1155,6 +1155,9 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
+            (when parent-key
+              (org-jira-entry-put (point) "parent-issue-key" (format ": [[%s][%s]]"
+                                                                     (concat jiralib-url "/browse/" parent-key) parent-key)))
 
             ;; Insert the duedate as a deadline if it exists
             (when org-jira-deadline-duedate-sync-p
