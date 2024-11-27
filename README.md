@@ -22,6 +22,7 @@ Sample of an org-jira buffer with a ticket synced using the
 :updated:  2021-07-19T18:40:30.722-0400
 :ID:       AHU-39
 :CUSTOM_ID: AHU-39
+:parent-issue-key: [jira:AHU-1]
 :type-id:  10100
 :END:
 :LOGBOOK:
