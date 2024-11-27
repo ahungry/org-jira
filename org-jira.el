@@ -1153,11 +1153,11 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                         (org-jira-entry-put (point) (symbol-name entry) val))))
                   '(filename reporter type type-id priority labels resolution status components created updated sprint))
 
+            (when parent-key
+              (org-jira-entry-put (point) "parent-issue-key" (format ": [jira:%s]" parent-key)))
+
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
-            (when parent-key
-              (org-jira-entry-put (point) "parent-issue-key" (format ": [[%s][%s]]"
-                                                                     (concat jiralib-url "/browse/" parent-key) parent-key)))
 
             ;; Insert the duedate as a deadline if it exists
             (when org-jira-deadline-duedate-sync-p
