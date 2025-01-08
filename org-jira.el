@@ -1116,7 +1116,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
   "Render single ISSUE."
 ;;  (org-jira-log "Rendering issue from issue list")
 ;;  (org-jira-log (org-jira-sdk-dump Issue))
-  (with-slots (filename proj-key issue-id summary status priority headline id) Issue
+  (with-slots (filename proj-key issue-id summary status priority headline id parent-key) Issue
     (let (p)
       (with-current-buffer (org-jira--get-project-buffer Issue)
         (org-jira-freeze-ui
@@ -1152,6 +1152,9 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                       (when (and val (not (string= val "")))
                         (org-jira-entry-put (point) (symbol-name entry) val))))
                   '(filename reporter type type-id priority labels resolution status components created updated sprint))
+
+            (when parent-key
+              (org-jira-entry-put (point) "parent-issue-key" (format "[jira:%s]" parent-key)))
 
             (org-jira-entry-put (point) "ID" issue-id)
             (org-jira-entry-put (point) "CUSTOM_ID" issue-id)
