@@ -237,6 +237,16 @@ The self-hosted version of Jira appears to still support Basic Authentication wi
 
 https://developer.atlassian.com/server/jira/platform/basic-authentication/
 
+#### Using API token on MacOS
+On MacOS, the initial connection may fail with `The macOS Keychain auth-source
+backend doesn’t support creation yet`. To resolve, [make an API
+token](https://id.atlassian.com/manage-profile/security/api-tokens) and save it
+in the keychain manually. This command will interactively prompt for the token:
+
+``` shell
+security add-internet-password -a "your.email@example.example" -s 'example.atlassian.net' -P 443 -w
+```
+
 #### Using Bearer authentication with Personal Access Tokens
 
 Some JIRA instances might require usage of Authorization headers using Bearer
