@@ -467,8 +467,19 @@ request.el, so if at all possible, it should be avoided."
                                 :type "POST"
                                 :data (json-encode `(,(car (second params)) ,(car (third params))))))
       ('getUsers
-       (jiralib--rest-call-it (format "/rest/api/2/user/assignable/search?project=%s&maxResults=10000" (first params))
-                              :type "GET"))
+       (let* ((project (first params))
+              (start-at 0)
+              (max-results 1000)
+              (all-users '())
+              (more-results t))
+         (while more-results
+           (let* ((endpoint (format "/rest/api/2/user/assignable/search?project=%s&startAt=%d&maxResults=%d"
+                                    project start-at max-results))
+                  (response (jiralib--rest-call-it endpoint :type "GET")))
+             (setq all-users (append all-users response))
+             (setq more-results (>= (length response) max-results))
+             (setq start-at (+ start-at max-results))))
+         all-users))
       ('updateIssue (jiralib--rest-call-it
                      (format "/rest/api/2/issue/%s" (first params))
                      :type "PUT"
