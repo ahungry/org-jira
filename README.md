@@ -115,6 +115,13 @@ machine your-site.atlassian.net login you@example.com password yourPassword port
 _Please note that in the authinfo file, port 443 should be specified
 if your jiralib-url is https._
 
+### Atlasian Jira Cloud Users
+Atlassian no longer accepts authentication via password. **All users must use a token for authentication**. Additionally https is required, so all atlassian cloud users should onlly apply a gpg file (or at their own risk a plain text file which contains the application key).
+**RECCOMMENDED FOR CLOUD USERS**
+```conf
+machine your-site.atlassian.net login you@example.com password yourPassword port 443
+```
+
 ## Usage
 ### Getting Started
 org-jira mode is easy to use, to get started (after installing this
