@@ -1813,31 +1813,32 @@ that should be bound to an issue."
 
 (defun org-jira-get-issue-struct (project type summary description &optional parent-id)
   "Create an issue struct for PROJECT, of TYPE, with SUMMARY and DESCRIPTION."
-  (if (or (equal project "")
-          (equal type "")
-          (equal summary ""))
+  (if (or (equal project "") (equal type "") (equal summary ""))
       (error "Must provide all information!"))
   (let* ((project-components (jiralib-get-components project))
          (jira-users (org-jira-get-assignable-users project))
-         (user (completing-read "Assignee: " (mapcar 'car jira-users)))
+         (user (completing-read "Assignee: " (mapcar #'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
          (labels (org-jira-read-labels))
-         (ticket-struct
-          `((fields
-             (project (key . ,project))
-             (parent (key . ,parent-id))
-             (issuetype (id . ,(car (rassoc type (if (and (boundp 'parent-id) parent-id)
-                                                     (jiralib-get-subtask-types)
-                                                   (jiralib-get-issue-types-by-project project))))))
-             (summary . ,(format "%s%s" summary
-                                 (if (and (boundp 'parent-id) parent-id)
-                                     (format " (subtask of [jira:%s])" parent-id)
-                                   "")))
-             (description . ,description)
-             (priority (id . ,priority))
-             (labels . ,labels)
-             ;; accountId should be nil if Unassigned, not the key slot.
-             (assignee (accountId . ,(or (cdr (assoc user jira-users)) nil)))))))
+         (ticket-fields
+          `((project (key . ,project))
+            (parent (key . ,parent-id))
+            (issuetype (id . ,(car (rassoc type
+                                           (if (and (boundp 'parent-id) parent-id)
+                                               (jiralib-get-subtask-types)
+                                             (jiralib-get-issue-types-by-project project))))))
+            (summary . ,(format "%s%s" summary
+                                (if (and (boundp 'parent-id) parent-id)
+                                    (format " (subtask of [jira:%s])" parent-id)
+                                  "")))
+            (description . ,description)
+            (priority (id . ,priority))
+            (labels . ,labels)
+            (assignee (accountId . ,(cdr (assoc user jira-users))))))
+         (filtered-fields (jiralib-filter-fields-by-exclude-list
+                           jiralib-update-issue-fields-exclude-list
+                           ticket-fields))
+         (ticket-struct `((fields . ,filtered-fields))))
     ticket-struct))
 
 ;;;###autoload

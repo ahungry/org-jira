@@ -603,7 +603,6 @@ emacs-lisp"
 
     (apply 'vector (nreverse remote-field-values))))
 
-
 ;;;; Wrappers around JIRA methods
 
 (defun jiralib--rest-api-for-issue-key (key)
