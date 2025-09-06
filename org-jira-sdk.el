@@ -151,7 +151,7 @@
      :components (mapconcat (lambda (c) (org-jira-sdk-path c '(name))) (path '(fields components)) ", ")
      :labels (mapconcat (lambda (c) (format "%s" c)) (mapcar #'identity (path '(fields labels))) ", ")
      :created (path '(fields created))     ; confirm
-     :description (or (path '(fields description)) "")
+     :description (or (path '(renderedFields description)) "")
      :duedate (or (path '(fields sprint endDate)) (path '(fields duedate)))         ; confirm
      :filename (path '(fields project key))
      :headline (path '(fields summary)) ; Duplicate of summary, maybe different.

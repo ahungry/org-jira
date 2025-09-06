@@ -439,7 +439,8 @@ request.el, so if at all possible, it should be avoided."
                                                               :type "GET"
                                                               :params `((jql . ,(nth 0 params))
                                                                         (maxResults . ,(nth 1 params))
-                                                                        (fields . "*all")))))
+                                                                        (fields . "*all")
+                                                                        (expand . "renderedFields")))))
                                         nil))
       ('getPriorities (jiralib--rest-call-it
                        "/rest/api/2/priority"))
