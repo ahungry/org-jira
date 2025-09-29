@@ -2223,6 +2223,7 @@ otherwise it should return:
            (org-issue-type (org-jira-get-issue-val-from-org 'type))
            (org-issue-type-id (org-jira-get-issue-val-from-org 'type-id))
            (org-issue-assignee (cl-getf rest :assignee (org-jira-get-issue-val-from-org 'assignee)))
+           (org-issue-assignee-username (cl-getf rest :assignee-username (org-jira-get-issue-val-from-org 'assignee-username)))
            (org-issue-reporter (cl-getf rest :reporter (org-jira-get-issue-val-from-org 'reporter)))
            (project (replace-regexp-in-string "-[0-9]+" "" issue-id))
            (project-components (jiralib-get-components project)))
@@ -2247,7 +2248,10 @@ otherwise it should return:
                    (cons 'priority (org-jira-get-id-name-alist org-issue-priority
                                                        (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
-                   (cons 'assignee (list (cons 'id (jiralib-get-user-account-id project org-issue-assignee))))
+                   ;; If org-issue-assignee-username is set, grab the username instead of the assignee value
+                   (if (stringp org-issue-assignee-username)
+                          (cons 'assignee (list (cons 'name org-issue-assignee-username)))
+                          (cons 'assignee (list (cons 'id (jiralib-get-user-account-id project org-issue-assignee)))))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                    (cons 'issuetype `((id . ,org-issue-type-id)
       (name . ,org-issue-type))))))
