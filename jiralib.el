@@ -362,6 +362,7 @@ request.el, so if at all possible, it should be avoided."
        (let ((response (jiralib--rest-call-it (format "/rest/api/2/project/%s" (first params)))))
          (cl-coerce (cdr (assoc 'issueTypes response)) 'list)))
       ('getUser (jiralib--rest-call-it "/rest/api/2/user" :params `((accountId . ,(first params)))))
+      ('getUserByUsername (jiralib--rest-call-it "/rest/api/2/user" :params `((username . ,(first params)))))
       ('getVersions (jiralib--rest-call-it (format "/rest/api/2/project/%s/versions" (first params))))
 
       ;; Worklog calls
