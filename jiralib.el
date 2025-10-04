@@ -331,7 +331,7 @@ This produces a noticeable slowdown and is not recommended by
 request.el, so if at all possible, it should be avoided."
   ;; @TODO :auth: Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
-  
+
   (setq jiralib-complete-callback
         ;; Don't run with async if we don't have a login token yet.
         (if jiralib-token callback nil))
@@ -436,10 +436,12 @@ request.el, so if at all possible, it should be avoided."
 				   'issues
 				   (cdr params)))
       ('getIssuesFromJqlSearch  (append (cdr ( assoc 'issues (jiralib--rest-call-it
-                                                              "/rest/api/2/search"
-                                                              :type "POST"
-                                                              :data (json-encode `((jql . ,(first params))
-                                                                                   (maxResults . ,(second params)))))))
+                                                              "/rest/api/3/search/jql"
+                                                              :type "GET"
+                                                              :params `((jql . ,(nth 0 params))
+                                                                        (maxResults . ,(nth 1 params))
+                                                                        (fields . "*all")
+                                                                        (expand . "renderedFields")))))
                                         nil))
       ('getPriorities (jiralib--rest-call-it
                        "/rest/api/2/priority"))
@@ -571,7 +573,7 @@ first is normally used."
 
 DATA is a list of association lists (a SOAP array-of type)
 KEY-FIELD is the field to use as the key in the returned alist
-VALUE-FIELD is the field to use as the value in the returned alist"  
+VALUE-FIELD is the field to use as the value in the returned alist"
   (cl-loop for element in data
         collect (cons (cdr (assoc key-field element))
                       (cdr (assoc value-field element)))))
