@@ -106,6 +106,11 @@
   :type 'boolean
   :initialize 'custom-initialize-set)
 
+(defcustom jiralib-target-api-version 3
+  "Specifies the target API version of the remote Jira instance."
+  :group 'jiralib
+  :type 'number)
+
 (defcustom jiralib-coding-system 'utf-8
   "Use custom coding system for Jiralib."
   :group 'jiralib)
@@ -435,6 +440,12 @@ request.el, so if at all possible, it should be avoided."
 				   (format "rest/agile/1.0/sprint/%d/issue" (first params))
 				   'issues
 				   (cdr params)))
+      ('getIssuesFromJqlSearchLegacy (append (cdr (assoc 'issues (jiralib--rest-call-it
+                                                                  "/rest/api/2/search"
+                                                                  :type "POST"
+                                                                  :data (json-encode `((jql . ,(first params))
+                                                                                       (maxResults . ,(second params)))))))
+                                             nil))
       ('getIssuesFromJqlSearch  (append (cdr ( assoc 'issues (jiralib--rest-call-it
                                                               "/rest/api/3/search/jql"
                                                               :type "GET"
@@ -736,7 +747,9 @@ might not be possible to find *ALL* the issues that match a
 query."
   (unless (or limit (numberp limit))
     (setq limit 100))
-  (jiralib-call "getIssuesFromJqlSearch" callback jql limit))
+  (if (>= jiralib-target-api-version 3)
+      (jiralib-call "getIssuesFromJqlSearch" callback jql limit)
+    (jiralib-call "getIssuesFromJqlSearchLegacy" callback jql limit)))
 
 (defcustom jiralib-available-actions-cache-p t
   "Set to t to enable caching for jiralib-get-available-actions.
