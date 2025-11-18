@@ -1386,6 +1386,77 @@ Expects input in format such as: [2017-04-05 Wed 01:00]--[2017-04-05 Wed 01:46] 
       (org-jira-update-worklogs-for-issue issue-id filename)
       )))
 
+;;;###autoload
+(defun org-jira-sync-agenda-clocks-to-jira (&optional dry-run)
+  "Iterate agenda items, dedupe by issue, and sync their clocks to Jira.
+
+Collect all agenda headings first, extract unique Jira issue keys, then
+(for each unique issue) invoke `org-jira-update-worklogs-from-org-clocks'.
+
+When DRY-RUN (interactive prefix arg) is non-nil, only report which
+issues would be processed (no Jira API calls).
+
+Non-Jira headings (those where we cannot obtain an issue key) are
+skipped (counted separately; listed in dry-run buffer)."
+  (interactive "P")
+  (let ((agenda-buf (get-buffer "*Org Agenda*"))
+        (issues '())                ; (issue-id . marker)
+        (skipped-non-marker 0)
+        (skipped-non-issue 0)
+        (processed 0)
+        (log-lines '()))
+    (unless (or agenda-buf org-agenda-files)
+      (error "No agenda buffer and no org-agenda-files configured"))
+    (when (not agenda-buf)
+      (org-agenda-list)
+      (setq agenda-buf (get-buffer "*Org Agenda*")))
+    ;; Phase 1: collect unique issue markers.
+    (with-current-buffer agenda-buf
+      (save-excursion
+        (goto-char (point-min))
+        (while (not (eobp))
+          (let ((marker (or (get-text-property (point) 'org-hd-marker)
+                            (get-text-property (point) 'org-marker))))
+            (if (not marker)
+                (setq skipped-non-marker (1+ skipped-non-marker))
+              (with-current-buffer (marker-buffer marker)
+                (save-excursion
+                  (goto-char marker)
+                  (condition-case _err
+                      (let ((issue-id (org-jira-get-from-org 'issue 'key)))
+                        (if (and issue-id (not (assoc issue-id issues)))
+                            (push (cons issue-id marker) issues)
+                          (unless issue-id
+                            (setq skipped-non-issue (1+ skipped-non-issue)))))
+                    (error (setq skipped-non-issue (1+ skipped-non-issue)))))))
+          (forward-line 1))))
+    ;; Phase 2: process each unique issue.
+    (dolist (im (nreverse issues))
+      (let* ((issue-id (car im))
+             (marker (cdr im))
+             (buf (marker-buffer marker)))
+        (when (buffer-live-p buf)
+          (with-current-buffer buf
+            (save-excursion
+              (goto-char marker)
+              (if dry-run
+                  (push (format "DRY-RUN: would sync %s (%s)" issue-id (buffer-name)) log-lines)
+                (condition-case err
+                    (progn
+                      (org-jira-update-worklogs-from-org-clocks)
+                      (setq processed (1+ processed)))
+                  (error (push (format "ERROR syncing %s: %s" issue-id (error-message-string err)) log-lines))))))))
+    (when dry-run
+      (with-current-buffer (get-buffer-create "*org-jira-sync-dry-run*")
+        (erase-buffer)
+        (insert (format "org-jira agenda sync DRY-RUN\nUnique issues: %d\nNon-marker lines: %d\nNon-issue headings: %d\n\nDetails:\n"
+                        (length issues) skipped-non-marker skipped-non-issue))
+        (dolist (l (nreverse log-lines)) (insert l "\n"))
+        (display-buffer (current-buffer))))
+    (unless dry-run
+      (message "org-jira-sync-agenda-clocks-to-jira: processed %d unique issues (non-marker lines: %d, non-issue headings: %d)"
+               processed skipped-non-marker skipped-non-issue))))))
+
 (defun org-jira-update-worklog ()
   "Update a worklog for the current issue."
   (interactive)

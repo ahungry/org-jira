@@ -106,6 +106,11 @@
   :type 'boolean
   :initialize 'custom-initialize-set)
 
+(defcustom jiralib-target-api-version 3
+  "Specifies the target API version of the remote Jira instance."
+  :group 'jiralib
+  :type 'number)
+
 (defcustom jiralib-coding-system 'utf-8
   "Use custom coding system for Jiralib."
   :group 'jiralib)
@@ -331,7 +336,7 @@ This produces a noticeable slowdown and is not recommended by
 request.el, so if at all possible, it should be avoided."
   ;; @TODO :auth: Probably pass this all the way down, but I think
   ;; it may be OK at the moment to just set the variable each time.
-  
+
   (setq jiralib-complete-callback
         ;; Don't run with async if we don't have a login token yet.
         (if jiralib-token callback nil))
@@ -435,11 +440,19 @@ request.el, so if at all possible, it should be avoided."
 				     (format "rest/agile/1.0/sprint/%d/issue" (first params))
 				     'issues
 				     (cdr params)))
+      ((getIssuesFromJqlSearchLegacy) (append (cdr (assoc 'issues (jiralib--rest-call-it
+                                                                   "/rest/api/2/search"
+                                                                   :type "POST"
+                                                                   :data (json-encode `((jql . ,(first params))
+                                                                                        (maxResults . ,(second params)))))))
+                                              nil))
       ((getIssuesFromJqlSearch)  (append (cdr ( assoc 'issues (jiralib--rest-call-it
-                                                               "/rest/api/2/search"
-                                                               :type "POST"
-                                                               :data (json-encode `((jql . ,(first params))
-                                                                                    (maxResults . ,(second params)))))))
+                                                               "/rest/api/3/search/jql"
+                                                               :type "GET"
+                                                               :params `((jql . ,(nth 0 params))
+                                                                         (maxResults . ,(nth 1 params))
+                                                                         (fields . "*all")
+                                                                         (expand . "renderedFields")))))
                                          nil))
       ((getPriorities) (jiralib--rest-call-it
                         "/rest/api/2/priority"))
@@ -571,7 +584,7 @@ first is normally used."
 
 DATA is a list of association lists (a SOAP array-of type)
 KEY-FIELD is the field to use as the key in the returned alist
-VALUE-FIELD is the field to use as the value in the returned alist"  
+VALUE-FIELD is the field to use as the value in the returned alist"
   (cl-loop for element in data
         collect (cons (cdr (assoc key-field element))
                       (cdr (assoc value-field element)))))
@@ -734,7 +747,9 @@ might not be possible to find *ALL* the issues that match a
 query."
   (unless (or limit (numberp limit))
     (setq limit 100))
-  (jiralib-call "getIssuesFromJqlSearch" callback jql limit))
+  (if (>= jiralib-target-api-version 3)
+      (jiralib-call "getIssuesFromJqlSearch" callback jql limit)
+    (jiralib-call "getIssuesFromJqlSearchLegacy" callback jql limit)))
 
 (defcustom jiralib-available-actions-cache-p t
   "Set to t to enable caching for jiralib-get-available-actions.
