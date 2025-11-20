@@ -360,40 +360,40 @@ request.el, so if at all possible, it should be avoided."
     (unless jiralib-token
       (call-interactively 'jiralib-login))
     (cl-case (intern method)
-      ('getStatuses (jiralib--rest-call-it "/rest/api/2/status"))
-      ('getIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
-      ('getSubTaskIssueTypes (jiralib--rest-call-it "/rest/api/2/issuetype"))
-      ('getIssueTypesByProject
+      ((getStatuses) (jiralib--rest-call-it "/rest/api/2/status"))
+      ((getIssueTypes) (jiralib--rest-call-it "/rest/api/2/issuetype"))
+      ((getSubTaskIssueTypes) (jiralib--rest-call-it "/rest/api/2/issuetype"))
+      ((getIssueTypesByProject)
        (let ((response (jiralib--rest-call-it (format "/rest/api/2/project/%s" (first params)))))
          (cl-coerce (cdr (assoc 'issueTypes response)) 'list)))
-      ('getUser (jiralib--rest-call-it "/rest/api/2/user" :params `((accountId . ,(first params)))))
-      ('getUserByUsername (jiralib--rest-call-it "/rest/api/2/user" :params `((username . ,(first params)))))
-      ('getVersions (jiralib--rest-call-it (format "/rest/api/2/project/%s/versions" (first params))))
+      ((getUser) (jiralib--rest-call-it "/rest/api/2/user" :params `((accountId . ,(first params)))))
+      ((getUserByUsername) (jiralib--rest-call-it "/rest/api/2/user" :params `((username . ,(first params)))))
+      ((getVersions) (jiralib--rest-call-it (format "/rest/api/2/project/%s/versions" (first params))))
 
       ;; Worklog calls
-      ('getWorklogs
+      ((getWorklogs)
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))))
 
-      ('addWorklog
+      ((addWorklog)
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))
                               :type "POST"
                               :data (json-encode (second params))))
 
-      ('updateWorklog
+      ((updateWorklog)
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog/%s" (first params) (second params))
                               :type "PUT"
                               :data (json-encode (third params))))
 
-      ('addWorklogAndAutoAdjustRemainingEstimate
+      ((addWorklogAndAutoAdjustRemainingEstimate)
        (jiralib--rest-call-it (format "/rest/api/2/issue/%s/worklog" (first params))
                               :type "POST"
                               :data (json-encode (second params))))
 
-      ('addComment (jiralib--rest-call-it
-                    (format "/rest/api/2/issue/%s/comment" (first params))
-                    :type "POST"
-                    :data (json-encode (second params))))
-      ('createIssue
+      ((addComment) (jiralib--rest-call-it
+                     (format "/rest/api/2/issue/%s/comment" (first params))
+                     :type "POST"
+                     :data (json-encode (second params))))
+      ((createIssue)
        ;; Creating the issue doesn't return it, a second call must be
        ;; made to pull it in by using the self key in response.
        (let ((response (jiralib--rest-call-it
@@ -402,85 +402,85 @@ request.el, so if at all possible, it should be avoided."
                         :data (json-encode (first params)))))
          (jiralib--rest-call-it (cdr (assoc 'self response)) :type "GET")
          ))
-      ('createIssueWithParent
+      ((createIssueWithParent)
        (let ((response (jiralib--rest-call-it
                         "/rest/api/2/issue"
                         :type "POST"
                         :data (json-encode (first params)))))
          (jiralib--rest-call-it (cdr (assoc 'self response)) :type "GET")
          ))
-      ('editComment (jiralib--rest-call-it
-                     (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params))
-                     :data (json-encode `((body . ,(third params))))
-                     :type "PUT"))
-      ('getBoard  (jiralib--rest-call-it (format "/rest/agile/1.0/board/%s"  (first params))))
-      ('getBoards (apply 'jiralib--agile-call-it "/rest/agile/1.0/board" 'values params))
-      ('getComment (org-jira-find-value
+      ((editComment) (jiralib--rest-call-it
+                      (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params))
+                      :data (json-encode `((body . ,(third params))))
+                      :type "PUT"))
+      ((getBoard)  (jiralib--rest-call-it (format "/rest/agile/1.0/board/%s"  (first params))))
+      ((getBoards) (apply 'jiralib--agile-call-it "/rest/agile/1.0/board" 'values params))
+      ((getComment) (org-jira-find-value
                      (jiralib--rest-call-it
                       (format "/rest/api/2/issue/%s/comment/%s" (first params) (second params)))
                      'comments))
-      ('getComments (org-jira-find-value
-                     (jiralib--rest-call-it
-                      (format "/rest/api/2/issue/%s/comment" (first params)))
-                     'comments))
-      ('getAttachmentsFromIssue (org-jira-find-value
-                                 (jiralib--rest-call-it
-                                  (format "/rest/api/2/issue/%s?fields=attachment" (first params)))
-                                 'comments))
-      ('getComponents (jiralib--rest-call-it
-                       (format "/rest/api/2/project/%s/components" (first params))))
-      ('getIssue (jiralib--rest-call-it
-                  (format "/rest/api/2/issue/%s" (first params))))
-      ('getIssuesFromBoard  (apply 'jiralib--agile-call-it
-				   (format "rest/agile/1.0/board/%d/issue" (first params))
-				   'issues
-				   (cdr params)))
-      ('getSprintsFromBoard  (jiralib--rest-call-it (format "/rest/agile/1.0/board/%s/sprint"  (first params))))
-      ('getIssuesFromSprint  (apply 'jiralib--agile-call-it
-				   (format "rest/agile/1.0/sprint/%d/issue" (first params))
-				   'issues
-				   (cdr params)))
-      ('getIssuesFromJqlSearchLegacy (append (cdr (assoc 'issues (jiralib--rest-call-it
-                                                                  "/rest/api/2/search"
-                                                                  :type "POST"
-                                                                  :data (json-encode `((jql . ,(first params))
-                                                                                       (maxResults . ,(second params)))))))
-                                             nil))
-      ('getIssuesFromJqlSearch  (append (cdr ( assoc 'issues (jiralib--rest-call-it
-                                                              "/rest/api/3/search/jql"
-                                                              :type "GET"
-                                                              :params `((jql . ,(nth 0 params))
-                                                                        (maxResults . ,(nth 1 params))
-                                                                        (fields . "*all")
-                                                                        (expand . "renderedFields")))))
-                                        nil))
-      ('getPriorities (jiralib--rest-call-it
-                       "/rest/api/2/priority"))
-      ('getProjects (jiralib--rest-call-it "rest/api/2/project"))
-      ('getProjectsNoSchemes (append (jiralib--rest-call-it
-                                      "/rest/api/2/project"
-                                      :params '((expand . "description,lead,url,projectKeys"))) nil))
-      ('getResolutions (append (jiralib--rest-call-it
-                                "/rest/api/2/resolution") nil))
-      ('getAvailableActions
+      ((getComments) (org-jira-find-value
+                      (jiralib--rest-call-it
+                       (format "/rest/api/2/issue/%s/comment" (first params)))
+                      'comments))
+      ((getAttachmentsFromIssue) (org-jira-find-value
+                                  (jiralib--rest-call-it
+                                   (format "/rest/api/2/issue/%s?fields=attachment" (first params)))
+                                  'comments))
+      ((getComponents) (jiralib--rest-call-it
+                        (format "/rest/api/2/project/%s/components" (first params))))
+      ((getIssue) (jiralib--rest-call-it
+                   (format "/rest/api/2/issue/%s" (first params))))
+      ((getIssuesFromBoard)  (apply 'jiralib--agile-call-it
+				    (format "rest/agile/1.0/board/%d/issue" (first params))
+				    'issues
+				    (cdr params)))
+      ((getSprintsFromBoard)  (jiralib--rest-call-it (format "/rest/agile/1.0/board/%s/sprint"  (first params))))
+      ((getIssuesFromSprint)  (apply 'jiralib--agile-call-it
+				     (format "rest/agile/1.0/sprint/%d/issue" (first params))
+				     'issues
+				     (cdr params)))
+      ((getIssuesFromJqlSearchLegacy) (append (cdr (assoc 'issues (jiralib--rest-call-it
+                                                                   "/rest/api/2/search"
+                                                                   :type "POST"
+                                                                   :data (json-encode `((jql . ,(first params))
+                                                                                        (maxResults . ,(second params)))))))
+                                              nil))
+      ((getIssuesFromJqlSearch)  (append (cdr ( assoc 'issues (jiralib--rest-call-it
+                                                               "/rest/api/3/search/jql"
+                                                               :type "GET"
+                                                               :params `((jql . ,(nth 0 params))
+                                                                         (maxResults . ,(nth 1 params))
+                                                                         (fields . "*all")
+                                                                         (expand . "renderedFields")))))
+                                         nil))
+      ((getPriorities) (jiralib--rest-call-it
+                        "/rest/api/2/priority"))
+      ((getProjects) (jiralib--rest-call-it "rest/api/2/project"))
+      ((getProjectsNoSchemes) (append (jiralib--rest-call-it
+                                       "/rest/api/2/project"
+                                       :params '((expand . "description,lead,url,projectKeys"))) nil))
+      ((getResolutions) (append (jiralib--rest-call-it
+                                 "/rest/api/2/resolution") nil))
+      ((getAvailableActions)
        (mapcar
         (lambda (trans)
           `(,(assoc 'name trans) ,(assoc 'id trans)))
         (cdadr (jiralib--rest-call-it (format "/rest/api/2/issue/%s/transitions" (first params))))))
-      ('getFieldsForAction (org-jira-find-value (car (let ((issue (first params))
-                                                           (action (second params)))
-                                                       (seq-filter (lambda (trans)
-                                                                     (or (string-equal action (org-jira-find-value trans 'id))
-                                                                         (string-equal action (org-jira-find-value trans 'name))))
-                                                                   (cdadr (jiralib--rest-call-it
-                                                                           (format "/rest/api/2/issue/%s/transitions" (first params))
-                                                                           :params '((expand . "transitions.fields")))))))
-                                                'fields))
-      ('progressWorkflowAction (jiralib--rest-call-it
-                                (format "/rest/api/2/issue/%s/transitions" (first params))
-                                :type "POST"
-                                :data (json-encode `(,(car (second params)) ,(car (third params))))))
-      ('getUsers
+      ((getFieldsForAction) (org-jira-find-value (car (let ((issue (first params))
+                                                            (action (second params)))
+                                                        (seq-filter (lambda (trans)
+                                                                      (or (string-equal action (org-jira-find-value trans 'id))
+                                                                          (string-equal action (org-jira-find-value trans 'name))))
+                                                                    (cdadr (jiralib--rest-call-it
+                                                                            (format "/rest/api/2/issue/%s/transitions" (first params))
+                                                                            :params '((expand . "transitions.fields")))))))
+                                                 'fields))
+      ((progressWorkflowAction) (jiralib--rest-call-it
+                                 (format "/rest/api/2/issue/%s/transitions" (first params))
+                                 :type "POST"
+                                 :data (json-encode `(,(car (second params)) ,(car (third params))))))
+      ((getUsers)
        (let* ((project (first params))
               (start-at 0)
               (max-results 1000)
@@ -494,11 +494,11 @@ request.el, so if at all possible, it should be avoided."
              (setq more-results (>= (length response) max-results))
              (setq start-at (+ start-at max-results))))
          all-users))
-      ('updateIssue (jiralib--rest-call-it
-                     (format "/rest/api/2/issue/%s" (first params))
-                     :type "PUT"
-                     :data (json-encode `((fields . ,(second params))))))
-      ('getLabels (jiralib--rest-call-it (format "/rest/api/2/label?startAt=%s" (first params)))))))
+      ((updateIssue) (jiralib--rest-call-it
+                      (format "/rest/api/2/issue/%s" (first params))
+                      :type "PUT"
+                      :data (json-encode `((fields . ,(second params))))))
+      ((getLabels) (jiralib--rest-call-it (format "/rest/api/2/label?startAt=%s" (first params)))))))
 
 (defun jiralib--soap-call-it (&rest args)
   "Deprecated SOAP call endpoint.  Will be removed soon.
