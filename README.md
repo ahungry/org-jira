@@ -254,16 +254,29 @@ tokens as documented in [Using
 PATs](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html#UsingPersonalAccessTokens-UsingPATs)
 Atlassian documentation.
 
-As documented, PATs should be used without a username in Authorization header as
-Bearer tokens. Following is an example of using PAT token stored in `authinfo`
+As [documented here](https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/#supply-basic-auth-headers), create an API token for Jira then build a string of the form `useremail:api_token`. Then encode the string into base64 then add this block into your emacs configuration:
+
+```
+(setq jiralib-url "https://yourcompany.atlassian.net")
+(setq jiralib-token
+    (cons "Authorization"
+          (concat "Basic " "<BASE64_ENCODED_STRING>")))
+```
+
+If you want to use `authinfo` file, set `password` field as `useremail:api_token` base64 encoded.
+
+As documented, PATs should be used with a username in Authorization header as
+Basic tokens. Following is an example of using PAT token stored in `authinfo`
 to authenticate to JIRA:
 
 ```lisp
 (setq jiralib-token
     (cons "Authorization"
-          (concat "Bearer " (auth-source-pick-first-password
-              :host "jira.company.com"))))
+          (concat "Basic " (auth-source-pick-first-password
+              :host "yourcompany.atlassian.net"))))
 ```
+
+NOTE FOR PR REVIEWER: should we do the base64 encoding into `(setq jiralib-token)` by using `login` and `password` from `authinfo` file instead of setting `login:password` (password == token) base64 encoded directly into `(setq jiralib-token)` or `authinfo` file?
 
 #### Last Resort Authorization workaround (NOT secure)
 However, if all else fails (your Jira instance has disabled basic auth
