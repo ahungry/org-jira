@@ -1918,9 +1918,10 @@ that should be bound to an issue."
   (if (or (equal project "") (equal type "") (equal summary ""))
       (error "Must provide all information!"))
   (let* ((project-components (jiralib-get-components project))
-         (assignee-username (read-string "Assignee username (leave empty for unassigned): "))
+         (jira-users (org-jira-get-assignable-users project))
+         (user (completing-read "Assignee: " (mapcar #'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
-         (labels nil)
+         (labels (org-jira-read-labels))
          (ticket-fields
           `((project (key . ,project))
             (parent (key . ,parent-id))
@@ -1935,8 +1936,7 @@ that should be bound to an issue."
             (description . ,description)
             (priority (id . ,priority))
             (labels . ,labels)
-            ,@(unless (string-empty-p assignee-username)
-                `((assignee (name . ,assignee-username))))))
+            (assignee (accountId . ,(cdr (assoc user jira-users))))))
          (filtered-fields (jiralib-filter-fields-by-exclude-list
                            jiralib-update-issue-fields-exclude-list
                            ticket-fields))
