@@ -335,6 +335,25 @@ See `org-default-priority' for more info."
 (defcustom org-jira-update-issue-details-include-reporter t
   "For Jira Cloud API we will get an error if `reporter' is sent with an update request."
   :group 'org-jira
+  :type 'boolean)
+
+(defcustom org-jira-update-issue-details-include-components t
+  "For Jira Cloud API we will get an error if `components' is sent with an update request."
+  :group 'org-jira
+  :type 'boolean)
+
+(defcustom org-jira-update-issue-details-include-priority t
+  "For Jira Cloud API we will get an error if `priority' is sent with an update request."
+  :group 'org-jira
+  :type 'boolean)
+
+(defcustom org-jira-comment-buffer
+  "# Insert Jira issue comment here.
+# Finish with C-c C-c, or cancel with C-c C-k.
+
+"
+  "Holds the jira issue comment buffer text."
+  :group 'org-jira
   :type 'string)
 
 (defvar org-jira-serv nil
@@ -565,7 +584,9 @@ See `org-default-priority' for more info."
     (define-key org-jira-map (kbd "C-c ik") 'org-jira-copy-current-issue-key)
     (define-key org-jira-map (kbd "C-c sc") 'org-jira-create-subtask)
     (define-key org-jira-map (kbd "C-c sg") 'org-jira-get-subtasks)
-    (define-key org-jira-map (kbd "C-c cc") 'org-jira-add-comment)
+    (define-key org-jira-map (kbd "C-c cc") 'org-jira-create-comment-buffer)
+    (define-key org-jira-map (kbd "C-c C-c") 'org-jira-continue-with-comment)
+    (define-key org-jira-map (kbd "C-c C-k") 'org-jira-cancel-comment)
     (define-key org-jira-map (kbd "C-c cu") 'org-jira-update-comment)
     (define-key org-jira-map (kbd "C-c wu") 'org-jira-update-worklogs-from-org-clocks)
     (define-key org-jira-map (kbd "C-c tj") 'org-jira-todo-to-jira)
@@ -1275,6 +1296,84 @@ ISSUES is a list of `org-jira-sdk-issue' records."
         (lambda (&key _data &allow-other-keys)
           (ensure-on-issue-id-with-filename issue-id filename
             (org-jira-update-comments-for-current-issue))))))))
+(org-link-set-parameters "~accountid")
+
+(defun org-jira-parse-jira-project-from-issue-id (issue-id)
+  ""
+  (replace-regexp-in-string (rx (group (+ alnum)) "-" (+ digit)) "\\1" issue-id))
+
+(defun org-jira-comment-buffer-string (issue-id)
+  ""
+  (format "*org-jira-%s*" issue-id))
+
+(defun org-jira--comment-buffer-end-of-read ()
+  ""
+  (length org-jira-comment-buffer))
+
+(defun org-jira-create-comment-buffer (&optional issue-id)
+  "Create a jira issue comment buffer."
+  (interactive)
+  (let* ((issue-id (or issue-id (org-jira-get-from-org 'issue 'id)))
+         (jira-project (org-jira-parse-jira-project-from-issue-id issue-id))
+         (comment-buffer-name (org-jira-comment-buffer-string issue-id))
+         (end-of-read-only (org-jira--comment-buffer-end-of-read))
+         (start-of-write (+ 1 (length org-jira-comment-buffer))))
+    (get-buffer-create comment-buffer-name)
+    (switch-to-buffer comment-buffer-name)
+    (insert org-jira-comment-buffer)
+    (insert-char #o12 125)
+    (goto-char start-of-write)
+    (org-mode)
+    (org-jira-mode)
+    (setq-local jira-issue-id issue-id
+                jira-project jira-project
+                jira-comment-end-of-read-only end-of-read-only)
+    (put-text-property 1 end-of-read-only  'read-only t)
+    (put-text-property start-of-write (point-max) 'read-only nil)))
+
+(define-key org-jira-entry-mode-map (kbd "C-c C-k") #'org-jira-cancel-comment)
+(define-key org-jira-entry-mode-map (kbd "C-c C-c") #'org-jira-continue-with-comment)
+
+(defun org-jira-continue-with-comment ()
+  "continue with comment"
+  (interactive)
+  (font-lock-mode -1)
+  (replace-regexp (rx "[" (group "[~accountid:" (+ alnum) "]") "[" ?@ (+ (in alnum space)) "]]") "\\1" nil jira-comment-end-of-read-only (point-max))
+  (let ((comment (substring (string-trim-right (buffer-string)) jira-comment-end-of-read-only))
+        (jira-project jira-project)
+        (jira-issue-id jira-issue-id))
+    (if jira-issue-id
+        (kill-current-buffer))
+    (org-jira-add-comment jira-issue-id jira-project comment)))
+
+(defun org-jira-cancel-comment ()
+  (interactive)
+  (if jira-issue-id
+      (kill-current-buffer)))
+
+(defun org-jira-comment-switch-account-id-strings-to-org-links (comment)
+  ""
+  (with-temp-buffer
+    (insert comment)
+    (goto-char (point-min))
+    (while (re-search-forward (rx (group "[" "~accountid:" (group (+ alnum)) "]")) nil t)
+      (message (format "match-string-0 %s, match-string-1 %s, match-string2 %s" (match-string 0) (match-string 1) (match-string 2)))
+      (replace-match (format "[%s[%s]]" (match-string 1) (jiralib-get-user-fullname (match-string 2)))))
+    (buffer-string)))
+
+(defun org-jira-get-comment-from-comment-buffer (issue-id)
+  "get the comment of of the comment buffer."
+  (let* ((comment-buffer-name (org-jira-comment-buffer-string issue-id))
+         (end-of-read (org-jira--comment-buffer-end-of-read)))
+    (substring (string-trim-right (buffer-string)) end-of-read)))
+
+(defun org-jira-mention-user ()
+  (interactive)
+  (let* ((jira-users (org-jira-get-assignable-users jira-project))
+         (selected-user-display-name (completing-read "User to mention: " jira-users))
+         (selected-user-account-id (cdr (assoc selected-user-display-name jira-users))))
+    (insert (format "[[~accountid:%s][@%s]] " selected-user-account-id selected-user-display-name))))
+
 
 (defun org-jira-org-clock-to-date (org-time)
   "Convert ORG-TIME formatted date into a plain date string."
@@ -1547,7 +1646,7 @@ skipped (counted separately; listed in dry-run buffer)."
           (org-jira-entry-put (point) "updated" updated))
         (goto-char (point-max))
         ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-        (org-jira-insert (replace-regexp-in-string "^" "  " (or body "")))))))
+        (org-jira-insert (org-jira-comment-switch-account-id-strings-to-org-links (replace-regexp-in-string "^" "  " (or body ""))))))))
 
 (defun org-jira-update-comments-for-issue (Issue)
   "Update the comments for the specified ISSUE issue."
@@ -2001,6 +2100,12 @@ that should be bound to an issue."
              (let ((org-special-properties nil))
                (or (org-entry-get (point) my-key t)
                    "")))))))
+(defun org-jira-create-git-branch-for-issue ()
+  "Create a git branch for a given issue. You can also pass one in if not in an `org-jira-mode'"
+  (interactive)
+  (let* ((issue-id (org-jira-get-issue-val-from-org 'ID))
+         (summary (org-jira-get-issue-val-from-org 'summary)))
+    (message (format "%s-%s" issue-id (downcase (replace-regexp-in-string "[ ,]" "-" summary))))))
 
 (defun org-jira-read-action (actions)
   "Read issue workflow progress ACTIONS."
@@ -2310,14 +2415,7 @@ otherwise it should return:
 
       ;; Send the update to jira
       (let ((update-fields
-             (list (cons
-                    'components
-                    (or (org-jira-build-components-list
-                         project-components
-                         org-issue-components) []))
-                   (cons 'labels (split-string org-issue-labels ",\\s *"))
-                   (cons 'priority (org-jira-get-id-name-alist org-issue-priority
-                                                       (jiralib-get-priorities)))
+             (list (cons 'labels (split-string org-issue-labels ",\\s *"))
                    (cons 'description org-issue-description)
                    ;; If org-issue-assignee-username is set, grab the username instead of the assignee value
                    (if (stringp org-issue-assignee-username)
@@ -2331,6 +2429,16 @@ otherwise it should return:
             (setq update-fields
                   (append update-fields
                           (list (cons 'reporter (list (cons 'id (jiralib-get-user-account-id project org-issue-reporter))))))))
+
+        (if org-jira-update-issue-details-include-priority
+            (setq update-fields
+                  (append update-fields
+                          (list (cons 'priority (org-jira-get-id-name-alist org-issue-priority (jiralib-get-priorities)))))))
+
+        (if org-jira-update-issue-details-include-components
+            (setq update-fields
+                  (append update-fields
+                          (list (cons 'components (or (org-jira-build-components-list project-components org-issue-components) []))))))
 
         ;; If we enable duedate sync and we have a deadline present
         (when (and org-jira-deadline-duedate-sync-p
